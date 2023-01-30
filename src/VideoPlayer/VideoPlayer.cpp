@@ -36,17 +36,17 @@ VideoPlayer* initVidePlayerImpl(WODWindow* xpp, int type)
 		}
 		delete ret;
 	}
-	// vlc 播放器不支持硬件加速
-	// 	   启用此需要 vlc sdk，并设置相关路径于 VLCPaths.props，记得将相关源码(VLCPlayer.cpp)拖入项目。
-	//if (type==1)
-	//{
-	//	ret = new VLCPlayer(error_code, xpp->getInstace(), xpp->getHWND());
-	//	if (SUCCEED)
-	//	{
-	//		return ret;
-	//	}
-	//	delete ret;
-	//}
+	/*vlc 播放器不支持硬件加速
+	 	   启用此需要 vlc sdk，并设置相关路径于 VLCPaths.props，记得将相关源码(VLCPlayer.cpp)拖入项目。*/
+	if (type==1)
+	{
+		ret = new VLCPlayer(error_code, xpp->getInstace(), xpp->getHWND());
+		if (SUCCEED)
+		{
+			return ret;
+		}
+		delete ret;
+	}
 
 	// MF 框架支持的格式太少，弃。
 	//if (type==2)

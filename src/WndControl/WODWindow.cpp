@@ -103,7 +103,7 @@ void WODWindow::newVideoView()
 		delete mMediaPlayer0;
 		mMediaPlayer0 = 0;
 	}
-	mMediaPlayer0 = initVidePlayerImpl(this, 0);
+	mMediaPlayer0 = initVidePlayerImpl(this, 1);
 	if (mMediaPlayer0)
 	{
 		_hPlayer = mMediaPlayer0->getHWND();

@@ -66,6 +66,9 @@
     <ClCompile Include="src\comctl32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\VideoPlayer\VLCPlayer.cpp">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WODPlayer.h">
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="src\InsituDebug.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VideoPlayer\VLCPlayer.h">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
