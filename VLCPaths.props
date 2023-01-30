@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <VLC_INC>C:\VideoLan\vlc-3.0.9.2\sdk\include</VLC_INC>
+    <VLC_LIBS>libvlc.lib;libvlccore.lib;</VLC_LIBS>
+    <VLC_LIPA_64>C:\VideoLan\vlc-3.0.9.2\sdk\lib</VLC_LIPA_64>
+    <VLC_LIPA>C:\VideoLan\vlc-3.0.9.2\sdk\lib</VLC_LIPA>
+    <MF_LIBS>mf.lib;mfplat.lib;mfuuid.lib;mfplay.lib;</MF_LIBS>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(VLC_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="VLC_INC">
+      <Value>$(VLC_INC)</Value>
+    </BuildMacro>
+    <BuildMacro Include="VLC_LIBS">
+      <Value>$(VLC_LIBS)</Value>
+    </BuildMacro>
+    <BuildMacro Include="VLC_LIPA_64">
+      <Value>$(VLC_LIPA_64)</Value>
+    </BuildMacro>
+    <BuildMacro Include="VLC_LIPA">
+      <Value>$(VLC_LIPA)</Value>
+    </BuildMacro>
+    <BuildMacro Include="MF_LIBS">
+      <Value>$(MF_LIBS)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <DIS_WARN>4996</DIS_WARN>
+    <GL>No</GL>
+    <LG>/LTCG:OFF</LG>
+    <direct_path>$(SolutionDir)..</direct_path>
+    <dir_output>$(direct_path)\build\$(Configuration)_$(Platform)\</dir_output>
+    <dir_intermediate>$(Configuration)_$(Platform)\</dir_intermediate>
+    <dir_bin>$(direct_path)\bin\$(TargetName)$(TargetExt)</dir_bin>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <DisableSpecificWarnings>$(DIS_WARN)</DisableSpecificWarnings>
+      <WholeProgramOptimization>$(GL)</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>$(LG) %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="DIS_WARN">
+      <Value>$(DIS_WARN)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GL">
+      <Value>$(GL)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LG">
+      <Value>$(LG)</Value>
+    </BuildMacro>
+    <BuildMacro Include="direct_path">
+      <Value>$(direct_path)</Value>
+    </BuildMacro>
+    <BuildMacro Include="dir_intermediate">
+      <Value>$(dir_intermediate)</Value>
+    </BuildMacro>
+    <BuildMacro Include="dir_output">
+      <Value>$(dir_output)</Value>
+    </BuildMacro>
+    <BuildMacro Include="dir_bin">
+      <Value>$(dir_bin)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

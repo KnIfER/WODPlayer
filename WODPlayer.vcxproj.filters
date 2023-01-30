@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\video_src">
+      <UniqueIdentifier>{5fc36d1f-3008-4e22-a334-9d6a803defa3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\video_src\WndControl">
+      <UniqueIdentifier>{42d64097-32ba-4763-b3c5-f88fc5ac8697}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\video_src\VideoPlayer">
+      <UniqueIdentifier>{ddd610ef-a438-4e5a-9e66-d16d0c5520d9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="WODPlayer.cpp">
+      <Filter>Source Files\video_src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WndControl\WODWindow.cpp">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WndControl\TabLayout.cpp">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WndControl\ButtonList.cpp">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VideoPlayer\Simpleplayer.cpp">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VideoPlayer\PlayerSink.cpp">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WndControl\SeekBar.cpp">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VideoPlayer\VideoPlayer.cpp">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InsituDebug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\toolbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\comctl32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="WODPlayer.h">
+      <Filter>Source Files\video_src</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Source Files\video_src</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Source Files\video_src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WndControl\WODWindow.h">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WndControl\TabLayout.h">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WndControl\WindowBase.h">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WndControl\ButtonList.h">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VideoPlayer\Simpleplayer.h">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VideoPlayer\PlayerSink.h">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WndControl\SeekBar.h">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VideoPlayer\VideoPlayer.h">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\comctl32.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\heap.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InsituDebug.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WOD.rc">
+      <Filter>Source Files\video_src</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\demo\res\icons.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\play.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\folder.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\nxt.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\prev.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\stop.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\pause.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\readme.md">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
