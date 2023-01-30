@@ -1,4 +1,4 @@
-/** Copyright 2021 KnIfER JK. Chen
+/** Copyright 2023 WODPLayer author
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -18,7 +18,7 @@
 #include "VLCPlayer.h"
 #include "Resource.h"
 
-#include "VideoPlayer.h"
+#include "VideoPlayerInerface.h"
 
 typedef unsigned int ssize_t;
 #include "vlc/vlc.h"

@@ -1,4 +1,4 @@
-/** Copyright 2021 KnIfER JK. Chen
+/** Copyright 2023 WODPLayer author
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 #include "WODWindow.h"
 #include "resource.h"
 #include "SeekBar.h"
-#include "VideoPlayer.h"
+#include "VideoPlayerInerface.h"
 #include "InsituDebug.h"
 
 HBRUSH bgBrush;

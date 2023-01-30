@@ -36,16 +36,13 @@
     <ClCompile Include="src\WndControl\ButtonList.cpp">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClCompile>
-    <ClCompile Include="src\VideoPlayer\Simpleplayer.cpp">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VideoPlayer\PlayerSink.cpp">
+    <ClCompile Include="src\VideoPlayer\ExternalPlayer.cpp">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClCompile>
     <ClCompile Include="src\WndControl\SeekBar.cpp">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClCompile>
-    <ClCompile Include="src\VideoPlayer\VideoPlayer.cpp">
+    <ClCompile Include="src\VideoPlayer\VideoPlayerInerface.cpp">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClCompile>
     <ClCompile Include="src\InsituDebug.cpp">
@@ -92,16 +89,13 @@
     <ClInclude Include="src\WndControl\ButtonList.h">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClInclude>
-    <ClInclude Include="src\VideoPlayer\Simpleplayer.h">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\VideoPlayer\PlayerSink.h">
+    <ClInclude Include="src\VideoPlayer\ExternalPlayer.h">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClInclude>
     <ClInclude Include="src\WndControl\SeekBar.h">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClInclude>
-    <ClInclude Include="src\VideoPlayer\VideoPlayer.h">
+    <ClInclude Include="src\VideoPlayer\VideoPlayerInerface.h">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClInclude>
     <ClInclude Include="src\comctl32.h">
@@ -117,6 +111,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\VideoPlayer\VLCPlayer.h">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VideoPlayer\ExternalPlayerInterface.h">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClInclude>
   </ItemGroup>

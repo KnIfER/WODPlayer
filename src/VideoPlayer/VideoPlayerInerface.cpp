@@ -1,4 +1,4 @@
-/** Copyright 2021 KnIfER JK. Chen
+/** Copyright 2023 WODPLayer author
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -16,7 +16,7 @@
 */
 
 #include "WODWindow.h"
-#include "SimplePlayer.h"
+#include "ExternalPlayer.h"
 #include "VLCPlayer.h"
 //#include "MFPlayer2.h"
 
@@ -26,10 +26,12 @@ VideoPlayer* initVidePlayerImpl(WODWindow* xpp, int type)
 {
 	int error_code=-1;
 	VideoPlayer* ret;
-	//type = 1;
+	//type = 1
+	type = 0;
 	if (type==0)
 	{
-		ret = new VPlayerXunBo(error_code, xpp->getInstace(), xpp->getHWND());
+		ret = new ExternalPlayer(error_code, xpp->getInstace(), xpp->getHWND()
+			, L"D:\\Code\\FigureOut\\XunLeiExternalPlayer\\bin\\XunLeiExternalPlayer.dll");
 		if (SUCCEED)
 		{
 			return ret;

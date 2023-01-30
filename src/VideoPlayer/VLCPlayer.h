@@ -1,4 +1,4 @@
-/** Copyright 2021 KnIfER JK. Chen
+/** Copyright 2023 WODPLayer author
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 #pragma once
 
 #include "WindowBase.h"
-#include <VideoPlayer.h>
+#include <VideoPlayerInerface.h>
 
 
 class VLCPlayer : public VideoPlayer
