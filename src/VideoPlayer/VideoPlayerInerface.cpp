@@ -26,8 +26,8 @@ VideoPlayer* initVidePlayerImpl(WODWindow* xpp, int type)
 {
 	int error_code=-1;
 	VideoPlayer* ret;
-	//type = 1
-	type = 0;
+	type = 1;
+	//type = 0;
 	if (type==0)
 	{
 		ret = new ExternalPlayer(error_code, xpp->getInstace(), xpp->getHWND()

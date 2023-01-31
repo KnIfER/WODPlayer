@@ -63,10 +63,10 @@ void WODWindow::init(HINSTANCE hInstance, HWND hParent)
 		| WS_MAXIMIZEBOX | WS_SIZEBOX
 		| WS_CLIPCHILDREN 
 		,
-		CW_USEDEFAULT,// initial x position
-		CW_USEDEFAULT,// initial y position
-		CW_USEDEFAULT,// initial x size
-		CW_USEDEFAULT,// initial y size
+		800,// initial x position
+		250,// initial y position
+		500,// initial x size
+		500,// initial y size
 		NULL,                 // parent window handle
 		NULL,            // window menu handle
 		hInstance,   // program instance handle
@@ -233,6 +233,11 @@ void WODWindow::MarkPlaying(bool playing)
 		GetClientRect(_toolbar.getHWND(), &rc);
 		rc.right = rc.bottom;
 		InvalidateRect(_toolbar.getHWND(), &rc, TRUE);
+
+		if(playing)
+			::SetTimer(_hWnd, 1, 100, NULL);
+		else
+			::KillTimer(_hWnd, 1);
 	}
 }
 
@@ -320,6 +325,12 @@ bool WODWindow::PickFile()
 TCHAR nxt_file[_MAX_PATH];
 
 extern bool running;
+
+
+bool IsKeyDown(int key) {
+	return (::GetKeyState(key) & 0x80000000) != 0;
+}
+
 
 LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -534,6 +545,31 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case VK_SPACE:
 			Toggle();
 		break;
+		case VK_LEFT:
+		case VK_RIGHT:
+			if (mMediaPlayer0)
+			{
+				int delta = wParam==VK_LEFT?-1:1, max=mMediaPlayer0->GetDuration();
+				int factor = 1;
+				if(IsKeyDown(VK_CONTROL)) {
+					factor = 5;
+				}
+				if(IsKeyDown(VK_SHIFT)) {
+					factor = 30;
+				}
+				delta = mMediaPlayer0->GetPosition()+delta*factor*1000;
+				bool set=0;
+				if(delta<0)  delta=0;
+				else if(delta>max) delta=max;
+				else set=1;
+				if(set || mMediaPlayer0->GetPosition()!=delta) {
+					mMediaPlayer0->SetPosition(delta);
+				}
+				if(!_isPlaying && !_seekbar._isSeeking) {
+					_seekbar.SetPositionAndMax(delta, mMediaPlayer0->GetDuration());
+				}
+			}
+		break;
 		default:
 			break;
 		}
@@ -583,7 +619,6 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	return ::DefWindowProc(hwnd, msg, wParam, lParam);
 }
-
 
 LRESULT CALLBACK WODWindow::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {

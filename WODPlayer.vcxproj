@@ -134,9 +134,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -157,7 +159,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>$(MF_LIBS);$(VLC_LIBS);UxTheme.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>bin/$(TargetName)$(TargetExt)</OutputFile>
+      <OutputFile>$(ProjectDir)bin/$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(VLC_LIPA);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -178,8 +180,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>$(MF_LIBS);UxTheme.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>bin/$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(VLC_LIPA)</AdditionalLibraryDirectories>
+      <OutputFile>$(ProjectDir)bin/$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(VLC_LIPA);;%(AdditionalLibraryDirectories);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
