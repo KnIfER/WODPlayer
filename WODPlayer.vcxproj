@@ -19,12 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\button.cpp" />
     <ClCompile Include="src\comctl32.cpp" />
+    <ClCompile Include="src\database\database_helper.cpp" />
     <ClCompile Include="src\InsituDebug.cpp" />
     <ClCompile Include="src\tab.cpp" />
     <ClCompile Include="src\toolbar.cpp" />
     <ClCompile Include="src\trackbar.cpp" />
+    <ClCompile Include="src\Utils\ImageUtils.cpp" />
     <ClCompile Include="src\VideoPlayer\VideoPlayerInerface.cpp" />
     <ClCompile Include="src\VideoPlayer\VLCPlayer.cpp" />
     <ClCompile Include="WODPlayer.cpp" />
@@ -36,11 +37,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\comctl32.h" />
+    <ClInclude Include="src\database\database_helper.h" />
+    <ClInclude Include="src\database\sqlite3.h" />
     <ClInclude Include="src\debug.h" />
     <ClInclude Include="src\heap.h" />
     <ClInclude Include="src\InsituDebug.h" />
+    <ClInclude Include="src\Utils\WindowUtils.h" />
     <ClInclude Include="src\VideoPlayer\ExternalPlayerInterface.h" />
     <ClInclude Include="src\VideoPlayer\VLCPlayer.h" />
+    <ClInclude Include="src\WndControl\virtual_keys.h" />
     <ClInclude Include="WODPlayer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\VideoPlayer\ExternalPlayer.h" />
@@ -154,11 +159,12 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;./richedit20;$(VLC_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(MF_LIBS);$(VLC_LIBS);UxTheme.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(MF_LIBS);$(VLC_LIBS);UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(ProjectDir)bin/$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(VLC_LIPA);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -179,7 +185,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(MF_LIBS);UxTheme.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(MF_LIBS);UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(ProjectDir)bin/$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(VLC_LIPA);;%(AdditionalLibraryDirectories);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -196,7 +202,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(VLC_LIBS);$(MF_LIBS);UxTheme.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(VLC_LIBS);$(MF_LIBS);UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>bin/$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(VLC_LIPA_64)</AdditionalLibraryDirectories>
     </Link>
@@ -217,7 +223,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(VLC_LIBS);$(MF_LIBS);UxTheme.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(VLC_LIBS);$(MF_LIBS);UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>bin/$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(VLC_LIPA_64)</AdditionalLibraryDirectories>
     </Link>

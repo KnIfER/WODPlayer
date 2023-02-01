@@ -19,6 +19,8 @@
 #include <Windowsx.h>
 #include "comctl32.h"
 
+extern LONG_PTR WOD_IMG_UTILS(const char* msg, HWND hWnd=0, LONG_PTR wParam=0, LONG_PTR lParam=0);
+
 #define SendWndMessage(Msg, wParam, lParam) SendMessage(_hWnd, Msg, wParam, lParam)
 
 class WindowBase 

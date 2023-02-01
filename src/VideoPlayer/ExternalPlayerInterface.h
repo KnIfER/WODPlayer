@@ -40,6 +40,7 @@ typedef void (__cdecl* VW_SETPOSITION)(LONG_PTR, long);
 typedef void (__cdecl* VW_SETFULLSCREEN)(LONG_PTR, bool);
 typedef bool (__cdecl* VW_PLAYVIDEOFILE)(LONG_PTR, TCHAR*);
 typedef bool (__cdecl* VW_CLOSE)(LONG_PTR);
+typedef bool (__cdecl* VW_SYNCSIZE)(LONG_PTR, unsigned int*, unsigned int*);
 
 // D:\Code\FigureOut\XunLeiExternalPlayer\bin\XunLeiExternalPlayer.dll
 
@@ -57,6 +58,7 @@ __declspec(selectany) /*static*/ VW_SETPOSITION vwSetPosition = nullptr;
 __declspec(selectany) /*static*/ VW_SETFULLSCREEN vwSetFullScreen = nullptr;
 __declspec(selectany) /*static*/ VW_PLAYVIDEOFILE vwPlayVideoFile = nullptr;
 __declspec(selectany) /*static*/ VW_CLOSE vwClose = nullptr;
+__declspec(selectany) /*static*/ VW_SYNCSIZE vwSynSize = nullptr;
 
 // load module
 static void PRINTMSG(TCHAR* buff, const CHAR* name, int & printed_len)
@@ -105,6 +107,7 @@ static HMODULE vwInit(const TCHAR* dllPath, bool blame=false)
 			DEF_FUNC(hPlayer, vwSetPosition, VW_SETPOSITION, "vwSetPosition");
 			DEF_FUNC(hPlayer, vwSetFullScreen, VW_SETFULLSCREEN, "vwSetFullScreen");
 			DEF_FUNC(hPlayer, vwPlayVideoFile, VW_PLAYVIDEOFILE, "vwPlayVideoFile");
+			DEF_FUNC(hPlayer, vwSynSize, VW_SYNCSIZE, "vwSynSize");
 			DEF_FUNC(hPlayer, vwClose, VW_CLOSE, "vwClose");
 			if(blame && PRINTLEN!=PRINTLEN_0)
 			{

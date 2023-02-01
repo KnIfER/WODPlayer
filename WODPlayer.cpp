@@ -108,6 +108,8 @@ void hookMButtonClick(MSG & msg)
 
 bool running=true;
 
+extern int testSqlite();
+
 int APIENTRY 
 wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -117,7 +119,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-
+	testSqlite();
 	// 初始化公共空间
 	INITCOMMONCONTROLSEX icc;
 	icc.dwSize = sizeof(INITCOMMONCONTROLSEX);

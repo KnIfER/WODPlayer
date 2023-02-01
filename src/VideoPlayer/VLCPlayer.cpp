@@ -14,11 +14,17 @@
 * along with this program; if not, write to the Free Software
 * Foundation.
 */
-#include "windows.h"
+#include <Windows.h>
+#include <GdiPlus.h>
+
+#pragma comment(lib, "GdiPlus")//Visual Studio specific
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "VLCPlayer.h"
 #include "Resource.h"
 
 #include "VideoPlayerInerface.h"
+#include "../DirectUILib/DuiLib/Utils/stb_image.h"
 
 typedef unsigned int ssize_t;
 #include "vlc/vlc.h"
@@ -126,6 +132,11 @@ static void handleEvents(const libvlc_event_t *event, void *userData)
         PostMessage(player->getHParent(), MM_PREPARED
             , event->u.media_player_length_changed.new_length, 0);
         break;
+    case libvlc_MediaMetaChanged:
+        LogIs("handleEvents::libvlc_MediaMetaChanged %s\n");
+        //PostMessage(player->getHParent(), MM_PREPARED
+        //    , event->u.media_player_length_changed.new_length, 0);
+        break;
     default:
         break;
     }
@@ -173,6 +184,7 @@ VLCPlayer::VLCPlayer(int & error_code, HINSTANCE hInstance, HWND hParent)
             libvlc_event_e events[] {
                 libvlc_MediaPlayerPositionChanged,
                 libvlc_MediaPlayerTimeChanged,
+                libvlc_MediaMetaChanged ,
                 libvlc_MediaPlayerLengthChanged
             };
 
@@ -246,3 +258,135 @@ void VLCPlayer::SetFullScreen(bool val)
 {
     libvlc_set_fullscreen(VPlayer, val);
 }
+
+bool copyimage(const wchar_t* filename)
+{
+    //initialize Gdiplus once:
+    Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+    ULONG_PTR gdiplusToken;
+    Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+
+    bool result = false;
+    Gdiplus::Bitmap *gdibmp = Gdiplus::Bitmap::FromFile(filename);
+    LogIs(2, "succ= %d  ", gdibmp);
+    if (gdibmp)
+    {
+        HBITMAP hbitmap;
+        gdibmp->GetHBITMAP(0, &hbitmap);
+        if (OpenClipboard(NULL))
+        {
+            EmptyClipboard();
+            DIBSECTION ds;
+            if (GetObject(hbitmap, sizeof(DIBSECTION), &ds))
+            {
+                HDC hdc = GetDC(HWND_DESKTOP);
+                //create compatible bitmap (get DDB from DIB)
+                HBITMAP hbitmap_ddb = CreateDIBitmap(hdc, &ds.dsBmih, CBM_INIT,
+                    ds.dsBm.bmBits, (BITMAPINFO*)&ds.dsBmih, DIB_RGB_COLORS);
+                ReleaseDC(HWND_DESKTOP, hdc);
+                SetClipboardData(CF_BITMAP, hbitmap_ddb);
+                DeleteObject(hbitmap_ddb);
+                result = true;
+            }
+            CloseClipboard();
+        }
+
+        //cleanup:
+        DeleteObject(hbitmap);  
+        delete gdibmp;              
+    }
+    return result;
+}
+
+bool copyimage(HBITMAP hbitmap)
+{
+    if (hbitmap && OpenClipboard(NULL)) {
+        EmptyClipboard();
+        SetClipboardData(CF_BITMAP, hbitmap);
+        CloseClipboard();
+        return 1;
+    }
+    return 0;
+}
+
+bool copyimage_1(HBITMAP hbitmap)
+{
+    if (hbitmap)
+    {
+        DIBSECTION ds;
+        if (GetObject(hbitmap, sizeof(DIBSECTION), &ds))
+        {
+            HDC hdc = GetDC(HWND_DESKTOP);
+            //create compatible bitmap (get DDB from DIB)
+            HBITMAP hbitmap_ddb = CreateDIBitmap(hdc, &ds.dsBmih, CBM_INIT,
+                ds.dsBm.bmBits, (BITMAPINFO*)&ds.dsBmih, DIB_RGB_COLORS);
+            ReleaseDC(HWND_DESKTOP, hdc);
+            copyimage(hbitmap_ddb);
+            DeleteObject(hbitmap_ddb);
+        }
+        return 1;
+    }
+    return 0;
+}
+
+void VLCPlayer::takeSnapShot(const char* psz_filepath) {
+    libvlc_video_take_snapshot(VPlayer, 0, psz_filepath, 0, 0);
+}
+
+void VLCPlayer::syncResolution() {
+    libvlc_video_get_size(VPlayer, 0, &_resX, &_resY);
+}
+
+void copyimage_1(const char* psz_filepath)
+{
+   int x=0,y=0,n;
+   unsigned char *pImage = stbi_load(psz_filepath, &x, &y, &n, 0);
+
+   int bytesPerPixel = 3;
+   BITMAPINFO bmi;
+   ::ZeroMemory(&bmi, sizeof(BITMAPINFO));
+   bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+   bmi.bmiHeader.biWidth = x;
+   bmi.bmiHeader.biHeight = y;
+   bmi.bmiHeader.biPlanes = 1;
+   bmi.bmiHeader.biCompression = BI_RGB;
+   bmi.bmiHeader.biBitCount = bytesPerPixel*8;
+   bmi.bmiHeader.biSizeImage = x * y * bytesPerPixel;
+
+   LPBYTE pDest = NULL;
+   HBITMAP hBitmap = ::CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&pDest, NULL, 0);
+   //hBitmap = CreateBitmap(100, 100, 1, 24, NULL);
+
+   BYTE alphaByte;
+   float alpha;
+   for( int i = 0; i < x * y; i++ ) 
+   {
+       pDest[i*bytesPerPixel] = pImage[i*n + 2];
+       pDest[i*bytesPerPixel + 1] = pImage[i*n + 1];
+       pDest[i*bytesPerPixel + 2] = pImage[i*n]; 
+       if (bytesPerPixel>3)
+       {
+           pDest[i*bytesPerPixel + 3] = alphaByte = pImage[i*n + 3];
+           if (alphaByte<255)
+           {
+               alpha = alphaByte*1.f/255;
+               pDest[i*bytesPerPixel] *= alpha;
+               pDest[i*bytesPerPixel + 1] *= alpha;
+               pDest[i*bytesPerPixel + 2] *= alpha; 
+           }
+       }
+   }
+    
+   if(hBitmap) {
+       stbi_image_free(pImage);
+
+       bool succ = copyimage_1(hBitmap);
+
+       DeleteObject(hBitmap);  
+
+       LogIs(2, "succ = %d, n= %d", succ, n);
+   }
+
+   // copyimage(L"G:\\IMG\\123.png");
+}
+

@@ -57,6 +57,14 @@ void ExternalPlayer::Release()
 	}
 }
 
+void ExternalPlayer::syncResolution()
+{
+	if (_player)
+	{
+		vwSynSize(_player, &_resX, &_resY);
+	}
+}
+
 bool ExternalPlayer::PlayVideoFile(TCHAR* path)
 {
 	LogIs(L"PlayVideoFile host :: path=%s, m_pAPlayer=%ld", path, _player);

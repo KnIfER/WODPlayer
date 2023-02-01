@@ -35,4 +35,9 @@ public:
 	virtual void SetFullScreen(bool val){};
 	virtual void Release(){};
 	virtual void Close(){};
+	virtual void syncResolution(){};
+	//POINT _resolution; 
+	unsigned int _resX; 
+	unsigned int _resY; 
+
 };

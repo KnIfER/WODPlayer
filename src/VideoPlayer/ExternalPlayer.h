@@ -39,6 +39,7 @@ public:
 	bool			PlayVideoFile(TCHAR* path) override;
 	void			Close() override;
 	void			Release() override;
+	void			syncResolution() override;
 protected:
 	LONG_PTR _player;
 

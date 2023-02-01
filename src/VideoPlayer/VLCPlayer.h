@@ -34,6 +34,8 @@ public:
 	long			GetDuration() override;
 	bool			PlayVideoFile(TCHAR* path) override;
 	void			SetFullScreen(bool val) override;
+	void			takeSnapShot(const char *psz_filepath);
+	void			syncResolution() override;
 private:
 	LONG_PTR mMediaPlayer;
 };

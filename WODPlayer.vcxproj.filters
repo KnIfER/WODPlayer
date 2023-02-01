@@ -22,6 +22,12 @@
     <Filter Include="Source Files\video_src\VideoPlayer">
       <UniqueIdentifier>{ddd610ef-a438-4e5a-9e66-d16d0c5520d9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\database">
+      <UniqueIdentifier>{ef3c76de-0f5d-4dfd-be91-e9dbbd0e67e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utils">
+      <UniqueIdentifier>{6edef70d-d640-447d-9752-68528c448376}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WODPlayer.cpp">
@@ -57,14 +63,17 @@
     <ClCompile Include="src\trackbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\button.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\comctl32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\VideoPlayer\VLCPlayer.cpp">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\database\database_helper.cpp">
+      <Filter>Source Files\database</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\ImageUtils.cpp">
+      <Filter>Source Files\utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -115,6 +124,18 @@
     </ClInclude>
     <ClInclude Include="src\VideoPlayer\ExternalPlayerInterface.h">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WndControl\virtual_keys.h">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\database\database_helper.h">
+      <Filter>Source Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="src\database\sqlite3.h">
+      <Filter>Source Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\WindowUtils.h">
+      <Filter>Source Files\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -19,6 +19,8 @@
 #include "SeekBar.h"
 #include "VideoPlayerInerface.h"
 #include "InsituDebug.h"
+#include "virtual_keys.h"
+#include "Utils/WindowUtils.h"
 
 HBRUSH bgBrush;
 
@@ -38,7 +40,10 @@ void WOD_Register(HINSTANCE hInstance)
 	wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wndclass.hbrBackground = (HBRUSH)(COLOR_MENU + 1);//白色 COLOR_WINDOW // COLOR_MENU 界面灰
-	wndclass.hbrBackground = bgBrush;
+	//wndclass.hbrBackground = bgBrush;
+	//wndclass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	//wndclass.hbrBackground = CreateSolidBrush(RGB(0, 1, 0));
+	wndclass.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
 	wndclass.lpszMenuName = lpszMenuName;
 	wndclass.lpszMenuName = 0;
 	wndclass.lpszClassName = szAppName;
@@ -57,7 +62,7 @@ void WODWindow::init(HINSTANCE hInstance, HWND hParent)
 	WindowBase::init(hInstance, hParent);
 	WOD_Register(hInstance);
 
-	_hWnd = CreateWindowEx(WS_EX_ACCEPTFILES, L"Hello",      // window class name
+	_hWnd = CreateWindowEx(WS_EX_ACCEPTFILES|WS_EX_LAYERED, L"Hello",      // window class name
 		TEXT("The Hello Program"),   // window caption
 		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX  
 		| WS_MAXIMIZEBOX | WS_SIZEBOX
@@ -71,6 +76,8 @@ void WODWindow::init(HINSTANCE hInstance, HWND hParent)
 		NULL,            // window menu handle
 		hInstance,   // program instance handle
 		this);      // creation parameters
+
+	SetLayeredWindowAttributes(_hWnd, RGB(0,1,0), 0, LWA_COLORKEY);
 
 	//_SysWndProc = (WNDPROC)GetWindowLongPtr(_hWnd, GWL_WNDPROC);
 
@@ -332,6 +339,11 @@ bool IsKeyDown(int key) {
 }
 
 
+
+#include <Windows.h>
+#include <GdiPlus.h>
+#pragma comment(lib, "GdiPlus")//Visual Studio specific
+
 LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	static TCHAR s[] = TEXT("Hello, Windows.");
@@ -437,6 +449,8 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		RECT rect;
 		GetClientRect(hwnd, &rect);
+		float width = rect.right - rect.left;
+		float height = rect.bottom - rect.top;
 		MoveWindow(_tabLayout.getHWND(), rect.left, rect.top, rect.right, rect.bottom, true);
 
 		int videoHeightAvailable = rect.bottom - rect.top;
@@ -470,12 +484,27 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		_barsHeight = barsHeight;
 		if (mMediaPlayer0)
 		{
-			::SetWindowPos(mMediaPlayer0->getHWND(), HWND_TOP, 
-				rect.left, 
-				rect.top, 
-				rect.right - rect.left, 
-				fullScreen?videoHeightAvailable:(videoHeightAvailable-barsHeight), 
-				SWP_SHOWWINDOW);
+			height -= barsHeight;
+			if(mMediaPlayer0->_resX && mMediaPlayer0->_resY) 
+			{
+				float ratio = min(width/mMediaPlayer0->_resX, height/mMediaPlayer0->_resY);
+				int w = mMediaPlayer0->_resX*ratio;
+				int h = mMediaPlayer0->_resY*ratio;
+				::SetWindowPos(mMediaPlayer0->getHWND(), HWND_TOP, 
+					(width-w)/2, 
+					max(0, (height-h)/2), 
+					w, 
+					h, 
+					SWP_SHOWWINDOW);
+			} else {
+				::SetWindowPos(mMediaPlayer0->getHWND(), HWND_TOP, 
+					rect.left, 
+					rect.top, 
+					//1*(rect.right - rect.left), 
+					1*(rect.right - rect.left), 
+					1*(fullScreen?videoHeightAvailable:(videoHeightAvailable-barsHeight)), 
+					SWP_SHOWWINDOW);
+			}
 		}
 
 		if (fullScreen)
@@ -517,6 +546,7 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				_seekbar.SetPositionAndMax(pos, mMediaPlayer0->GetDuration());
 			}
 
+			mMediaPlayer0->syncResolution();
 			//LogIs(3, "setPosition:: %d %d max=%d curr=%d\n", mMediaPlayer0->m_nPosition, mMediaPlayer0->m_nDuration, _seekbar.GetMax(), _seekbar.GetPosition());
 		}
 	}
@@ -544,6 +574,21 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 		case VK_SPACE:
 			Toggle();
+		break;
+		case VK_C:
+		{
+			if(IsKeyDown(VK_CONTROL)) {
+				VLCPlayer* player = (VLCPlayer*)mMediaPlayer0;
+				player->takeSnapShot("G:\\IMG\\tmp.png");
+			}
+			//int pos = mMediaPlayer0->GetPosition();
+		}
+		break;
+		case VK_P:
+		{
+			int pos = mMediaPlayer0->GetPosition();
+			WOD_IMG_UTILS("screenshotie", mMediaPlayer0->getHWND());
+		}
 		break;
 		case VK_LEFT:
 		case VK_RIGHT:
@@ -635,6 +680,27 @@ LRESULT CALLBACK WODWindow::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
 		WODWindow* app = (WODWindow*)((LPCREATESTRUCT)lParam)->lpCreateParams;
 		app->_hWnd = hwnd;
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)app);
+	}
+	//if(0)
+	if (message==WM_PAINT)
+	{
+		//if (WS_EX_LAYERED == (WS_EX_LAYERED & GetWindowLong(hWnd, GWL_EXSTYLE))) break;;
+		RECT rcClient;
+		::GetClientRect(hwnd, &rcClient);
+
+		PAINTSTRUCT ps = { 0 };
+		HDC hdc = ::BeginPaint(hwnd, &ps);
+
+		RECT rect = rcClient;  
+
+		//rect.right = rect.left+(rect.right-rect.left)/2;
+
+		HBRUSH hbrush = CreateSolidBrush(RGB(0,1,0));
+
+		FillRect(hdc, &rect, hbrush);
+
+		::EndPaint(hwnd, &ps);
+		return 1;
 	}
 	return ((WODWindow*)GetWindowLongPtr(hwnd, GWLP_USERDATA))->RunProc(hwnd, message, wParam, lParam);
 }

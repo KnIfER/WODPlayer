@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdarg.h>
 
+namespace WOD{
 HWND mainAppWnd;
 
 void LogIs(int show, HWND hWnd, const TCHAR* msg, va_list & args)
@@ -115,3 +116,4 @@ void LogIs(const CHAR* msg, ...)
 	LogIs(3, (HWND)-1, msg, args);
 }
 #endif
+}
