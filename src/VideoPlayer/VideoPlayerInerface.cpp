@@ -15,14 +15,18 @@
 * Foundation.
 */
 
-#include "WODWindow.h"
+#include "pch.h"
+
 #include "ExternalPlayer.h"
+
 #include "VLCPlayer.h"
 //#include "MFPlayer2.h"
 
+
 #define SUCCEED error_code==0
 
-VideoPlayer* initVidePlayerImpl(WODWindow* xpp, int type)
+
+VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, int type)
 {
 	int error_code=-1;
 	VideoPlayer* ret;
@@ -30,7 +34,7 @@ VideoPlayer* initVidePlayerImpl(WODWindow* xpp, int type)
 	type = 0;
 	if (type==0)
 	{
-		ret = new ExternalPlayer(error_code, xpp->getInstace(), xpp->getHWND()
+		ret = new ExternalPlayer(error_code, CPaintManagerUI::GetInstance(), xpp->GetHWND()
 			, L"D:\\Code\\FigureOut\\XunLeiExternalPlayer\\bin\\XunLeiExternalPlayer.dll");
 		if (SUCCEED)
 		{
@@ -42,7 +46,7 @@ VideoPlayer* initVidePlayerImpl(WODWindow* xpp, int type)
 	 	   启用此需要 vlc sdk，并设置相关路径于 VLCPaths.props，记得将相关源码(VLCPlayer.cpp)拖入项目。*/
 	if (type==1)
 	{
-		ret = new VLCPlayer(error_code, xpp->getInstace(), xpp->getHWND());
+		ret = new VLCPlayer(error_code, CPaintManagerUI::GetInstance(), xpp->GetHWND());
 		if (SUCCEED)
 		{
 			return ret;

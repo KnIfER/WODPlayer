@@ -14,45 +14,51 @@
 * along with this program; if not, write to the Free Software
 * Foundation.
 */
-#include "SeekBar.h"
-
-#include "resource.h"
-#include "InsituDebug.h"
+#include "pch.h"
+#include "comctl32.h"
 
 
 extern void TRACKBAR_Register (void);
 
-void SeekBar::init(HINSTANCE hInstance, HWND hParent)
+void SeekBar::Init()
 {
-	TRACKBAR_Register();
+	if (!_hWnd && GetParent()->GetHWND())
+	{ 
+		_hParent = GetParent()->GetHWND();
+		TRACKBAR_Register();
 
-	_hWnd = CreateWindowEx(0
-		, true?L"my_trackbar32":TRACKBAR_CLASS, nullptr
-		, WS_CHILD 
-		| TBS_HORZ  | WS_VISIBLE
-		| TBS_FOCUSNEVER
-		| TBS_BOOKMARKTICS
-		| TBS_SEEKBAR
-		, 20, 50, 200, 23, hParent
-		, nullptr, nullptr, nullptr);
+		_hWnd = CreateWindowEx(0
+			, true?L"my_trackbar32":TRACKBAR_CLASS, nullptr
+			, WS_CHILD 
+			| TBS_HORZ  | WS_VISIBLE
+			| TBS_FOCUSNEVER
+			| TBS_BOOKMARKTICS
+			| TBS_SEEKBAR
+			, 20, 50, 200, 23, _hParent
+			, nullptr, nullptr, nullptr);
 
-	//SendWndMessage(TBM_SETTHUMBLENGTH, 100, 0);
- 
-	SendWndMessage(TBM_SETRANGEMAX, false, 10000000);
+		//SendWndMessage(TBM_SETTHUMBLENGTH, 100, 0);
 
-	//SetPosition(20);
-	//LogIs(2, "GetMax :: %d", GetMax());
-	//LogIs(2, "GetMax :: %d", GetPosition());
+		SendWndMessage(TBM_SETRANGEMAX, false, 10000000);
 
-	//SendWndMessage(TBM_SETTIC , 0, 200);
+		//SetPosition(20);
+		//LogIs(2, "GetMax :: %d", GetMax());
+		//LogIs(2, "GetMax :: %d", GetPosition());
 
-
-	SetWindowLongPtr(_hWnd, GWLP_USERDATA, (LONG_PTR)this);
-
-
-	_SysWndProc = (WNDPROC)SetWindowLongPtr(_hWnd, GWL_WNDPROC, (LONG_PTR)SeekBar::WndProc);
+		//SendWndMessage(TBM_SETTIC , 0, 200);
 
 
+		SetWindowLongPtr(_hWnd, GWLP_USERDATA, (LONG_PTR)this);
+
+
+		_SysWndProc = (WNDPROC)SetWindowLongPtr(_hWnd, GWL_WNDPROC, (LONG_PTR)SeekBar::WndProc);
+	}
+	if (_hWnd && _hParent != __hParent)
+	{
+		__hParent = _hParent;
+		::SetParent(_hWnd, _hParent);
+		SetPos(GetPos());
+	}
 }
 
 void SeekBar::SetPosition(LONG pos)

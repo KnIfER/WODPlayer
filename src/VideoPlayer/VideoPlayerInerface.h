@@ -15,10 +15,10 @@
 * Foundation.
 */
 #pragma once
-#include "InsituDebug.h"
-#include "../WndControl/WindowBase.h"
 
 #define MM_PREPARED              (WM_USER)
+
+#include "../WndControl/WindowBase.h"
 
 class VideoPlayer : public WindowBase
 {

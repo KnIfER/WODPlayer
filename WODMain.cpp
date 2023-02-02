@@ -14,11 +14,7 @@
 * along with this program; if not, write to the Free Software
 * Foundation.
 */
-#include <windows.h>
-#include "WODWindow.h"
-#include "TabLayout.h"
-#include "WODPlayer.h"
-#include <iostream>
+#include "pch.h"
 
 
 struct DemoData
@@ -27,44 +23,44 @@ struct DemoData
 	int image;
 };
 
-WODWindow XPP;
+WODApplication* XPP;
 
 void hookMouseMove(MSG & msg)
 {
 	int yPos = msg.pt.y;
 	RECT rc;
-	GetClientRect(XPP.getHWND(), &rc);
-	if (IsWindowVisible(XPP._hFullScreenBtmbar))
+	GetClientRect(XPP->GetHWND(), &rc);
+	if (IsWindowVisible(XPP->_hFullScreenBtmbar))
 	{
-		if (!XPP._seekbar._isSeeking && yPos<rc.bottom-XPP._barsHeight-12)
+		if (!XPP->_mainPlayer._seekbar._isSeeking && yPos<rc.bottom-XPP->_barsHeight-12)
 		{
-			ShowWindow(XPP._hFullScreenBtmbar, SW_HIDE);
+			ShowWindow(XPP->_hFullScreenBtmbar, SW_HIDE);
 		}
 	}
-	else if (yPos>=rc.bottom-XPP._barsHeight) // -4
+	else if (yPos>=rc.bottom-XPP->_barsHeight) // -4
 	{
-		ShowWindow(XPP._hFullScreenBtmbar, SW_SHOW);
+		ShowWindow(XPP->_hFullScreenBtmbar, SW_SHOW);
 	}
 }
 
 void hookLButtonDown(MSG & msg)
 {
-	if(XPP.IsFullScreen())
+	if(XPP->IsFullScreen())
 		return;
 	LogIs("hookLButtonDown");
-	if (XPP.IsMediaPlayerWindow(msg.hwnd)||msg.hwnd==XPP.getHWND())
+	if (XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd)||msg.hwnd==XPP->GetHWND())
 	{
 		ReleaseCapture();
-		SendMessage(XPP.getHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
-		SetFocus(XPP.getHWND());
+		::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+		SetFocus(XPP->GetHWND());
 		return;
 	}
-	if (msg.hwnd==XPP._toolbar.getHWND())
+	if (msg.hwnd==XPP->_toolbar.GetHWND())
 	{
-		if (GET_X_LPARAM(msg.lParam)>XPP._toolbar.getHeight()*5)
+		if (GET_X_LPARAM(msg.lParam)>XPP->_toolbar.GetHeight()*5)
 		{
 			ReleaseCapture();
-			SendMessage(XPP.getHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+			::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
 		}
 		return;
 	}
@@ -73,35 +69,35 @@ void hookLButtonDown(MSG & msg)
 void hookLButtonDoubleClick(MSG & msg)
 {
 	//LogIs("hookLButtonDoubleClick");
-	if (msg.hwnd==XPP._toolbar.getHWND())
+	if (msg.hwnd==XPP->_toolbar.GetHWND())
 	{
-		if (GET_X_LPARAM(msg.lParam)>XPP._toolbar.getHeight()*5)
+		if (GET_X_LPARAM(msg.lParam)>XPP->_toolbar.GetHeight()*5)
 		{
-			XPP.Toggle();
+			XPP->_mainPlayer.Toggle();
 		}
 		return;
 	}
-	if (XPP.IsMediaPlayerWindow(msg.hwnd))
+	if (XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd))
 	{
-		XPP.Toggle();
+		XPP->_mainPlayer.Toggle();
 		return;
 	}
 }
 
 void hookMButtonClick(MSG & msg)
 {
-	if (msg.hwnd==XPP._toolbar.getHWND())
+	if (msg.hwnd==XPP->_toolbar.GetHWND())
 	{
-		if (GET_X_LPARAM(msg.lParam)>XPP._toolbar.getHeight()*5)
+		if (GET_X_LPARAM(msg.lParam)>XPP->_toolbar.GetHeight()*5)
 		{
-			XPP.ToggleFullScreen();
+			XPP->ToggleFullScreen();
 		}
 		return;
 	}
-	if (XPP.IsMediaPlayerWindow(msg.hwnd))
+	if (XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd))
 	{
-		XPP.ToggleFullScreen();
-		SetFocus(XPP.getHWND());
+		XPP->ToggleFullScreen();
+		SetFocus(XPP->GetHWND());
 		return;
 	}
 }
@@ -119,17 +115,26 @@ wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	testSqlite();
+	//testSqlite();
 	// 初始化公共空间
-	INITCOMMONCONTROLSEX icc;
-	icc.dwSize = sizeof(INITCOMMONCONTROLSEX);
-	icc.dwICC = ICC_BAR_CLASSES;
-	InitCommonControlsEx(&icc);
+	//INITCOMMONCONTROLSEX icc;
+	//icc.dwSize = sizeof(INITCOMMONCONTROLSEX);
+	//icc.dwICC = ICC_BAR_CLASSES;
+	//InitCommonControlsEx(&icc);
 
-	XPP.init(hInstance, NULL);
+	CPaintManagerUI::SetInstance(hInstance);
+	CPaintManagerUI::SetResourcePath(CPaintManagerUI::GetInstancePath() + _T("..//skin//"));
 
-	XPP.showWindow();
+	XPP = new WODApplication();
+	XPP->Create(NULL, _T("无限播放器"), UI_WNDSTYLE_FRAME, WS_EX_APPWINDOW, 0, 0, 500, 500);
+	//XPP->ShowWindow();
+	//XPP->CenterWindow();
+	//XPP->init(hInstance, NULL);
 
+	XPP->ShowModal();
+
+
+	return 0;
 	MSG    msg;
 	//while(running)
 	{
@@ -146,15 +151,15 @@ wWinMain(_In_ HINSTANCE hInstance,
 					hookLButtonDown(msg);
 					break;
 				case WM_MOUSEMOVE:
-					if (XPP.IsFullScreen())
+					if (XPP->IsFullScreen())
 						hookMouseMove(msg);
 					break;
 				case WM_MBUTTONUP:
 					hookMButtonClick(msg);
 					//case WM_RBUTTONDOWN:
-					//	if (IsChild(XPP.GetMediaPlayerHWND(), msg.hwnd))
+					//	if (IsChild(XPP->GetMediaPlayerHWND(), msg.hwnd))
 					//	{
-					//		SetFocus(XPP.getHWND());
+					//		SetFocus(XPP->getHWND());
 					//	}
 					break;
 				case WM_NCLBUTTONDBLCLK:
@@ -175,3 +180,6 @@ wWinMain(_In_ HINSTANCE hInstance,
 
 	return msg.wParam;
 }
+
+
+

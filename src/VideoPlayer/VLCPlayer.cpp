@@ -24,7 +24,11 @@
 #include "Resource.h"
 
 #include "VideoPlayerInerface.h"
-#include "../DirectUILib/DuiLib/Utils/stb_image.h"
+#include "DuiLib\Core\InsituDebug.h"
+
+//#include "DuiLib/UIlib.h"
+//#define STB_IMAGE_IMPLEMENTATION
+//#include "DuiLib\Utils\stb_image.h"
 
 typedef unsigned int ssize_t;
 #include "vlc/vlc.h"
@@ -339,54 +343,54 @@ void VLCPlayer::syncResolution() {
 
 void copyimage_1(const char* psz_filepath)
 {
-   int x=0,y=0,n;
-   unsigned char *pImage = stbi_load(psz_filepath, &x, &y, &n, 0);
+   //int x=0,y=0,n;
+   //unsigned char *pImage = stbi_load(psz_filepath, &x, &y, &n, 0);
 
-   int bytesPerPixel = 3;
-   BITMAPINFO bmi;
-   ::ZeroMemory(&bmi, sizeof(BITMAPINFO));
-   bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-   bmi.bmiHeader.biWidth = x;
-   bmi.bmiHeader.biHeight = y;
-   bmi.bmiHeader.biPlanes = 1;
-   bmi.bmiHeader.biCompression = BI_RGB;
-   bmi.bmiHeader.biBitCount = bytesPerPixel*8;
-   bmi.bmiHeader.biSizeImage = x * y * bytesPerPixel;
+   //int bytesPerPixel = 3;
+   //BITMAPINFO bmi;
+   //::ZeroMemory(&bmi, sizeof(BITMAPINFO));
+   //bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+   //bmi.bmiHeader.biWidth = x;
+   //bmi.bmiHeader.biHeight = y;
+   //bmi.bmiHeader.biPlanes = 1;
+   //bmi.bmiHeader.biCompression = BI_RGB;
+   //bmi.bmiHeader.biBitCount = bytesPerPixel*8;
+   //bmi.bmiHeader.biSizeImage = x * y * bytesPerPixel;
 
-   LPBYTE pDest = NULL;
-   HBITMAP hBitmap = ::CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&pDest, NULL, 0);
-   //hBitmap = CreateBitmap(100, 100, 1, 24, NULL);
+   //LPBYTE pDest = NULL;
+   //HBITMAP hBitmap = ::CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&pDest, NULL, 0);
+   ////hBitmap = CreateBitmap(100, 100, 1, 24, NULL);
 
-   BYTE alphaByte;
-   float alpha;
-   for( int i = 0; i < x * y; i++ ) 
-   {
-       pDest[i*bytesPerPixel] = pImage[i*n + 2];
-       pDest[i*bytesPerPixel + 1] = pImage[i*n + 1];
-       pDest[i*bytesPerPixel + 2] = pImage[i*n]; 
-       if (bytesPerPixel>3)
-       {
-           pDest[i*bytesPerPixel + 3] = alphaByte = pImage[i*n + 3];
-           if (alphaByte<255)
-           {
-               alpha = alphaByte*1.f/255;
-               pDest[i*bytesPerPixel] *= alpha;
-               pDest[i*bytesPerPixel + 1] *= alpha;
-               pDest[i*bytesPerPixel + 2] *= alpha; 
-           }
-       }
-   }
-    
-   if(hBitmap) {
-       stbi_image_free(pImage);
+   //BYTE alphaByte;
+   //float alpha;
+   //for( int i = 0; i < x * y; i++ ) 
+   //{
+   //    pDest[i*bytesPerPixel] = pImage[i*n + 2];
+   //    pDest[i*bytesPerPixel + 1] = pImage[i*n + 1];
+   //    pDest[i*bytesPerPixel + 2] = pImage[i*n]; 
+   //    if (bytesPerPixel>3)
+   //    {
+   //        pDest[i*bytesPerPixel + 3] = alphaByte = pImage[i*n + 3];
+   //        if (alphaByte<255)
+   //        {
+   //            alpha = alphaByte*1.f/255;
+   //            pDest[i*bytesPerPixel] *= alpha;
+   //            pDest[i*bytesPerPixel + 1] *= alpha;
+   //            pDest[i*bytesPerPixel + 2] *= alpha; 
+   //        }
+   //    }
+   //}
+   // 
+   //if(hBitmap) {
+   //    stbi_image_free(pImage);
 
-       bool succ = copyimage_1(hBitmap);
+   //    bool succ = copyimage_1(hBitmap);
 
-       DeleteObject(hBitmap);  
+   //    DeleteObject(hBitmap);  
 
-       LogIs(2, "succ = %d, n= %d", succ, n);
-   }
+   //    LogIs(2, "succ = %d, n= %d", succ, n);
+   //}
 
-   // copyimage(L"G:\\IMG\\123.png");
+   //// copyimage(L"G:\\IMG\\123.png");
 }
 

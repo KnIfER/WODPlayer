@@ -1,4 +1,4 @@
-/** Copyright 2021 KnIfER JK. Chen
+/** Copyright 2021 WODPLayer author
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -18,10 +18,6 @@
 #include <Windows.h>
 #include <Windowsx.h>
 #include "comctl32.h"
-
-extern LONG_PTR WOD_IMG_UTILS(const char* msg, HWND hWnd=0, LONG_PTR wParam=0, LONG_PTR lParam=0);
-
-#define SendWndMessage(Msg, wParam, lParam) SendMessage(_hWnd, Msg, wParam, lParam)
 
 class WindowBase 
 {

@@ -14,13 +14,122 @@
 * along with this program; if not, write to the Free Software
 * Foundation.
 */
-#include "WODWindow.h"
-#include "resource.h"
-#include "SeekBar.h"
-#include "VideoPlayerInerface.h"
-#include "InsituDebug.h"
+#include <pch.h>
+#include "../resource.h"
 #include "virtual_keys.h"
-#include "Utils/WindowUtils.h"
+
+
+struct DemoData
+{
+	const TCHAR* title;
+	int image;
+};
+
+extern WODApplication* XPP;
+
+extern int testSqlite();
+
+CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
+	if(*pstrClass=='_') {
+		pstrClass++;
+		if(*pstrClass=='t') {
+			//LogIs(L"CreateControl::%s %d", pstrClass, *pstrClass=='_');
+			return &_toolbar;
+		}
+		if(*pstrClass=='s') {
+			//LogIs(L"CreateControl::%s %d", pstrClass, *pstrClass=='_');
+			return &_mainPlayer._seekbar;
+		}
+		if(*pstrClass=='v') {
+			//LogIs(L"CreateControl::%s %d", pstrClass, *pstrClass=='_');
+			return &_mainPlayer;
+		}
+	}
+	return 0;
+}
+
+void WODApplication::InitWindow()
+{
+	//ListView* pList = static_cast<ListView*>(m_pm.FindControl(_T("btn")));
+	//LogIs(L"WODApplication::InitWindow %s", (LPCWSTR)m_pm.FindControl(L"btn")->GetText());
+
+	//CHorizontalLayoutUI* menuBar = static_cast<CHorizontalLayoutUI*>(m_pm.FindControl(_T("menuBar")));
+	//for (size_t i = 0; i < 10; i++)
+	//{
+	//    auto menu = builder.Create(L"menu_item.xml", 0, 0, &m_pm);
+	//    menu->SetFixedWidth(0);
+	//    menu->GetText().Format(L"菜单#%d", i);
+	//    menu->GetText().Format(L"文件#%d", i);
+	//    menu->GetText().Format(L"文件(&F)", i);
+	//    menuBar->Add(menu);
+	//}
+	//_toolbar.Init();
+	//_toolbar.Init();
+	//_mainPlayer._seekbar.Init();
+
+	//LogIs(L"InitWindow::%ld %ld", _toolbar.GetHWND(), _mainPlayer._seekbar.GetHWND());
+	if(0) {
+		LogIs("WODPlayer::init");
+		//WOD_Register(hInstance);
+
+		m_hWnd = CreateWindowEx(WS_EX_ACCEPTFILES, L"Hello",      // window class name
+			TEXT("The Hello Program"),   // window caption
+			WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX  
+			| WS_MAXIMIZEBOX | WS_SIZEBOX
+			| WS_CLIPCHILDREN 
+			,
+			800,// initial x position
+			250,// initial y position
+			500,// initial x size
+			500,// initial y size
+			NULL,                 // parent window handle
+			NULL,            // window menu handle
+			0,   // program instance handle
+			this);      // creation parameters
+
+		//SetLayeredWindowAttributes(_hWnd, RGB(0,1,0), 0, LWA_COLORKEY);
+
+		//_SysWndProc = (WNDPROC)GetWindowLongPtr(_hWnd, GWL_WNDPROC);
+
+		//_SysWndProc = (WNDPROC)SetWindowLongPtr(_hWnd, GWL_WNDPROC, (LONG_PTR)WndProc);
+
+		//_tabLayout = new TabLayout(hInstance, _hWnd);
+
+		//	_toolbar.init(hInstance, _hWnd);
+
+		//CreateRebar(_hWnd, _toolbar.GetHWND());
+
+		RECT rect;
+		GetClientRect(m_hWnd, &rect);
+
+		MoveWindow(_toolbar.GetHWND(), rect.left, 100+rect.top, rect.right, 24, true);
+
+		SetWindowPos(_toolbar.GetHWND(), 0 , 100+rect.left
+			, 100+rect.top, rect.right, 12, SWP_SHOWWINDOW);
+
+
+		//	_mainPlayer._seekbar.init(hInstance, _hWnd);
+	}
+
+	_mainPlayer.newVideoView();
+}
+
+void WODApplication::Notify( TNotifyUI &msg )
+{
+	if (msg.sType==L"click")
+	{
+		if(msg.pSender == m_pSearch)
+		{
+		}
+		else if( msg.sType == _T("itemclick") ) 
+		{
+		}
+
+		//auto bRoot = builder.Create(L"<Window><Button/></Window>", TEXT("str"), 0, &m_pm);
+		//ASSERT(bRoot);
+	}
+	// WindowImplBase::Notify(msg);
+}
 
 HBRUSH bgBrush;
 
@@ -33,16 +142,16 @@ void WOD_Register(HINSTANCE hInstance)
 	MSG    msg;
 	WNDCLASS wndclass;//WNDCLASSEX比WNDCLASS多两个结构成员－－cbSize(指定WNDCLASSEX结构的大小－－字节)  －－hIconSm(标识类的小图标)
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;
-	wndclass.lpfnWndProc = WODWindow::WndProc;
+	wndclass.lpfnWndProc = WODApplication::WndProc;
 	wndclass.cbClsExtra = 0;
 	wndclass.cbWndExtra = 0;
 	wndclass.hInstance = hInstance;
 	wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wndclass.hbrBackground = (HBRUSH)(COLOR_MENU + 1);//白色 COLOR_WINDOW // COLOR_MENU 界面灰
-	//wndclass.hbrBackground = bgBrush;
-	//wndclass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	//wndclass.hbrBackground = CreateSolidBrush(RGB(0, 1, 0));
+													  //wndclass.hbrBackground = bgBrush;
+													  //wndclass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+													  //wndclass.hbrBackground = CreateSolidBrush(RGB(0, 1, 0));
 	wndclass.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
 	wndclass.lpszMenuName = lpszMenuName;
 	wndclass.lpszMenuName = 0;
@@ -55,72 +164,12 @@ void WOD_UnRegister()
 {
 }
 
-extern VideoPlayer* initVidePlayerImpl(WODWindow* xpp, int type);
 
-void WODWindow::init(HINSTANCE hInstance, HWND hParent)
+
+void WODApplication::showWindow()
 {
-	WindowBase::init(hInstance, hParent);
-	WOD_Register(hInstance);
-
-	_hWnd = CreateWindowEx(WS_EX_ACCEPTFILES|WS_EX_LAYERED, L"Hello",      // window class name
-		TEXT("The Hello Program"),   // window caption
-		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX  
-		| WS_MAXIMIZEBOX | WS_SIZEBOX
-		| WS_CLIPCHILDREN 
-		,
-		800,// initial x position
-		250,// initial y position
-		500,// initial x size
-		500,// initial y size
-		NULL,                 // parent window handle
-		NULL,            // window menu handle
-		hInstance,   // program instance handle
-		this);      // creation parameters
-
-	SetLayeredWindowAttributes(_hWnd, RGB(0,1,0), 0, LWA_COLORKEY);
-
-	//_SysWndProc = (WNDPROC)GetWindowLongPtr(_hWnd, GWL_WNDPROC);
-
-	//_SysWndProc = (WNDPROC)SetWindowLongPtr(_hWnd, GWL_WNDPROC, (LONG_PTR)WndProc);
-
-	//_tabLayout = new TabLayout(hInstance, _hWnd);
-
-	_toolbar.init(hInstance, _hWnd);
-
-	//CreateRebar(_hWnd, _toolbar->getHWND());
-
-	RECT rect;
-	GetClientRect(_hWnd, &rect);
-
-	MoveWindow(_toolbar.getHWND(), rect.left, 100+rect.top, rect.right, 24, true);
-
-	SetWindowPos(_toolbar.getHWND(), 0 , 100+rect.left
-		, 100+rect.top, rect.right, 12, SWP_SHOWWINDOW);
-
-
-	_seekbar.init(hInstance, _hWnd);
-
-	newVideoView();
-}
-
-void WODWindow::newVideoView()
-{
-	if (mMediaPlayer0)
-	{
-		delete mMediaPlayer0;
-		mMediaPlayer0 = 0;
-	}
-	mMediaPlayer0 = initVidePlayerImpl(this, 1);
-	if (mMediaPlayer0)
-	{
-		_hPlayer = mMediaPlayer0->getHWND();
-	}
-}
-
-void WODWindow::showWindow()
-{
-	ShowWindow(_hWnd, SW_SHOW);
-	UpdateWindow(_hWnd);
+	ShowWindow(m_hWnd, SW_SHOW);
+	UpdateWindow(m_hWnd);
 }
 
 static DWORD dwNScStyle = WS_CAPTION|WS_BORDER|WS_SIZEBOX; 
@@ -132,12 +181,13 @@ LRESULT WINAPI FullScreenBarsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-void WODWindow::ToggleFullScreen()
+
+void WODApplication::ToggleFullScreen()
 {
-	HWND hThisFSc = _hWnd;
+	HWND hThisFSc = m_hWnd;
 	DWORD style = GetWindowLong(hThisFSc, GWL_STYLE);
 	if (style&WS_CAPTION)
-	//if (!_isFullScreen)
+		//if (!_isFullScreen)
 	{
 		if(_hFullScreenBtmbar == NULL)
 		{
@@ -149,7 +199,7 @@ void WODWindow::ToggleFullScreen()
 			wc.hbrBackground = bgBrush;
 			wc.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 			wc.hIcon = NULL;
-			wc.hInstance = _hInst;
+			wc.hInstance = CPaintManagerUI::GetInstance();
 			wc.lpfnWndProc = FullScreenBarsProc;
 			wc.lpszClassName = TEXT("FullScreenBarsHolder");
 			wc.lpszMenuName = 0;
@@ -165,12 +215,12 @@ void WODWindow::ToggleFullScreen()
 			_hFullScreenBtmbar = ::CreateWindow(wc.lpszClassName
 				, TEXT(""), WS_VISIBLE | WS_CHILD
 				, 0, 0, 100, 100,
-				_hWnd, NULL, NULL, this);
+				m_hWnd, NULL, NULL, this);
 		}
-		SetParent(_toolbar.getHWND(), _hFullScreenBtmbar);
-		SetParent(_seekbar.getHWND(), _hFullScreenBtmbar);
+		SetParent(_toolbar.GetHWND(), _hFullScreenBtmbar);
+		SetParent(_mainPlayer._seekbar.GetHWND(), _hFullScreenBtmbar);
 
-		if (mMediaPlayer0) mMediaPlayer0->SetFullScreen(true);
+		if (_mainPlayer._mMediaPlayer) _mainPlayer._mMediaPlayer->SetFullScreen(true);
 		_isFullScreen = true;
 		GetWindowRect(hThisFSc, &rcNScPos);
 		SetWindowLong(hThisFSc, GWL_STYLE , style&~dwNScStyle );
@@ -184,10 +234,10 @@ void WODWindow::ToggleFullScreen()
 	}
 	else
 	{
-		SetParent(_toolbar.getHWND(), _hWnd);
-		SetParent(_seekbar.getHWND(), _hWnd);
+		SetParent(_toolbar.GetHWND(), m_hWnd);
+		SetParent(_mainPlayer._seekbar.GetHWND(), m_hWnd);
 		ShowWindow(_hFullScreenBtmbar, SW_HIDE);
-		if (mMediaPlayer0) mMediaPlayer0->SetFullScreen(false);
+		if (_mainPlayer._mMediaPlayer) _mainPlayer._mMediaPlayer->SetFullScreen(false);
 		_isFullScreen = false;
 		SetWindowLong(hThisFSc, GWL_STYLE , style|dwNScStyle );
 		style = GetWindowLong(hThisFSc, GWL_EXSTYLE);
@@ -198,55 +248,28 @@ void WODWindow::ToggleFullScreen()
 	}
 }
 
-bool WODWindow::IsFullScreen()
+bool WODApplication::IsFullScreen()
 {
-	return (GetWindowLong(_hWnd, GWL_STYLE)&WS_CAPTION)==0;
+	return (GetWindowLong(m_hWnd, GWL_STYLE)&WS_CAPTION)==0;
 	//return _isFullScreen;
 }
 
-bool WODWindow::IsMediaPlayerWindow(HWND hwnd)
+void WODApplication::MarkPlaying(bool playing)
 {
-	return hwnd==_hPlayer||IsChild(_hPlayer, hwnd);
+	_toolbar.ReplaceIcon(0, playing?IDI_PAUSE:IDI_PLAY);
+	RECT rc;
+	GetClientRect(_toolbar.GetHWND(), &rc);
+	rc.right = rc.bottom;
+	InvalidateRect(_toolbar.GetHWND(), &rc, TRUE);
+
+	if(playing)
+		::SetTimer(m_hWnd, 1, 100, NULL);
+	else
+		::KillTimer(m_hWnd, 1);
 }
 
-HWND WODWindow::GetMediaPlayerHWND()
-{
-	return _hPlayer;
-}
+extern bool running;
 
-void WODWindow::Toggle()
-{
-	if (mMediaPlayer0)
-	{
-		if (_isPlaying)
-		{
-			mMediaPlayer0->Pause();
-		}
-		else 
-		{
-			mMediaPlayer0->Play();
-		}
-		MarkPlaying(!_isPlaying);
-	}
-}
-
-void WODWindow::MarkPlaying(bool playing)
-{
-	if (_isPlaying!=playing)
-	{
-		_isPlaying = playing;
-		_toolbar.ReplaceIcon(0, _isPlaying?IDI_PAUSE:IDI_PLAY);
-		RECT rc;
-		GetClientRect(_toolbar.getHWND(), &rc);
-		rc.right = rc.bottom;
-		InvalidateRect(_toolbar.getHWND(), &rc, TRUE);
-
-		if(playing)
-			::SetTimer(_hWnd, 1, 100, NULL);
-		else
-			::KillTimer(_hWnd, 1);
-	}
-}
 
 
 BOOL PickFileDlg(HWND hOwner,
@@ -289,7 +312,7 @@ BOOL PickFileDlg(HWND hOwner,
 	return bResult;
 }
 
-bool WODWindow::PickFile()
+bool WODApplication::PickFile()
 {
 	TCHAR filepath[MAX_PATH]{};
 
@@ -315,36 +338,33 @@ bool WODWindow::PickFile()
 	pFilter += (lstrlen(pFilter) + 1);
 	*pFilter = 0; pFilter++;
 
-	BOOL ret = PickFileDlg(_hWnd, FALSE, TEXT("选择媒体文件"), filters, filepath, MAX_PATH, NULL, 0);
-	
-	if (false)
-	{
-		newVideoView();
-	}
+	BOOL ret = PickFileDlg(m_hWnd, FALSE, TEXT("选择媒体文件"), filters, filepath, MAX_PATH, NULL, 0);
+
+	//if (false)
+	//{
+	//	newVideoView();
+	//}
 
 	if(ret)
 	{
-		MarkPlaying(mMediaPlayer0->PlayVideoFile(filepath));
+		MarkPlaying(_mainPlayer._mMediaPlayer->PlayVideoFile(filepath));
 	}
 	return false;
 }
-
-TCHAR nxt_file[_MAX_PATH];
-
-extern bool running;
-
 
 bool IsKeyDown(int key) {
 	return (::GetKeyState(key) & 0x80000000) != 0;
 }
 
 
-
 #include <Windows.h>
 #include <GdiPlus.h>
 #pragma comment(lib, "GdiPlus")//Visual Studio specific
 
-LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+
+TCHAR nxt_file[_MAX_PATH];
+
+LRESULT WODApplication::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	static TCHAR s[] = TEXT("Hello, Windows.");
 	switch (msg)
@@ -369,9 +389,9 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			else
 			{
 				// filepath
-				if (mMediaPlayer0)
+				if (_mainPlayer._mMediaPlayer)
 				{
-					mMediaPlayer0->Close();
+					_mainPlayer._mMediaPlayer->Close();
 					lstrcpy(nxt_file, szFileName);
 					::KillTimer(hwnd, 10086);
 					::SetTimer(hwnd, 10086, 200, 0);
@@ -386,9 +406,9 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		::DragFinish(hDropInfo);
 		return true;
-	
+
 	};
-		break;
+	break;
 
 	case WM_CONTEXTMENU:
 	{
@@ -437,12 +457,12 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_CLOSE:
 	case WM_DESTROY:
 		running = false;
-		if (mMediaPlayer0)
+		if (_mainPlayer._mMediaPlayer)
 		{
-			//delete mMediaPlayer0;
-			//mMediaPlayer0 = NULL;
+			//delete _mainPlayer._mMediaPlayer;
+			//_mainPlayer._mMediaPlayer = NULL;
 		}
-		_hWnd = 0;
+		m_hWnd = 0;
 		PostQuitMessage(0);
 		return TRUE;
 	case WM_SIZE:
@@ -451,7 +471,7 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		GetClientRect(hwnd, &rect);
 		float width = rect.right - rect.left;
 		float height = rect.bottom - rect.top;
-		MoveWindow(_tabLayout.getHWND(), rect.left, rect.top, rect.right, rect.bottom, true);
+		//sMoveWindow(_tabLayout.getHWND(), rect.left, rect.top, rect.right, rect.bottom, true);
 
 		int videoHeightAvailable = rect.bottom - rect.top;
 		int toolbarHeight = 0;
@@ -462,42 +482,42 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		if (1)
 		{
-			SendMessage(_toolbar.getHWND(), TB_AUTOSIZE, 0, 0);
+			::SendMessage(_toolbar.GetHWND(), TB_AUTOSIZE, 0, 0);
 			RECT toolbarRect;
-			GetClientRect(_toolbar.getHWND(), &toolbarRect);
+			GetClientRect(_toolbar.GetHWND(), &toolbarRect);
 			toolbarHeight = toolbarRect.bottom-toolbarRect.top;
 			barsHeight += toolbarHeight;
-			//MoveWindow(_toolbar->getHWND(), 1000+rect.left, rect.top, rect.right, rect.bottom, true);
+			//MoveWindow(_toolbar.GetHWND(), 1000+rect.left, rect.top, rect.right, rect.bottom, true);
 
-			//SetWindowPos(_toolbar.getHWND(), 0
+			//SetWindowPos(_toolbar.GetHWND(), 0
 			//	, 1000+rect.left, rect.top, rect.right, rect.bottom, SWP_SHOWWINDOW);
 		}
 		if (1)
 		{
 			seekbarHeight = 32;
-			SetWindowPos(_seekbar.getHWND(), HWND_TOP, rect.left, rect.bottom-toolbarHeight-seekbarHeight, rect.right, seekbarHeight, SWP_SHOWWINDOW);
+			SetWindowPos(_mainPlayer._seekbar.GetHWND(), HWND_TOP, rect.left, rect.bottom-toolbarHeight-seekbarHeight, rect.right, seekbarHeight, SWP_SHOWWINDOW);
 
 			barsHeight += seekbarHeight;
-			//SetWindowPos(_toolbar->getHWND(), 0
+			//SetWindowPos(_toolbar.GetHWND(), 0
 			//	, 1000+rect.left, rect.top, rect.right, rect.bottom, SWP_SHOWWINDOW);
 		}
 		_barsHeight = barsHeight;
-		if (mMediaPlayer0)
+		if (_mainPlayer._mMediaPlayer)
 		{
 			height -= barsHeight;
-			if(mMediaPlayer0->_resX && mMediaPlayer0->_resY) 
+			if(_mainPlayer._mMediaPlayer->_resX && _mainPlayer._mMediaPlayer->_resY) 
 			{
-				float ratio = min(width/mMediaPlayer0->_resX, height/mMediaPlayer0->_resY);
-				int w = mMediaPlayer0->_resX*ratio;
-				int h = mMediaPlayer0->_resY*ratio;
-				::SetWindowPos(mMediaPlayer0->getHWND(), HWND_TOP, 
+				float ratio = min(width/_mainPlayer._mMediaPlayer->_resX, height/_mainPlayer._mMediaPlayer->_resY);
+				int w = _mainPlayer._mMediaPlayer->_resX*ratio;
+				int h = _mainPlayer._mMediaPlayer->_resY*ratio;
+				::SetWindowPos(_mainPlayer._mMediaPlayer->getHWND(), HWND_TOP, 
 					(width-w)/2, 
 					max(0, (height-h)/2), 
 					w, 
 					h, 
 					SWP_SHOWWINDOW);
 			} else {
-				::SetWindowPos(mMediaPlayer0->getHWND(), HWND_TOP, 
+				::SetWindowPos(_mainPlayer._mMediaPlayer->getHWND(), HWND_TOP, 
 					rect.left, 
 					rect.top, 
 					//1*(rect.right - rect.left), 
@@ -511,57 +531,57 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			SetWindowPos(_hFullScreenBtmbar , HWND_TOP
 				, rect.left , rect.bottom-barsHeight, rect.right, barsHeight, SWP_SHOWWINDOW);
-			SetWindowPos(_seekbar.getHWND(), HWND_TOP, rect.left, 0, rect.right, seekbarHeight, SWP_SHOWWINDOW);
+			SetWindowPos(_mainPlayer._seekbar.GetHWND(), HWND_TOP, rect.left, 0, rect.right, seekbarHeight, SWP_SHOWWINDOW);
 
-			SendMessage(_toolbar.getHWND(), TB_AUTOSIZE, 0, 0);
+			::SendMessage(_toolbar.GetHWND(), TB_AUTOSIZE, 0, 0);
 		}
 		return 0;
 	}
 
 	case WM_TIMER:
 	{
-		if (wParam==10086 && mMediaPlayer0)
+		if (wParam==10086 && _mainPlayer._mMediaPlayer)
 		{
-			mMediaPlayer0->PlayVideoFile(nxt_file);
+			_mainPlayer._mMediaPlayer->PlayVideoFile(nxt_file);
 			::KillTimer(hwnd, 10086);
 		}
 		if ((wParam == 1)
-			&& (mMediaPlayer0->IsPlaying() || mMediaPlayer0->IsPaused()) )
+			&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
 		{
-			long pos = mMediaPlayer0->GetPosition();
-		
+			long pos = _mainPlayer._mMediaPlayer->GetPosition();
+
 			//TCHAR szPosition[64];
 			//TCHAR szDuration[64];
 			//g_MyPlayer.MillisecondToText(g_MyPlayer.m_nPosition, szPosition);
 			//g_MyPlayer.MillisecondToText(g_MyPlayer.m_nDuration, szDuration);
-		
+
 			//lstrcat(szPosition, _T("/"));
 			//lstrcat(szPosition, szDuration);
-		
-			int nPos =  int (pos / (double)mMediaPlayer0->GetDuration() * 1000);
+
+			int nPos =  int (pos / (double)_mainPlayer._mMediaPlayer->GetDuration() * 1000);
 			//SendMessage(GetDlgItem(hwnd, IDC_SLIDER1), TBM_SETPOS, (WPARAM)TRUE, (LPARAM)nPos);
-			
-			if (!_seekbar._isSeeking)
+
+			if (!_mainPlayer._seekbar._isSeeking)
 			{
-				_seekbar.SetPositionAndMax(pos, mMediaPlayer0->GetDuration());
+				_mainPlayer._seekbar.SetPositionAndMax(pos, _mainPlayer._mMediaPlayer->GetDuration());
 			}
 
-			mMediaPlayer0->syncResolution();
-			//LogIs(3, "setPosition:: %d %d max=%d curr=%d\n", mMediaPlayer0->m_nPosition, mMediaPlayer0->m_nDuration, _seekbar.GetMax(), _seekbar.GetPosition());
+			_mainPlayer._mMediaPlayer->syncResolution();
+			//LogIs(3, "setPosition:: %d %d max=%d curr=%d\n", _mainPlayer._mMediaPlayer->m_nPosition, _mainPlayer._mMediaPlayer->m_nDuration, _mainPlayer._seekbar.GetMax(), _mainPlayer._seekbar.GetPosition());
 		}
 	}
-		return 0;
+	return 0;
 
 
 	case WM_HSCROLL:
 	{
-		//LogIs("SetTime GETPOS:: %ld \n", _seekbar->GetPosition());
-		if ((HWND)lParam==_seekbar.getHWND())
+		//LogIs("SetTime GETPOS:: %ld \n", _mainPlayer._seekbar.GetPosition());
+		if ((HWND)lParam==_mainPlayer._seekbar.GetHWND())
 		{
-			if (_seekbar._isSeeking && mMediaPlayer0
-				&& (mMediaPlayer0->IsPlaying() || mMediaPlayer0->IsPaused()) )
+			if (_mainPlayer._seekbar._isSeeking && _mainPlayer._mMediaPlayer
+				&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
 			{
-				mMediaPlayer0->SetPosition(wParam);
+				_mainPlayer._mMediaPlayer->SetPosition(wParam);
 			}
 		}
 	}
@@ -573,28 +593,28 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		switch(wParam)
 		{
 		case VK_SPACE:
-			Toggle();
-		break;
+			_mainPlayer.Toggle();
+			break;
 		case VK_C:
 		{
-			if(IsKeyDown(VK_CONTROL)) {
-				VLCPlayer* player = (VLCPlayer*)mMediaPlayer0;
-				player->takeSnapShot("G:\\IMG\\tmp.png");
-			}
-			//int pos = mMediaPlayer0->GetPosition();
+			//if(IsKeyDown(VK_CONTROL)) {
+			//	VLCPlayer* player = (VLCPlayer*)_mainPlayer._mMediaPlayer;
+			//	player->takeSnapShot("G:\\IMG\\tmp.png");
+			//}
+			//int pos = _mainPlayer._mMediaPlayer->GetPosition();
 		}
 		break;
 		case VK_P:
 		{
-			int pos = mMediaPlayer0->GetPosition();
-			WOD_IMG_UTILS("screenshotie", mMediaPlayer0->getHWND());
+			int pos = _mainPlayer._mMediaPlayer->GetPosition();
+			WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
 		}
 		break;
 		case VK_LEFT:
 		case VK_RIGHT:
-			if (mMediaPlayer0)
+			if (_mainPlayer._mMediaPlayer)
 			{
-				int delta = wParam==VK_LEFT?-1:1, max=mMediaPlayer0->GetDuration();
+				int delta = wParam==VK_LEFT?-1:1, max=_mainPlayer._mMediaPlayer->GetDuration();
 				int factor = 1;
 				if(IsKeyDown(VK_CONTROL)) {
 					factor = 5;
@@ -602,19 +622,19 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				if(IsKeyDown(VK_SHIFT)) {
 					factor = 30;
 				}
-				delta = mMediaPlayer0->GetPosition()+delta*factor*1000;
+				delta = _mainPlayer._mMediaPlayer->GetPosition()+delta*factor*1000;
 				bool set=0;
 				if(delta<0)  delta=0;
 				else if(delta>max) delta=max;
 				else set=1;
-				if(set || mMediaPlayer0->GetPosition()!=delta) {
-					mMediaPlayer0->SetPosition(delta);
+				if(set || _mainPlayer._mMediaPlayer->GetPosition()!=delta) {
+					_mainPlayer._mMediaPlayer->SetPosition(delta);
 				}
-				if(!_isPlaying && !_seekbar._isSeeking) {
-					_seekbar.SetPositionAndMax(delta, mMediaPlayer0->GetDuration());
+				if(!_mainPlayer._isPlaying && !_mainPlayer._seekbar._isSeeking) {
+					_mainPlayer._seekbar.SetPositionAndMax(delta, _mainPlayer._mMediaPlayer->GetDuration());
 				}
 			}
-		break;
+			break;
 		default:
 			break;
 		}
@@ -623,11 +643,11 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case IDM_START:
-			Toggle();
+			_mainPlayer.Toggle();
 			break;
 		case IDM_STOP:
-			if (mMediaPlayer0)
-				mMediaPlayer0->Stop();
+			if (_mainPlayer._mMediaPlayer)
+				_mainPlayer._mMediaPlayer->Stop();
 			MarkPlaying(false);
 			break;
 		case IDM_OPEN:
@@ -642,9 +662,9 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case MM_PREPARED:
 	{
 		LogIs("MPM_PREPARED %d\n", wParam);
-		if (hwnd==_hWnd)
+		if (hwnd==m_hWnd)
 		{
-			_seekbar.SetMax(wParam);
+			_mainPlayer._seekbar.SetMax(wParam);
 		}
 		MarkPlaying(true);
 		break;
@@ -665,7 +685,8 @@ LRESULT WODWindow::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return ::DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-LRESULT CALLBACK WODWindow::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+
+LRESULT CALLBACK WODApplication::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (!running)
 	{
@@ -677,8 +698,8 @@ LRESULT CALLBACK WODWindow::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
 	}
 	else if(message==WM_NCCREATE)
 	{
-		WODWindow* app = (WODWindow*)((LPCREATESTRUCT)lParam)->lpCreateParams;
-		app->_hWnd = hwnd;
+		WODApplication* app = (WODApplication*)((LPCREATESTRUCT)lParam)->lpCreateParams;
+		app->m_hWnd = hwnd;
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)app);
 	}
 	//if(0)
@@ -702,5 +723,5 @@ LRESULT CALLBACK WODWindow::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
 		::EndPaint(hwnd, &ps);
 		return 1;
 	}
-	return ((WODWindow*)GetWindowLongPtr(hwnd, GWLP_USERDATA))->RunProc(hwnd, message, wParam, lParam);
+	return ((WODApplication*)GetWindowLongPtr(hwnd, GWLP_USERDATA))->RunProc(hwnd, message, wParam, lParam);
 }

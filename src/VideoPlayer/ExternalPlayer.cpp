@@ -20,8 +20,8 @@
 
 #include <atlbase.h>
 #include <atlhost.h>
+#include "DuiLib\Core\InsituDebug.h"
 
-#include "InsituDebug.h"
 
 
 ExternalPlayer::ExternalPlayer(int & error_code, HINSTANCE hInstance, HWND hParent, const TCHAR* dllPath)

@@ -15,13 +15,12 @@
 * Foundation.
 */
 #pragma once
-#include "WindowBase.h"
 
-class ButtonList : public WindowBase 
+class ButtonList : public WinFrame 
 {
 public:
 	ButtonList()=default;
-	void init(HINSTANCE hInstance, HWND hParent);
+	void Init() override;
 
 	LRESULT RunProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l);
 	
@@ -41,10 +40,9 @@ public:
 	void AddIcon(int id);
 	void ReplaceIcon(int pos, int id);
 
-
-
 protected:
 	HIMAGELIST _hImgList;
+	WNDPROC _SysWndProc=NULL;
 
 	int size;
 };

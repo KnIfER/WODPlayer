@@ -1,8 +1,39 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
-#include "InsituDebug.h"
 #include "sqlite3.h"
+#include <Duilib/Core/InsituDebug.h>
+#include "database_helper.h"
+
+WODBase::WODBase() 
+{
+    const char *sql;
+
+    sqlite3 *db = NULL;
+    int res = sqlite3_open("D:\\wodbase.db", &db);
+    if (res != SQLITE_OK) {
+        LogIs(L"打开失败!\n ERR: %s\n", sqlite3_errmsg(db));
+        // todo throw???
+    }
+
+    sql = "create table if not exists timemarks(\
+id INTEGER PRIMARY KEY AUTOINCREMENT\
+, name TEXT\
+, fname TEXT\
+, path TEXT\
+, vid INTEGER\
+, pos INTEGER\
+, duration INTEGER\
+, opt INTEGER\
+, layer INTEGER\
+, color INTEGER\
+, creation_time INTEGER NOT NULL\
+, thumbnail BLOB\
+        )";
+    sqlite3_exec(db, sql, NULL, NULL, NULL);
+}
+
+
 
 void sqlite3_test_get_table(sqlite3 *db)
 {
@@ -94,33 +125,5 @@ int testSqlite()
     //sqlite3_test_get_table(db);
 
     //sqlite3_close(db);
-    const char *sql;
-
-
-
-    sqlite3 *db = NULL;
-    int res = sqlite3_open("D:\\wodbase.db", &db);
-    if (res != SQLITE_OK) {
-        LogIs(L"打开失败!\n ERR: %s\n", sqlite3_errmsg(db));
-        return -1;
-    }
-
-    sql = "create table if not exists timemarks(\
-id INTEGER PRIMARY KEY AUTOINCREMENT\
-, path LONGVARCHAR\
-, vid LONGVARCHAR\
-, pos INTEGER\
-, duration INTEGER\
-, layer INTEGER\
-, color INTEGER\
-, creation_time INTEGER NOT NULL\
-, thumbnail BLOB\
-        )";
-    sqlite3_exec(db, sql, NULL, NULL, NULL);
-
-
-
-
     return 0;
 }
-

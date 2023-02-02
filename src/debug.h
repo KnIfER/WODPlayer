@@ -1,6 +1,6 @@
 #pragma once
 
-#include "InsituDebug.h"
+#include <Duilib/Core/InsituDebug.h>
 
 /***********************************************************************
 * COMCTL32_IsReflectedMessage [internal]

@@ -30,11 +30,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WODPlayer.cpp">
+    <ClCompile Include="WODApplication.cpp">
       <Filter>Source Files\video_src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\WndControl\WODWindow.cpp">
-      <Filter>Source Files\video_src\WndControl</Filter>
     </ClCompile>
     <ClCompile Include="src\WndControl\TabLayout.cpp">
       <Filter>Source Files\video_src\WndControl</Filter>
@@ -42,17 +39,11 @@
     <ClCompile Include="src\WndControl\ButtonList.cpp">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClCompile>
-    <ClCompile Include="src\VideoPlayer\ExternalPlayer.cpp">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
-    </ClCompile>
     <ClCompile Include="src\WndControl\SeekBar.cpp">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClCompile>
     <ClCompile Include="src\VideoPlayer\VideoPlayerInerface.cpp">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\InsituDebug.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\tab.cpp">
       <Filter>Source Files</Filter>
@@ -75,9 +66,18 @@
     <ClCompile Include="src\Utils\ImageUtils.cpp">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
+    <ClCompile Include="WODMain.cpp">
+      <Filter>Source Files\video_src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VideoPlayer\WODPlayer.cpp">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VideoPlayer\ExternalPlayer.cpp">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WODPlayer.h">
+    <ClInclude Include="WODApplication.h">
       <Filter>Source Files\video_src</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -86,20 +86,11 @@
     <ClInclude Include="targetver.h">
       <Filter>Source Files\video_src</Filter>
     </ClInclude>
-    <ClInclude Include="src\WndControl\WODWindow.h">
-      <Filter>Source Files\video_src\WndControl</Filter>
-    </ClInclude>
     <ClInclude Include="src\WndControl\TabLayout.h">
-      <Filter>Source Files\video_src\WndControl</Filter>
-    </ClInclude>
-    <ClInclude Include="src\WndControl\WindowBase.h">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClInclude>
     <ClInclude Include="src\WndControl\ButtonList.h">
       <Filter>Source Files\video_src\WndControl</Filter>
-    </ClInclude>
-    <ClInclude Include="src\VideoPlayer\ExternalPlayer.h">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClInclude>
     <ClInclude Include="src\WndControl\SeekBar.h">
       <Filter>Source Files\video_src\WndControl</Filter>
@@ -116,13 +107,7 @@
     <ClInclude Include="src\heap.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\InsituDebug.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\VideoPlayer\VLCPlayer.h">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\VideoPlayer\ExternalPlayerInterface.h">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClInclude>
     <ClInclude Include="src\WndControl\virtual_keys.h">
@@ -136,6 +121,15 @@
     </ClInclude>
     <ClInclude Include="src\Utils\WindowUtils.h">
       <Filter>Source Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VideoPlayer\WODPlayer.h">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VideoPlayer\ExternalPlayer.h">
+      <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

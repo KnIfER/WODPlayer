@@ -14,17 +14,49 @@
 * along with this program; if not, write to the Free Software
 * Foundation.
 */
-#pragma once
-#include "WindowBase.h"
-#include "TabLayout.h"
-#include "ButtonList.h"
-#include "VLCPlayer.h"
-#include "SeekBar.h"
+#include "pch.h"
 
-class WODWindow : public WindowBase 
+class WODPlayer : public WindowImplBase, public INotifyUI
 {
 public:
-	WODWindow()=default;
+    WODPlayer() { };     
+
+    LPCTSTR GetWindowClassName() const override
+    { 
+        return _T("WODPlayer"); 
+    }
+
+    UINT GetClassStyle() const override
+    { 
+        return CS_DBLCLKS; 
+    }
+
+    void OnFinalMessage(HWND hWnd) override
+    { 
+        __super::OnFinalMessage(hWnd);
+        delete this;
+    }
+
+    LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) override
+    {
+        ::DestroyWindow(GetHWND());
+        bHandled = TRUE;
+        return 0;
+    }
+
+    CControlUI* viewTemplate;
+
+
+    void InitWindow() override;
+
+    QkString GetSkinFile() override
+    {
+        return _T("WODPlayer.xml");
+    }
+
+    void Notify( TNotifyUI &msg ) override;
+
+    
 	void init(HINSTANCE hInstance, HWND hParent);
 	void newVideoView();
 
@@ -47,13 +79,13 @@ public:
 	SeekBar _seekbar;
 	int _barsHeight=10;
 	HWND _hFullScreenBtmbar;
-protected:
-	VideoPlayer* mMediaPlayer0=NULL;
-	WNDPROC _SysWndProc=NULL;
-	bool _isPlaying;
-	bool _isFullScreen=false;
-	HWND _hPlayer;
+private:
+    CDialogBuilder builder;
+    Button* m_pSearch;
+
+    VideoPlayer* mMediaPlayer0=NULL;
+    WNDPROC _SysWndProc=NULL;
+    bool _isPlaying;
+    bool _isFullScreen=false;
+    HWND _hPlayer;
 };
-
-
-

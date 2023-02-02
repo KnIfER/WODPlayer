@@ -14,9 +14,7 @@
 * along with this program; if not, write to the Free Software
 * Foundation.
 */
-#include "ButtonList.h"
-#include "InsituDebug.h"
-
+#include "pch.h"
 #include "../resource.h"
 
 extern VOID TOOLBAR_Register (void);
@@ -25,74 +23,78 @@ extern VOID TOOLBAR_Register (void);
 //{
 //}
 
-void ButtonList::init(HINSTANCE hInstance, HWND hParent)
+void ButtonList::Init()
 {
-	TOOLBAR_Register();
-	WindowBase::init(hInstance, hParent);
-	DWORD style = 
-		WS_CHILD | WS_VISIBLE 
-		| WS_CLIPCHILDREN | WS_CLIPSIBLINGS 
-		| TBSTYLE_TOOLTIPS 
-		| TBSTYLE_FLAT 
-		//| CCS_NODIVIDER | CCS_NORESIZE | CCS_NOPARENTALIGN
-		| CCS_BOTTOM
-		| CCS_NODIVIDER
-		;
+	if (!_hWnd && GetParent()->GetHWND())
+	{ 
+		_hParent = GetParent()->GetHWND();
+		TOOLBAR_Register();
+		DWORD style = 
+			WS_CHILD | WS_VISIBLE 
+			| WS_CLIPCHILDREN | WS_CLIPSIBLINGS 
+			| TBSTYLE_TOOLTIPS 
+			| TBSTYLE_FLAT 
+			//| CCS_NODIVIDER | CCS_NORESIZE | CCS_NOPARENTALIGN
+			| CCS_BOTTOM
+			| CCS_NODIVIDER
+			;
 
-	// WS_VISIBLE|WS_CHILD|TBSTYLE_FLAT|TBSTYLE_TOOLTIPS
+		// WS_VISIBLE|WS_CHILD|TBSTYLE_FLAT|TBSTYLE_TOOLTIPS
 
-	_hInst = hInstance;
-
-	_hWnd = CreateWindowEx(0, L"MyToolbarWindow32", TEXT("toolbar"),
-		style ,
-		0, 0, 0, 0,
-		hParent,
-		(HMENU)0,
-		hInstance,
-		NULL);
-
-
-	_hImgList = ImageList_Create(38, 38
-		, ILC_COLOR32 | ILC_MASK, 3, 1);
-
-	//ImageList_SetIconSize
-
-	AddIcon(IDI_PLAY);
-	AddIcon(IDI_STOP);
-	AddIcon(IDI_PREV);
-	AddIcon(IDI_NXT);
-	AddIcon(IDI_FOLDER);
+		_hWnd = CreateWindowEx(0, L"MyToolbarWindow32", TEXT("toolbar"),
+			style ,
+			0, 0, 0, 0,
+			GetParent()->GetHWND(),
+			(HMENU)0,
+			CPaintManagerUI::GetInstance(),
+			NULL);
 
 
-	SendWndMessage(TB_SETIMAGELIST, 0, (LPARAM)_hImgList);
+		_hImgList = ImageList_Create(38, 38
+			, ILC_COLOR32 | ILC_MASK, 3, 1);
 
-	TBBUTTON buttonInfo[] =
+		//ImageList_SetIconSize
+
+		AddIcon(IDI_PLAY);
+		AddIcon(IDI_STOP);
+		AddIcon(IDI_PREV);
+		AddIcon(IDI_NXT);
+		AddIcon(IDI_FOLDER);
+
+
+		SendWndMessage(TB_SETIMAGELIST, 0, (LPARAM)_hImgList);
+
+		TBBUTTON buttonInfo[] =
+		{
+			{ 0, IDM_START,       TBSTATE_ENABLED
+			, TBSTYLE_BUTTON|TBSTYLE_GROUP, {0}, 0, 0 }
+			,{ 1, IDM_STOP,      TBSTATE_ENABLED, TBSTYLE_BUTTON|TBSTYLE_GROUP, {0}, 0, 0 }
+			,{ 2, IDM_PREV,     TBSTATE_ENABLED, TBSTYLE_BUTTON|TBSTYLE_GROUP, {0}, 0, 0 }
+			,{ 3, IDM_NXT,    TBSTATE_ENABLED, TBSTYLE_BUTTON|TBSTYLE_GROUP, {0}, 0, 0 }
+			,{ 4, IDM_OPEN,    TBSTATE_ENABLED, TBSTYLE_BUTTON|TBSTYLE_GROUP, {0}, 0, 0 }
+		};
+		SendWndMessage(TB_ADDBUTTONS, 5, (LPARAM)&buttonInfo);
+
+		SetWindowLongPtr(_hWnd, GWLP_USERDATA, (LONG_PTR)this);
+
+		_SysWndProc = (WNDPROC)SetWindowLongPtr(_hWnd, GWLP_WNDPROC, (LONG_PTR)ButtonList::WndProc);
+	}
+	if (_hWnd && _hParent != __hParent)
 	{
-		{ 0, IDM_START,       TBSTATE_ENABLED
-		, TBSTYLE_BUTTON|TBSTYLE_GROUP, {0}, 0, 0 }
-		,{ 1, IDM_STOP,      TBSTATE_ENABLED, TBSTYLE_BUTTON|TBSTYLE_GROUP, {0}, 0, 0 }
-		,{ 2, IDM_PREV,     TBSTATE_ENABLED, TBSTYLE_BUTTON|TBSTYLE_GROUP, {0}, 0, 0 }
-		,{ 3, IDM_NXT,    TBSTATE_ENABLED, TBSTYLE_BUTTON|TBSTYLE_GROUP, {0}, 0, 0 }
-		,{ 4, IDM_OPEN,    TBSTATE_ENABLED, TBSTYLE_BUTTON|TBSTYLE_GROUP, {0}, 0, 0 }
-	};
-	SendWndMessage(TB_ADDBUTTONS, 5, (LPARAM)&buttonInfo);
-
-	SetWindowLongPtr(_hWnd, GWLP_USERDATA, (LONG_PTR)this);
-
-
-	_SysWndProc = (WNDPROC)SetWindowLongPtr(_hWnd, GWLP_WNDPROC, (LONG_PTR)ButtonList::WndProc);
-
-
+		__hParent = _hParent;
+		::SetParent(_hWnd, _hParent);
+		SetPos(GetPos());
+	}
 }
 
 void ButtonList::AddIcon(int id)
 {
-	ImageList_AddIcon(_hImgList , LoadIcon(_hInst, MAKEINTRESOURCE(id)));
+	ImageList_AddIcon(_hImgList , LoadIcon(CPaintManagerUI::GetInstance(), MAKEINTRESOURCE(id)));
 }
 
 void ButtonList::ReplaceIcon(int pos, int id)
 {
-	ImageList_ReplaceIcon(_hImgList , pos, LoadIcon(_hInst, MAKEINTRESOURCE(id)));
+	ImageList_ReplaceIcon(_hImgList , pos, LoadIcon(CPaintManagerUI::GetInstance(), MAKEINTRESOURCE(id)));
 }
 
 
