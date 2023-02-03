@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <string>
 #include "sqlite3.h"
 #include <Duilib/Core/InsituDebug.h>
 #include "database_helper.h"
@@ -21,68 +22,165 @@ bool WODBase::Init()
         // todo throw???
     }
 
-    sql = "create table if not exists timemarks(\
+    sql = "CREATE TABLE IF NOT EXISTS timemarks(\
 id INTEGER PRIMARY KEY AUTOINCREMENT\
+, vid INTEGER DEFAULT 0\
 , name TEXT DEFAULT NULL\
 , fname TEXT DEFAULT NULL\
-, path TEXT DEFAULT NULL\
-, vid INTEGER DEFAULT 0\
+, fpath TEXT DEFAULT NULL\
 , pos INTEGER\
 , duration INTEGER DEFAULT 0\
 , thumbnail INTEGER DEFAULT 0\
 , opt INTEGER DEFAULT 0\
 , param TEXT DEFAULT NULL\
+, folder TEXT DEFAULT NULL\
 , layer INTEGER DEFAULT 0\
+, layerInfo TEXT DEFAULT NULL\
 , color INTEGER DEFAULT 0\
 , creation_time INTEGER NOT NULL\
         )";
     sqlite3_exec(db, sql, NULL, NULL, NULL);
+    // 文件夹-位置-创建时间排序，按照此顺序收集，构建排序好的数组
+    sqlite3_exec(db, "CREATE INDEX if not exists timemarks_index ON timemarks(vid, pos, creation_time, id)", NULL, NULL, NULL);
+    // 打开新文件时，依照此索引查询得唯一vid，然后收集所有书签
+    // query by |fname|-|fpath| where |folder|==1, fetch the unique vid as folder id, collect rows with the same vid in above order.
+    // |pos| serve as bookmark counter when folder==1 (indicating folder);
+    sqlite3_exec(db, "CREATE INDEX if not exists timemarks_folder_index ON timemarks(fname, fpath, id, pos) where folder==1", NULL, NULL, NULL);
+
     return 0;
 }
 
-int WODBase::AddBookmark(const char* fullpath, char* markName, long rowId, long pos, long duration, int flag)
+int WODBase::AddBookmark(const char* fullpath, char* markName, __int64 & folderId, int pos, int duration, int flag)
 {
-    //LogIs(2, "AddBookmark %s %s", fullpath?fullpath:"", markName?markName:"");
+    LogIs(2, "AddBookmark %s %ld", fullpath, folderId);
     sqlite3_exec(db, "begin", NULL, NULL, NULL);
-    const char *sql = "INSERT INTO timemarks(name, fname, path, pos, duration, creation_time) VALUES(?, ?, ? ,?, ?, ?)";
-
+    sqlite3_stmt *stmt1 = NULL;
+    sqlite3_stmt *stmt2 = NULL;
     sqlite3_stmt *stmt = NULL;
+    if(folderId==-1) {
+        const char *sql = "INSERT INTO timemarks(vid, fname, fpath, pos, duration, folder, creation_time) VALUES(?, ?, ?, ? ,?, ?, ?)";
+        int succ = sqlite3_prepare_v2(db, sql, -1, &stmt1, NULL);
+        if (succ != SQLITE_OK) {
+            LogIs("2, sql prepare error:  %d %s ", succ, sql);
+            return -1;
+        }
+        char buffer_path[MAX_PATH]{};
+        while(TRUE) {
+            int num = 1;
+            sqlite3_bind_int(stmt1, num++, 0); // vid
 
-    int succ = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+            ::PathCanonicalizeA(buffer_path, fullpath);
+            ::PathRemoveFileSpecA(buffer_path);
 
-    if (succ != SQLITE_OK) {
-        LogIs("2, sql prepare error:  %d %s ", succ, sql);
-        return -1;
-    }
+            sqlite3_bind_text(stmt1, num++, buffer_path+strlen(buffer_path)+1, -1, NULL); // 文件名
+            sqlite3_bind_text(stmt1, num++, buffer_path, -1, NULL); // 父目录
+            //LogIs(2, "%s \n %s", buffer_path, buffer_path+strlen(buffer_path)+1);
 
-    char buffer_path[MAX_PATH];
+            sqlite3_bind_int(stmt1, num++, 0); // pos
+            sqlite3_bind_int(stmt1, num++, duration); // duration
+            sqlite3_bind_int(stmt1, num++, 0); // folder
+            sqlite3_bind_int(stmt1, num++, 0); // creation_time
 
-    while(TRUE) {
-        sqlite3_bind_text(stmt, 1, markName, -1, NULL); // 书签名
-        
-        ::PathCanonicalizeA(buffer_path, fullpath);
-        ::PathRemoveFileSpecA(buffer_path);
-
-        sqlite3_bind_text(stmt, 2, buffer_path+strlen(buffer_path)+1, -1, NULL); // 文件名
-        sqlite3_bind_text(stmt, 3, buffer_path, -1, NULL); // 父目录
-        //LogIs(2, "%s \n %s", buffer_path, buffer_path+strlen(buffer_path)+1);
-
-        sqlite3_bind_int(stmt,  4, pos);
-        sqlite3_bind_int(stmt,  5, duration);
-        sqlite3_bind_int(stmt,  6, 0);
-
-        succ = sqlite3_step(stmt);
-        if (succ != SQLITE_DONE) {
-            LogIs(2, "insert error. res = %d\n", succ);
+            succ = sqlite3_step(stmt1);
+            if (succ != SQLITE_DONE) {
+                LogIs(2, "folder insert error. res = %d\n", succ);
+                break;
+            }
+            folderId = sqlite3_last_insert_rowid(db);
+            sqlite3_reset(stmt1);
             break;
         }
-
-        sqlite3_reset(stmt);
-        break;
     }
+    if(folderId!=-1) {
+        const char *sql = "INSERT INTO timemarks(vid, name, pos, duration, creation_time) VALUES(?, ?, ?, ?, ?)";
+        int succ = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+        if (succ != SQLITE_OK) {
+            LogIs("2, sql prepare error:  %d %s ", succ, sql);
+            return -1;
+        }
+        while(TRUE) {
+            int num = 1;
+            sqlite3_bind_int(stmt, num++, folderId); // vid
+            sqlite3_bind_text(stmt, num++, markName, -1, NULL); // 书签名
+            sqlite3_bind_int(stmt,  num++, pos);
+            sqlite3_bind_int(stmt,  num++, duration);
+            sqlite3_bind_int(stmt,  num++, 0);
+            succ = sqlite3_step(stmt);
+            if (succ != SQLITE_DONE) {
+                LogIs(2, "insert error. res = %d\n", succ);
+                break;
+            }
+            sqlite3_reset(stmt);
+            break;
+        }
+    }
+
     sqlite3_exec(db, "commit", NULL, NULL, NULL);
+    sqlite3_finalize(stmt1);
     sqlite3_finalize(stmt);
     return -1;
+}
+
+int exec_callback1(void *para, int columenCount, char **columnValue, char **columnName)
+{
+    int i;
+    LogIs("exec_callback1=%s", columnValue[0]);
+
+    *(__int64 *)para = atoi(columnValue[0]);
+
+    return 0;
+}
+
+int exec_callback2(void *para, int columenCount, char **columnValue, char **columnName)
+{
+
+    ((std::vector<BookMark>*)para)->push_back(BookMark{atoi(columnValue[0])});
+
+    return 0;
+}
+
+__int64 WODBase::GetBookMarks(const char* fullpath, std::vector<BookMark>& _bookmarks)
+{
+    _bookmarks.clear();
+    char buffer_path[MAX_PATH];
+    std::string localBuffer;
+
+    ::PathCanonicalizeA(buffer_path, fullpath);
+    ::PathRemoveFileSpecA(buffer_path);
+
+    // 首先查询得 folder vid
+    localBuffer = "select id from timemarks where folder=0 and fname=\"";
+    localBuffer += buffer_path+strlen(buffer_path)+1;
+    localBuffer += "\" and fpath=\"";
+    localBuffer += buffer_path;
+    localBuffer += "\"";
+    localBuffer += " limit 1";
+    LogIs("\nsql=%s", localBuffer.c_str());
+    __int64 folderVid = -1;
+    char *errmsg = 0;
+    int succ =  sqlite3_exec(db, localBuffer.c_str(), exec_callback1, &folderVid, &errmsg);
+
+    LogIs("\t首先查询得 folder vid=%ld succ=%d msg=%d", folderVid, succ, errmsg?errmsg:"");
+
+    if(folderVid>=0)
+    {
+        localBuffer = "select pos from timemarks where vid=";
+        localBuffer += std::to_string(folderVid);
+        localBuffer += " and folder=0";
+        localBuffer += " order by pos asc, creation_time asc, id asc";
+        LogIs("\tsql=%s", localBuffer.c_str());
+        __int64 folderVid = -1;
+        char *errmsg = 0;
+        int succ =  sqlite3_exec(db, localBuffer.c_str(), exec_callback2, &_bookmarks, &errmsg);
+        LogIs("\t收集了%d个书签 succ=%d msg=%s", _bookmarks.size(), succ, errmsg?errmsg:"");
+        for (size_t i = 0; i < _bookmarks.size(); i++)
+        {
+            LogIs("\t书签=%d", _bookmarks[i].pos);
+        }
+    }
+
+
+    return folderVid;
 }
 
 

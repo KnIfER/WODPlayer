@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\comctl32.h" />
+    <ClInclude Include="src\database\bookmark.h" />
     <ClInclude Include="src\database\database_helper.h" />
     <ClInclude Include="src\database\sqlite3.h" />
     <ClInclude Include="src\debug.h" />

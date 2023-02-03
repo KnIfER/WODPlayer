@@ -131,6 +131,9 @@
     <ClInclude Include="src\VideoPlayer\ExternalPlayer.h">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClInclude>
+    <ClInclude Include="src\database\bookmark.h">
+      <Filter>Source Files\database</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="WOD.rc">

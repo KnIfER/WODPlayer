@@ -1,10 +1,14 @@
 
 #include "pch.h"
 #include "resource.h"
+#include "database/database_helper.h"
 //#include "VideoPlayer/VLCPlayer.h"
 
 extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, int type);
 
+WODPlayer::WODPlayer() {
+	_timeMarked = -1;
+}
 
 void WODPlayer::newVideoView()
 {
@@ -34,6 +38,28 @@ bool WODPlayer::PlayVideoFile(TCHAR* path)
 	if (ret)
 	{
 		_currentPath = path;
+		QkString tmp;
+		const char* pStr;
+		if(_currentPath.Find('\"')) {
+			tmp = _currentPath;
+			tmp.Replace(L"\"", L"\"\"");
+			pStr = tmp.GetData(threadBuffer);
+		} else {
+			pStr = _currentPath.GetData(threadBuffer);
+		}
+		_timeMarked = _app->_db->GetBookMarks(pStr, _bookmarks);
+	}
+	return false;
+}
+
+bool WODPlayer::AddBookmark()
+{
+	if(_mMediaPlayer) {
+		int pos = _mMediaPlayer->GetPosition();
+		int duration = _mMediaPlayer->GetDuration();
+		//LogIs(2, L"%s", (LPCWSTR)_currentPath);
+		_app->_db->AddBookmark(_currentPath.GetData(threadBuffer), 0, _timeMarked, pos, duration, 0);
+		return true;
 	}
 	return false;
 }

@@ -115,6 +115,7 @@ void WODApplication::InitWindow()
 	//WideCharToMultiByte(CP_ACP, 0, test, -1, fullpath, _MAX_PATH*2, 0, 0);
 	//LogIs(2, fullpath);
 
+	//tg
 }
 
 LRESULT WODApplication::OnDestroy( UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled )
@@ -361,7 +362,7 @@ bool IsKeyDown(int key) {
 
 
 TCHAR nxt_file[_MAX_PATH];
-std::string threadBuffer;
+//std::string threadBuffer;
 
 
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
@@ -529,11 +530,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		break;
 		case VK_P:
 		{
-			int pos = _mainPlayer._mMediaPlayer->GetPosition();
-			int duration = _mainPlayer._mMediaPlayer->GetDuration();
 			//WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
 
-			_db->AddBookmark(_mainPlayer._currentPath.GetData(threadBuffer), 0, -1, pos, duration, 0);
+			_mainPlayer.AddBookmark();
 		}
 		break;
 		case VK_LEFT:

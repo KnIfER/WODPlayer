@@ -16,12 +16,14 @@
 */
 #pragma once
 
+#include "database\bookmark.h"
+
 class WODApplication;
 
 class WODPlayer : public WinFrame 
 {
 public:
-    WODPlayer() { };     
+    WODPlayer();     
 
     void Toggle();
     HWND GetMediaPlayerHWND();
@@ -30,6 +32,7 @@ public:
 
 
     bool PlayVideoFile(TCHAR* path);
+    bool AddBookmark();
 
     void newVideoView();
 
@@ -43,4 +46,6 @@ public:
     bool _isPlaying;
     HWND _hPlayer;
     WODApplication* _app;
+    std::vector<BookMark> _bookmarks;
+    __int64 _timeMarked;
 };

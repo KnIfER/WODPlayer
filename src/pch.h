@@ -32,7 +32,7 @@ extern LONG_PTR WOD_IMG_UTILS(const char* msg, HWND hWnd=0, LONG_PTR wParam=0, L
 
 #define SendWndMessage(Msg, wParam, lParam) SendMessage(_hWnd, Msg, wParam, lParam)
 
-
+__declspec(selectany)  std::string threadBuffer;
 
 
 
