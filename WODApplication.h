@@ -56,14 +56,10 @@ public:
     void Notify( TNotifyUI &msg ) override;
 
     CControlUI* CreateControl(LPCTSTR pstrClass) override;
-
     
-	LRESULT RunProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l);
+    LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) override;
 
-	
-	static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	void showWindow();
     void ToggleFullScreen();
     bool IsFullScreen();
     void MarkPlaying(bool playing=true);

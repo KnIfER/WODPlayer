@@ -42,6 +42,7 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 		}
 		if(*pstrClass=='v') {
 			//LogIs(L"CreateControl::%s %d", pstrClass, *pstrClass=='_');
+			_mainPlayer._app = this;
 			return &_mainPlayer;
 		}
 	}
@@ -68,7 +69,8 @@ void WODApplication::InitWindow()
 	//_mainPlayer._seekbar.Init();
 
 	//LogIs(L"InitWindow::%ld %ld", _toolbar.GetHWND(), _mainPlayer._seekbar.GetHWND());
-	if(0) {
+	if(0) 
+	{
 		LogIs("WODPlayer::init");
 		//WOD_Register(hInstance);
 
@@ -88,24 +90,6 @@ void WODApplication::InitWindow()
 			this);      // creation parameters
 
 		//SetLayeredWindowAttributes(_hWnd, RGB(0,1,0), 0, LWA_COLORKEY);
-
-		//_SysWndProc = (WNDPROC)GetWindowLongPtr(_hWnd, GWL_WNDPROC);
-
-		//_SysWndProc = (WNDPROC)SetWindowLongPtr(_hWnd, GWL_WNDPROC, (LONG_PTR)WndProc);
-
-		//_tabLayout = new TabLayout(hInstance, _hWnd);
-
-		//	_toolbar.init(hInstance, _hWnd);
-
-		//CreateRebar(_hWnd, _toolbar.GetHWND());
-
-		RECT rect;
-		GetClientRect(m_hWnd, &rect);
-
-		MoveWindow(_toolbar.GetHWND(), rect.left, 100+rect.top, rect.right, 24, true);
-
-		SetWindowPos(_toolbar.GetHWND(), 0 , 100+rect.left
-			, 100+rect.top, rect.right, 12, SWP_SHOWWINDOW);
 
 
 		//	_mainPlayer._seekbar.init(hInstance, _hWnd);
@@ -138,39 +122,28 @@ void WOD_Register(HINSTANCE hInstance)
 	bgBrush = CreateSolidBrush (RGB(29,29,29));
 	wchar_t lpszMenuName[] = L"Menu";
 
-	static TCHAR szAppName[] = TEXT("Hello");
-	MSG    msg;
-	WNDCLASS wndclass;//WNDCLASSEX比WNDCLASS多两个结构成员－－cbSize(指定WNDCLASSEX结构的大小－－字节)  －－hIconSm(标识类的小图标)
-	wndclass.style = CS_HREDRAW | CS_VREDRAW;
-	wndclass.lpfnWndProc = WODApplication::WndProc;
-	wndclass.cbClsExtra = 0;
-	wndclass.cbWndExtra = 0;
-	wndclass.hInstance = hInstance;
-	wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wndclass.hbrBackground = (HBRUSH)(COLOR_MENU + 1);//白色 COLOR_WINDOW // COLOR_MENU 界面灰
-													  //wndclass.hbrBackground = bgBrush;
-													  //wndclass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-													  //wndclass.hbrBackground = CreateSolidBrush(RGB(0, 1, 0));
-	wndclass.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
-	wndclass.lpszMenuName = lpszMenuName;
-	wndclass.lpszMenuName = 0;
-	wndclass.lpszClassName = szAppName;
+	//static TCHAR szAppName[] = TEXT("Hello");
+	//MSG    msg;
+	//WNDCLASS wndclass;//WNDCLASSEX比WNDCLASS多两个结构成员－－cbSize(指定WNDCLASSEX结构的大小－－字节)  －－hIconSm(标识类的小图标)
+	//wndclass.style = CS_HREDRAW | CS_VREDRAW;
+	//wndclass.lpfnWndProc = WODApplication::WndProc;
+	//wndclass.cbClsExtra = 0;
+	//wndclass.cbWndExtra = 0;
+	//wndclass.hInstance = hInstance;
+	//wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	//wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	//wndclass.hbrBackground = (HBRUSH)(COLOR_MENU + 1);//白色 COLOR_WINDOW // COLOR_MENU 界面灰
+	//												  //wndclass.hbrBackground = bgBrush;
+	//												  //wndclass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	//												  //wndclass.hbrBackground = CreateSolidBrush(RGB(0, 1, 0));
+	//wndclass.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+	//wndclass.lpszMenuName = lpszMenuName;
+	//wndclass.lpszMenuName = 0;
+	//wndclass.lpszClassName = szAppName;
 
-	RegisterClass(&wndclass);
+	//RegisterClass(&wndclass);
 }
 
-void WOD_UnRegister()
-{
-}
-
-
-
-void WODApplication::showWindow()
-{
-	ShowWindow(m_hWnd, SW_SHOW);
-	UpdateWindow(m_hWnd);
-}
 
 static DWORD dwNScStyle = WS_CAPTION|WS_BORDER|WS_SIZEBOX; 
 RECT rcNScPos;
@@ -271,7 +244,6 @@ void WODApplication::MarkPlaying(bool playing)
 extern bool running;
 
 
-
 BOOL PickFileDlg(HWND hOwner,
 	BOOL bIsSave,
 	const TCHAR * pcszTitle,
@@ -364,10 +336,44 @@ bool IsKeyDown(int key) {
 
 TCHAR nxt_file[_MAX_PATH];
 
-LRESULT WODApplication::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+
+LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-	static TCHAR s[] = TEXT("Hello, Windows.");
-	switch (msg)
+	//if (!running)
+	//{
+	//	return TRUE;
+	//}
+
+	//if(uMsg==WM_NCCREATE)
+	//{
+	//	WODApplication* app = (WODApplication*)((LPCREATESTRUCT)lParam)->lpCreateParams;
+	//	app->m_hWnd = hwnd;
+	//	SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)app);
+	//}
+
+	if(0)
+	if (uMsg==WM_PAINT)
+	{
+		//if (WS_EX_LAYERED == (WS_EX_LAYERED & GetWindowLong(hWnd, GWL_EXSTYLE))) break;;
+		RECT rcClient;
+		::GetClientRect(m_hWnd, &rcClient);
+
+		PAINTSTRUCT ps = { 0 };
+		HDC hdc = ::BeginPaint(m_hWnd, &ps);
+
+		RECT rect = rcClient;  
+
+		//rect.right = rect.left+(rect.right-rect.left)/2;
+
+		HBRUSH hbrush = CreateSolidBrush(RGB(0,1,0));
+
+		FillRect(hdc, &rect, hbrush);
+
+		::EndPaint(m_hWnd, &ps);
+		return 1;
+	}
+
+	switch (uMsg)
 	{
 	case WM_DROPFILES:
 	{
@@ -393,8 +399,8 @@ LRESULT WODApplication::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 				{
 					_mainPlayer._mMediaPlayer->Close();
 					lstrcpy(nxt_file, szFileName);
-					::KillTimer(hwnd, 10086);
-					::SetTimer(hwnd, 10086, 200, 0);
+					::KillTimer(m_hWnd, 10086);
+					::SetTimer(m_hWnd, 10086, 200, 0);
 				}
 				//CHAR buffer[256]={0};
 				//WideCharToMultiByte (CP_ACP, 0, szFileName
@@ -412,34 +418,8 @@ LRESULT WODApplication::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 	case WM_CONTEXTMENU:
 	{
-
 		return 0;
 	}
-
-	case WM_CREATE:
-	{
-
-		MENUINFO mi = { 0 }; 
-		mi.cbSize = sizeof(mi); 
-		mi.fMask = MIM_BACKGROUND|MIM_APPLYTOSUBMENUS; 
-		mi.hbrBack =  CreateSolidBrush (RGB(0,0,0)); 
-		mi.dwStyle = MNS_AUTODISMISS;
-
-		HMENU hMenu = ::GetMenu(hwnd); 
-		SetMenuInfo(hMenu, &mi); 
-
-		//test_menu_add_string(hMenu);
-		//test_menualign(0);
-
-
-		//test_menu_ownerdraw(hwnd, GetSubMenu(hMenu, 0));
-
-		//test_menu_ownerdraw(hwnd, 0);
-
-		return 0;
-	}
-
-
 	//case WM_PAINT:
 	//{
 	//
@@ -453,97 +433,97 @@ LRESULT WODApplication::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 	//	return 0;
 	//}
 
+	//case WM_CLOSE:
+	//case WM_DESTROY:
+	//	running = false;
+	//	if (_mainPlayer._mMediaPlayer)
+	//	{
+	//		//delete _mainPlayer._mMediaPlayer;
+	//		//_mainPlayer._mMediaPlayer = NULL;
+	//	}
+	//	m_hWnd = 0;
+	//	PostQuitMessage(0);
+	//	return TRUE;
 
-	case WM_CLOSE:
-	case WM_DESTROY:
-		running = false;
-		if (_mainPlayer._mMediaPlayer)
-		{
-			//delete _mainPlayer._mMediaPlayer;
-			//_mainPlayer._mMediaPlayer = NULL;
-		}
-		m_hWnd = 0;
-		PostQuitMessage(0);
-		return TRUE;
-	case WM_SIZE:
-	{
-		RECT rect;
-		GetClientRect(hwnd, &rect);
-		float width = rect.right - rect.left;
-		float height = rect.bottom - rect.top;
-		//sMoveWindow(_tabLayout.getHWND(), rect.left, rect.top, rect.right, rect.bottom, true);
+	//case WM_SIZE:
+	//{
+	//	RECT rect;
+	//	GetClientRect(m_hWnd, &rect);
+	//	float width = rect.right - rect.left;
+	//	float height = rect.bottom - rect.top;
+	//	//sMoveWindow(_tabLayout.getHWND(), rect.left, rect.top, rect.right, rect.bottom, true);
 
-		int videoHeightAvailable = rect.bottom - rect.top;
-		int toolbarHeight = 0;
-		int seekbarHeight = 0;
-		bool fullScreen = IsFullScreen();
-		//if (fullScreen)
-		int barsHeight=0;
+	//	int videoHeightAvailable = rect.bottom - rect.top;
+	//	int toolbarHeight = 0;
+	//	int seekbarHeight = 0;
+	//	bool fullScreen = IsFullScreen();
+	//	//if (fullScreen)
+	//	int barsHeight=0;
 
-		if (1)
-		{
-			::SendMessage(_toolbar.GetHWND(), TB_AUTOSIZE, 0, 0);
-			RECT toolbarRect;
-			GetClientRect(_toolbar.GetHWND(), &toolbarRect);
-			toolbarHeight = toolbarRect.bottom-toolbarRect.top;
-			barsHeight += toolbarHeight;
-			//MoveWindow(_toolbar.GetHWND(), 1000+rect.left, rect.top, rect.right, rect.bottom, true);
+	//	if (1)
+	//	{
+	//		::SendMessage(_toolbar.GetHWND(), TB_AUTOSIZE, 0, 0);
+	//		RECT toolbarRect;
+	//		GetClientRect(_toolbar.GetHWND(), &toolbarRect);
+	//		toolbarHeight = toolbarRect.bottom-toolbarRect.top;
+	//		barsHeight += toolbarHeight;
+	//		//MoveWindow(_toolbar.GetHWND(), 1000+rect.left, rect.top, rect.right, rect.bottom, true);
 
-			//SetWindowPos(_toolbar.GetHWND(), 0
-			//	, 1000+rect.left, rect.top, rect.right, rect.bottom, SWP_SHOWWINDOW);
-		}
-		if (1)
-		{
-			seekbarHeight = 32;
-			SetWindowPos(_mainPlayer._seekbar.GetHWND(), HWND_TOP, rect.left, rect.bottom-toolbarHeight-seekbarHeight, rect.right, seekbarHeight, SWP_SHOWWINDOW);
+	//		//SetWindowPos(_toolbar.GetHWND(), 0
+	//		//	, 1000+rect.left, rect.top, rect.right, rect.bottom, SWP_SHOWWINDOW);
+	//	}
+	//	if (1)
+	//	{
+	//		seekbarHeight = 32;
+	//		SetWindowPos(_mainPlayer._seekbar.GetHWND(), HWND_TOP, rect.left, rect.bottom-toolbarHeight-seekbarHeight, rect.right, seekbarHeight, SWP_SHOWWINDOW);
 
-			barsHeight += seekbarHeight;
-			//SetWindowPos(_toolbar.GetHWND(), 0
-			//	, 1000+rect.left, rect.top, rect.right, rect.bottom, SWP_SHOWWINDOW);
-		}
-		_barsHeight = barsHeight;
-		if (_mainPlayer._mMediaPlayer)
-		{
-			height -= barsHeight;
-			if(_mainPlayer._mMediaPlayer->_resX && _mainPlayer._mMediaPlayer->_resY) 
-			{
-				float ratio = min(width/_mainPlayer._mMediaPlayer->_resX, height/_mainPlayer._mMediaPlayer->_resY);
-				int w = _mainPlayer._mMediaPlayer->_resX*ratio;
-				int h = _mainPlayer._mMediaPlayer->_resY*ratio;
-				::SetWindowPos(_mainPlayer._mMediaPlayer->getHWND(), HWND_TOP, 
-					(width-w)/2, 
-					max(0, (height-h)/2), 
-					w, 
-					h, 
-					SWP_SHOWWINDOW);
-			} else {
-				::SetWindowPos(_mainPlayer._mMediaPlayer->getHWND(), HWND_TOP, 
-					rect.left, 
-					rect.top, 
-					//1*(rect.right - rect.left), 
-					1*(rect.right - rect.left), 
-					1*(fullScreen?videoHeightAvailable:(videoHeightAvailable-barsHeight)), 
-					SWP_SHOWWINDOW);
-			}
-		}
+	//		barsHeight += seekbarHeight;
+	//		//SetWindowPos(_toolbar.GetHWND(), 0
+	//		//	, 1000+rect.left, rect.top, rect.right, rect.bottom, SWP_SHOWWINDOW);
+	//	}
+	//	_barsHeight = barsHeight;
+	//	if (_mainPlayer._mMediaPlayer)
+	//	{
+	//		height -= barsHeight;
+	//		if(_mainPlayer._mMediaPlayer->_resX && _mainPlayer._mMediaPlayer->_resY) 
+	//		{
+	//			float ratio = min(width/_mainPlayer._mMediaPlayer->_resX, height/_mainPlayer._mMediaPlayer->_resY);
+	//			int w = _mainPlayer._mMediaPlayer->_resX*ratio;
+	//			int h = _mainPlayer._mMediaPlayer->_resY*ratio;
+	//			::SetWindowPos(_mainPlayer._mMediaPlayer->getHWND(), HWND_TOP, 
+	//				(width-w)/2, 
+	//				max(0, (height-h)/2), 
+	//				w, 
+	//				h, 
+	//				SWP_SHOWWINDOW);
+	//		} else {
+	//			::SetWindowPos(_mainPlayer._mMediaPlayer->getHWND(), HWND_TOP, 
+	//				rect.left, 
+	//				rect.top, 
+	//				//1*(rect.right - rect.left), 
+	//				1*(rect.right - rect.left), 
+	//				1*(fullScreen?videoHeightAvailable:(videoHeightAvailable-barsHeight)), 
+	//				SWP_SHOWWINDOW);
+	//		}
+	//	}
 
-		if (fullScreen)
-		{
-			SetWindowPos(_hFullScreenBtmbar , HWND_TOP
-				, rect.left , rect.bottom-barsHeight, rect.right, barsHeight, SWP_SHOWWINDOW);
-			SetWindowPos(_mainPlayer._seekbar.GetHWND(), HWND_TOP, rect.left, 0, rect.right, seekbarHeight, SWP_SHOWWINDOW);
+	//	if (fullScreen)
+	//	{
+	//		SetWindowPos(_hFullScreenBtmbar , HWND_TOP
+	//			, rect.left , rect.bottom-barsHeight, rect.right, barsHeight, SWP_SHOWWINDOW);
+	//		SetWindowPos(_mainPlayer._seekbar.GetHWND(), HWND_TOP, rect.left, 0, rect.right, seekbarHeight, SWP_SHOWWINDOW);
 
-			::SendMessage(_toolbar.GetHWND(), TB_AUTOSIZE, 0, 0);
-		}
-		return 0;
-	}
+	//		::SendMessage(_toolbar.GetHWND(), TB_AUTOSIZE, 0, 0);
+	//	}
+	//	return 0;
+	//}
 
 	case WM_TIMER:
 	{
 		if (wParam==10086 && _mainPlayer._mMediaPlayer)
 		{
 			_mainPlayer._mMediaPlayer->PlayVideoFile(nxt_file);
-			::KillTimer(hwnd, 10086);
+			::KillTimer(m_hWnd, 10086);
 		}
 		if ((wParam == 1)
 			&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
@@ -571,7 +551,6 @@ LRESULT WODApplication::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		}
 	}
 	return 0;
-
 
 	case WM_HSCROLL:
 	{
@@ -662,7 +641,7 @@ LRESULT WODApplication::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 	case MM_PREPARED:
 	{
 		LogIs("MPM_PREPARED %d\n", wParam);
-		if (hwnd==m_hWnd)
+		if (m_hWnd==m_hWnd)
 		{
 			_mainPlayer._seekbar.SetMax(wParam);
 		}
@@ -682,46 +661,5 @@ LRESULT WODApplication::RunProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 	break;
 	}
 
-	return ::DefWindowProc(hwnd, msg, wParam, lParam);
-}
-
-
-LRESULT CALLBACK WODApplication::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	if (!running)
-	{
-		return TRUE;
-	}
-	if (!hwnd)
-	{
-		return FALSE;
-	}
-	else if(message==WM_NCCREATE)
-	{
-		WODApplication* app = (WODApplication*)((LPCREATESTRUCT)lParam)->lpCreateParams;
-		app->m_hWnd = hwnd;
-		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)app);
-	}
-	//if(0)
-	if (message==WM_PAINT)
-	{
-		//if (WS_EX_LAYERED == (WS_EX_LAYERED & GetWindowLong(hWnd, GWL_EXSTYLE))) break;;
-		RECT rcClient;
-		::GetClientRect(hwnd, &rcClient);
-
-		PAINTSTRUCT ps = { 0 };
-		HDC hdc = ::BeginPaint(hwnd, &ps);
-
-		RECT rect = rcClient;  
-
-		//rect.right = rect.left+(rect.right-rect.left)/2;
-
-		HBRUSH hbrush = CreateSolidBrush(RGB(0,1,0));
-
-		FillRect(hdc, &rect, hbrush);
-
-		::EndPaint(hwnd, &ps);
-		return 1;
-	}
-	return ((WODApplication*)GetWindowLongPtr(hwnd, GWLP_USERDATA))->RunProc(hwnd, message, wParam, lParam);
+	return 0;
 }

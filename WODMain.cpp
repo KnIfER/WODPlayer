@@ -126,15 +126,13 @@ wWinMain(_In_ HINSTANCE hInstance,
 	CPaintManagerUI::SetResourcePath(CPaintManagerUI::GetInstancePath() + _T("..//skin//"));
 
 	XPP = new WODApplication();
-	XPP->Create(NULL, _T("无限播放器"), UI_WNDSTYLE_FRAME, WS_EX_APPWINDOW, 0, 0, 500, 500);
-	//XPP->ShowWindow();
-	//XPP->CenterWindow();
+	XPP->Create(NULL, _T("无限播放器"), UI_WNDSTYLE_FRAME, WS_EX_APPWINDOW|WS_EX_ACCEPTFILES, 0, 0, 500, 500);
+	XPP->ShowWindow();
+	XPP->CenterWindow();
 	//XPP->init(hInstance, NULL);
 
-	XPP->ShowModal();
+	//XPP->ShowModal();
 
-
-	return 0;
 	MSG    msg;
 	//while(running)
 	{
