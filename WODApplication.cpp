@@ -16,6 +16,7 @@
 */
 #include <pch.h>
 #include "../resource.h"
+#include "database\database_helper.h"
 #include "virtual_keys.h"
 
 
@@ -28,6 +29,11 @@ struct DemoData
 extern WODApplication* XPP;
 
 extern int testSqlite();
+
+WODApplication::WODApplication()
+{
+	_db = new WODBase();
+}
 
 CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 	if(*pstrClass=='_') {
@@ -51,6 +57,7 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 
 void WODApplication::InitWindow()
 {
+	m_pm._bIsLayoutOnly = true;
 	//ListView* pList = static_cast<ListView*>(m_pm.FindControl(_T("btn")));
 	//LogIs(L"WODApplication::InitWindow %s", (LPCWSTR)m_pm.FindControl(L"btn")->GetText());
 
@@ -96,6 +103,18 @@ void WODApplication::InitWindow()
 	}
 
 	_mainPlayer.newVideoView();
+
+
+	_db->Init();
+
+	BOOL bHandled;
+	//HandleCustomMessage(WM_KEYDOWN, VK_P, 0, bHandled);
+
+	//QkString test="asdsad";
+	//CHAR fullpath[_MAX_PATH*2];
+	//WideCharToMultiByte(CP_ACP, 0, test, -1, fullpath, _MAX_PATH*2, 0, 0);
+	//LogIs(2, fullpath);
+
 }
 
 LRESULT WODApplication::OnDestroy( UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled )
@@ -326,7 +345,7 @@ bool WODApplication::PickFile()
 
 	if(ret)
 	{
-		MarkPlaying(_mainPlayer._mMediaPlayer->PlayVideoFile(filepath));
+		MarkPlaying(_mainPlayer.PlayVideoFile(filepath));
 	}
 	return false;
 }
@@ -342,6 +361,7 @@ bool IsKeyDown(int key) {
 
 
 TCHAR nxt_file[_MAX_PATH];
+std::string threadBuffer;
 
 
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
@@ -419,7 +439,6 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 		::DragFinish(hDropInfo);
 		return true;
-
 	};
 	break;
 
@@ -440,109 +459,14 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	{
 		return 0;
 	}
-	//case WM_PAINT:
-	//{
-	//
-	//	HDC hdc;
-	//	PAINTSTRUCT ps;
-	//	RECT rect;
-	//	GetClientRect(hwnd, &rect);
-	//	hdc = BeginPaint(hwnd, &ps);
-	//	DrawText (hdc, s, -1, &rect,DT_SINGLELINE | DT_CENTER | DT_VCENTER) ;
-	//	EndPaint(hwnd, &ps);
-	//	return 0;
-	//}
-
-	//case WM_CLOSE:
-	//case WM_DESTROY:
-	//	running = false;
-	//	if (_mainPlayer._mMediaPlayer)
-	//	{
-	//		//delete _mainPlayer._mMediaPlayer;
-	//		//_mainPlayer._mMediaPlayer = NULL;
-	//	}
-	//	m_hWnd = 0;
-	//	PostQuitMessage(0);
-	//	return TRUE;
-
-	//case WM_SIZE:
-	//{
-	//	RECT rect;
-	//	GetClientRect(m_hWnd, &rect);
-	//	float width = rect.right - rect.left;
-	//	float height = rect.bottom - rect.top;
-	//	//sMoveWindow(_tabLayout.getHWND(), rect.left, rect.top, rect.right, rect.bottom, true);
-
-	//	int videoHeightAvailable = rect.bottom - rect.top;
-	//	int toolbarHeight = 0;
-	//	int seekbarHeight = 0;
-	//	bool fullScreen = IsFullScreen();
-	//	//if (fullScreen)
-	//	int barsHeight=0;
-
-	//	if (1)
-	//	{
-	//		::SendMessage(_toolbar.GetHWND(), TB_AUTOSIZE, 0, 0);
-	//		RECT toolbarRect;
-	//		GetClientRect(_toolbar.GetHWND(), &toolbarRect);
-	//		toolbarHeight = toolbarRect.bottom-toolbarRect.top;
-	//		barsHeight += toolbarHeight;
-	//		//MoveWindow(_toolbar.GetHWND(), 1000+rect.left, rect.top, rect.right, rect.bottom, true);
-
-	//		//SetWindowPos(_toolbar.GetHWND(), 0
-	//		//	, 1000+rect.left, rect.top, rect.right, rect.bottom, SWP_SHOWWINDOW);
-	//	}
-	//	if (1)
-	//	{
-	//		seekbarHeight = 32;
-	//		SetWindowPos(_mainPlayer._seekbar.GetHWND(), HWND_TOP, rect.left, rect.bottom-toolbarHeight-seekbarHeight, rect.right, seekbarHeight, SWP_SHOWWINDOW);
-
-	//		barsHeight += seekbarHeight;
-	//		//SetWindowPos(_toolbar.GetHWND(), 0
-	//		//	, 1000+rect.left, rect.top, rect.right, rect.bottom, SWP_SHOWWINDOW);
-	//	}
-	//	_barsHeight = barsHeight;
-	//	if (_mainPlayer._mMediaPlayer)
-	//	{
-	//		height -= barsHeight;
-	//		if(_mainPlayer._mMediaPlayer->_resX && _mainPlayer._mMediaPlayer->_resY) 
-	//		{
-	//			float ratio = min(width/_mainPlayer._mMediaPlayer->_resX, height/_mainPlayer._mMediaPlayer->_resY);
-	//			int w = _mainPlayer._mMediaPlayer->_resX*ratio;
-	//			int h = _mainPlayer._mMediaPlayer->_resY*ratio;
-	//			::SetWindowPos(_mainPlayer._mMediaPlayer->getHWND(), HWND_TOP, 
-	//				(width-w)/2, 
-	//				max(0, (height-h)/2), 
-	//				w, 
-	//				h, 
-	//				SWP_SHOWWINDOW);
-	//		} else {
-	//			::SetWindowPos(_mainPlayer._mMediaPlayer->getHWND(), HWND_TOP, 
-	//				rect.left, 
-	//				rect.top, 
-	//				//1*(rect.right - rect.left), 
-	//				1*(rect.right - rect.left), 
-	//				1*(fullScreen?videoHeightAvailable:(videoHeightAvailable-barsHeight)), 
-	//				SWP_SHOWWINDOW);
-	//		}
-	//	}
-
-	//	if (fullScreen)
-	//	{
-	//		SetWindowPos(_hFullScreenBtmbar , HWND_TOP
-	//			, rect.left , rect.bottom-barsHeight, rect.right, barsHeight, SWP_SHOWWINDOW);
-	//		SetWindowPos(_mainPlayer._seekbar.GetHWND(), HWND_TOP, rect.left, 0, rect.right, seekbarHeight, SWP_SHOWWINDOW);
-
-	//		::SendMessage(_toolbar.GetHWND(), TB_AUTOSIZE, 0, 0);
-	//	}
-	//	return 0;
-	//}
+	//case WM_PAINT: case WM_CLOSE: case WM_DESTROY:
+	//case WM_SIZE: // old layout code see ::  https://github.com/KnIfER/WODPlayer/blob/9a19f3e5f0893ba82c1a8a3566e5b55f7a3e6290/src/WndControl/WODWindow.cpp#L425
 
 	case WM_TIMER:
 	{
-		if (wParam==10086 && _mainPlayer._mMediaPlayer)
+		if (wParam==10086)
 		{
-			_mainPlayer._mMediaPlayer->PlayVideoFile(nxt_file);
+			_mainPlayer.PlayVideoFile(nxt_file);
 			::KillTimer(m_hWnd, 10086);
 		}
 		if ((wParam == 1)
@@ -606,7 +530,10 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case VK_P:
 		{
 			int pos = _mainPlayer._mMediaPlayer->GetPosition();
-			WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
+			int duration = _mainPlayer._mMediaPlayer->GetDuration();
+			//WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
+
+			_db->AddBookmark(_mainPlayer._currentPath.GetData(threadBuffer), 0, -1, pos, duration, 0);
 		}
 		break;
 		case VK_LEFT:

@@ -5,11 +5,16 @@
 #include <Duilib/Core/InsituDebug.h>
 #include "database_helper.h"
 
+#include "shlwapi.h"
+
 WODBase::WODBase() 
+{
+}
+
+bool WODBase::Init() 
 {
     const char *sql;
 
-    sqlite3 *db = NULL;
     int res = sqlite3_open("D:\\wodbase.db", &db);
     if (res != SQLITE_OK) {
         LogIs(L"打开失败!\n ERR: %s\n", sqlite3_errmsg(db));
@@ -18,21 +23,67 @@ WODBase::WODBase()
 
     sql = "create table if not exists timemarks(\
 id INTEGER PRIMARY KEY AUTOINCREMENT\
-, name TEXT\
-, fname TEXT\
-, path TEXT\
-, vid INTEGER\
+, name TEXT DEFAULT NULL\
+, fname TEXT DEFAULT NULL\
+, path TEXT DEFAULT NULL\
+, vid INTEGER DEFAULT 0\
 , pos INTEGER\
-, duration INTEGER\
-, opt INTEGER\
-, layer INTEGER\
-, color INTEGER\
+, duration INTEGER DEFAULT 0\
+, thumbnail INTEGER DEFAULT 0\
+, opt INTEGER DEFAULT 0\
+, param TEXT DEFAULT NULL\
+, layer INTEGER DEFAULT 0\
+, color INTEGER DEFAULT 0\
 , creation_time INTEGER NOT NULL\
-, thumbnail BLOB\
         )";
     sqlite3_exec(db, sql, NULL, NULL, NULL);
+    return 0;
 }
 
+int WODBase::AddBookmark(const char* fullpath, char* markName, long rowId, long pos, long duration, int flag)
+{
+    //LogIs(2, "AddBookmark %s %s", fullpath?fullpath:"", markName?markName:"");
+    sqlite3_exec(db, "begin", NULL, NULL, NULL);
+    const char *sql = "INSERT INTO timemarks(name, fname, path, pos, duration, creation_time) VALUES(?, ?, ? ,?, ?, ?)";
+
+    sqlite3_stmt *stmt = NULL;
+
+    int succ = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+
+    if (succ != SQLITE_OK) {
+        LogIs("2, sql prepare error:  %d %s ", succ, sql);
+        return -1;
+    }
+
+    char buffer_path[MAX_PATH];
+
+    while(TRUE) {
+        sqlite3_bind_text(stmt, 1, markName, -1, NULL); // 书签名
+        
+        ::PathCanonicalizeA(buffer_path, fullpath);
+        ::PathRemoveFileSpecA(buffer_path);
+
+        sqlite3_bind_text(stmt, 2, buffer_path+strlen(buffer_path)+1, -1, NULL); // 文件名
+        sqlite3_bind_text(stmt, 3, buffer_path, -1, NULL); // 父目录
+        //LogIs(2, "%s \n %s", buffer_path, buffer_path+strlen(buffer_path)+1);
+
+        sqlite3_bind_int(stmt,  4, pos);
+        sqlite3_bind_int(stmt,  5, duration);
+        sqlite3_bind_int(stmt,  6, 0);
+
+        succ = sqlite3_step(stmt);
+        if (succ != SQLITE_DONE) {
+            LogIs(2, "insert error. res = %d\n", succ);
+            break;
+        }
+
+        sqlite3_reset(stmt);
+        break;
+    }
+    sqlite3_exec(db, "commit", NULL, NULL, NULL);
+    sqlite3_finalize(stmt);
+    return -1;
+}
 
 
 void sqlite3_test_get_table(sqlite3 *db)

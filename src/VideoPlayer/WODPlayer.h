@@ -28,12 +28,17 @@ public:
     bool IsMediaPlayerWindow(HWND hwnd);
     void MarkPlaying(bool playing=true);
 
+
+    bool PlayVideoFile(TCHAR* path);
+
     void newVideoView();
+
 
     void SetPos(RECT rc, bool bNeedInvalidate = true) override;
 
     SeekBar _seekbar;
     VideoPlayer* _mMediaPlayer;
+    QkString _currentPath;
 //private:
     bool _isPlaying;
     HWND _hPlayer;

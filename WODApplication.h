@@ -15,10 +15,12 @@
 * Foundation.
 */
 
+class WODBase;
+
 class WODApplication : public WindowImplBase, public INotifyUI
 {
 public:
-    WODApplication() { };     
+    WODApplication();     
 
     LPCTSTR GetWindowClassName() const override
     { 
@@ -73,7 +75,7 @@ public:
 	ButtonList _toolbar;
 	int _barsHeight=10;
 	HWND _hFullScreenBtmbar;
-private:
+    WODBase* _db;
     CDialogBuilder builder;
     Button* m_pSearch;
 

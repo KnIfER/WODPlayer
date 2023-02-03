@@ -5,6 +5,7 @@
 
 extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, int type);
 
+
 void WODPlayer::newVideoView()
 {
 	if (_mMediaPlayer)
@@ -17,6 +18,24 @@ void WODPlayer::newVideoView()
 	{
 		_hPlayer = _mMediaPlayer->getHWND();
 	}
+}
+
+bool WODPlayer::PlayVideoFile(TCHAR* path)
+{
+	bool ret = false;
+	if (!_mMediaPlayer)
+	{
+		newVideoView();
+	}
+	if (_mMediaPlayer)
+	{
+		ret = _mMediaPlayer->PlayVideoFile(path);
+	}
+	if (ret)
+	{
+		_currentPath = path;
+	}
+	return false;
 }
 
 void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
