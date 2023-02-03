@@ -98,6 +98,14 @@ void WODApplication::InitWindow()
 	_mainPlayer.newVideoView();
 }
 
+LRESULT WODApplication::OnDestroy( UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled )
+{
+	//LogIs("OnDestroy UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled");
+	bHandled = TRUE;
+	::PostQuitMessage(wParam);
+	return 0;
+}
+
 void WODApplication::Notify( TNotifyUI &msg )
 {
 	if (msg.sType==L"click")
@@ -108,7 +116,6 @@ void WODApplication::Notify( TNotifyUI &msg )
 		else if( msg.sType == _T("itemclick") ) 
 		{
 		}
-
 		//auto bRoot = builder.Create(L"<Window><Button/></Window>", TEXT("str"), 0, &m_pm);
 		//ASSERT(bRoot);
 	}
@@ -415,6 +422,19 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 	};
 	break;
+
+
+	case WM_SETFOCUS:
+	{
+		LogIs(L"WM_SETFOCUS");
+	} break;
+	case WM_KILLFOCUS:
+	{
+		LogIs(L"WM_KILLFOCUS");
+		if(_mainPlayer.IsMediaPlayerWindow(::GetFocus())) {
+			::SetFocus(m_hWnd);
+		}
+	} break;
 
 	case WM_CONTEXTMENU:
 	{

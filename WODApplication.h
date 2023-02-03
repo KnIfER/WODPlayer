@@ -42,6 +42,8 @@ public:
         bHandled = TRUE;
         return 0;
     }
+    LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) override;
+
 
     CControlUI* viewTemplate;
 
@@ -54,6 +56,7 @@ public:
     }
 
     void Notify( TNotifyUI &msg ) override;
+
 
     CControlUI* CreateControl(LPCTSTR pstrClass) override;
     

@@ -10,11 +10,11 @@
 	<_v height="0" bkcolor="#FF555500" name="ch0"/>
 	
 	<WinFrame height="-2" name="ch1">
-		<VBox bkcolor="#FFFFFFFF"
+		<VBox bkcolor="#FF000000"
 			height="-2"
 			>
-			<_s height="50" />
-			<_t height="50"/>
+			<_s height="50" name="seek"/>
+			<_t height="50"name="btns"/>
 		</VBox>
 	</WinFrame>
 	
