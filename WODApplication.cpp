@@ -36,6 +36,9 @@ WODApplication::WODApplication()
 }
 
 CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
+	if(lstrcmp(pstrClass, L"seekbar")==0) {
+		return SeekBar::CreateControl();
+	}
 	if(*pstrClass=='_') {
 		pstrClass++;
 		if(*pstrClass=='t') {

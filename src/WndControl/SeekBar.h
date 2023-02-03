@@ -16,33 +16,17 @@
 */
 #pragma once
 
-class SeekBar : public WinFrame 
+class SeekBar : public CContainerUI 
 {
+	DECLARE_QKCONTROL(SeekBar)
 public:
 	SeekBar()=default;
-	void Init() override;
 
-	LRESULT RunProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l);
-	
-	static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		return ((SeekBar*)GetWindowLongPtr(hwnd, GWLP_USERDATA))->RunProc(hwnd, message, wParam, lParam);
-	}
-
-	void showWindow();
-
-	void SetPosition(LONG pos);
-	void SetPositionAndMax(LONG pos, LONG max);
-	LONG GetPosition();
-	void SetMax(LONG val);
-	LONG GetMax();
-	void SetMin(LONG val);
-	LONG GetMin();
-
+	LPCTSTR GetClass() {
+		return L"SeekBar";
+	};
 	bool _isSeeking=false;
 protected:
-	WNDPROC _SysWndProc=NULL;
-
 	int size;
 };
 

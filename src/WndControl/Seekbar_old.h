@@ -1,4 +1,4 @@
-/** Copyright 2021 WODPLayer author
+/** Copyright 2021 KnIfER JK. Chen
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -15,30 +15,36 @@
 * Foundation.
 */
 #pragma once
-#include <Windows.h>
-#include <Windowsx.h>
-#include "VideoPlayerInerface.h"
 
-#include "DuiLib\UIlib.h"
-#include <Duilib/Core/InsituDebug.h>
+class SeekBarOld : public WinFrame 
+{
+public:
+	SeekBarOld()=default;
+	void Init() override;
 
-#include "../WndControl/Seekbar_old.h"
-#include "../WndControl/SeekBar.h"
-#include "../WndControl/ButtonList.h"
-#include "WODPlayer.h"
-#include "WODApplication.h"
+	LRESULT RunProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l);
+	
+	static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		return ((SeekBarOld*)GetWindowLongPtr(hwnd, GWLP_USERDATA))->RunProc(hwnd, message, wParam, lParam);
+	}
 
+	void showWindow();
 
-extern LONG_PTR WOD_IMG_UTILS(const char* msg, HWND hWnd=0, LONG_PTR wParam=0, LONG_PTR lParam=0);
+	void SetPosition(LONG pos);
+	void SetPositionAndMax(LONG pos, LONG max);
+	LONG GetPosition();
+	void SetMax(LONG val);
+	LONG GetMax();
+	void SetMin(LONG val);
+	LONG GetMin();
 
-#define SendWndMessage(Msg, wParam, lParam) SendMessage(_hWnd, Msg, wParam, lParam)
+	bool _isSeeking=false;
+protected:
+	WNDPROC _SysWndProc=NULL;
 
-__declspec(selectany)  std::string threadBuffer;
-
-
-
-
-
+	int size;
+};
 
 
 

@@ -39,9 +39,6 @@
     <ClCompile Include="src\WndControl\ButtonList.cpp">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClCompile>
-    <ClCompile Include="src\WndControl\SeekBar.cpp">
-      <Filter>Source Files\video_src\WndControl</Filter>
-    </ClCompile>
     <ClCompile Include="src\VideoPlayer\VideoPlayerInerface.cpp">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClCompile>
@@ -75,6 +72,12 @@
     <ClCompile Include="src\VideoPlayer\ExternalPlayer.cpp">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClCompile>
+    <ClCompile Include="src\WndControl\Seekbar_old.cpp">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WndControl\SeekBar.cpp">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WODApplication.h">
@@ -90,9 +93,6 @@
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClInclude>
     <ClInclude Include="src\WndControl\ButtonList.h">
-      <Filter>Source Files\video_src\WndControl</Filter>
-    </ClInclude>
-    <ClInclude Include="src\WndControl\SeekBar.h">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClInclude>
     <ClInclude Include="src\VideoPlayer\VideoPlayerInerface.h">
@@ -133,6 +133,12 @@
     </ClInclude>
     <ClInclude Include="src\database\bookmark.h">
       <Filter>Source Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WndControl\Seekbar_old.h">
+      <Filter>Source Files\video_src\WndControl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WndControl\SeekBar.h">
+      <Filter>Source Files\video_src\WndControl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
