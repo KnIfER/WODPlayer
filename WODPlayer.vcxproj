@@ -30,7 +30,6 @@
     <ClCompile Include="src\VideoPlayer\VLCPlayer.cpp" />
     <ClCompile Include="src\VideoPlayer\WODPlayer.cpp" />
     <ClCompile Include="src\WndControl\SeekBar.cpp" />
-    <ClCompile Include="src\WndControl\Seekbar_old.cpp" />
     <ClCompile Include="WODMain.cpp" />
     <ClCompile Include="WODApplication.cpp" />
     <ClCompile Include="src\WndControl\ButtonList.cpp" />
@@ -49,7 +48,6 @@
     <ClInclude Include="src\VideoPlayer\VLCPlayer.h" />
     <ClInclude Include="src\VideoPlayer\WODPlayer.h" />
     <ClInclude Include="src\WndControl\SeekBar.h" />
-    <ClInclude Include="src\WndControl\Seekbar_old.h" />
     <ClInclude Include="src\WndControl\virtual_keys.h" />
     <ClInclude Include="WODApplication.h" />
     <ClInclude Include="resource.h" />

@@ -24,6 +24,17 @@ SeekBar::SeekBar(){
 	_progressColor = 0xff958700;
 	_enhancedTrackColor    = 0x20888888;
 	_enhancedProgressColor = 0x20565d06;
+
+	_thumbSize = 12;
+	_thumbColor = 0xffeeeeee;
+	_thumbColorTracking = 0x80eeeeee;
+
+	_enhanceThickness = 1;
+	_barInset = 5;
+	_thickness = 3;
+
+	_max = 100000;
+	_progress = 50000;
 }
 
 void SeekBar::SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue)
@@ -40,6 +51,9 @@ void SeekBar::SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue)
 		else if( _tcsicmp(pstrName, _T("progresscolor1")) == 0 ) SetEnhancedProgressColor(ParseInt(pstrValue));
 		else if( _tcsicmp(pstrName, _T("trackcolor1")) == 0 ) SetEnhancedTrackColor(ParseInt(pstrValue));
 		else if( _tcsicmp(pstrName, _T("thickness1")) == 0 ) SetEnhanceThickness(ParseInt(pstrValue));
+		else if( _tcsicmp(pstrName, _T("thumbsize")) == 0 ) SetEnhanceThickness(ParseInt(pstrValue));
+		else if( _tcsicmp(pstrName, _T("thumbcolor")) == 0 ) SetThumbColor(ParseInt(pstrValue));
+		else if( _tcsicmp(pstrName, _T("thumbcolor1")) == 0 ) SetThumbColorTraking(ParseInt(pstrValue));
 		else __super::SetAttribute(pstrName, pstrValue);
 	}
 	else __super::SetAttribute(pstrName, pstrValue);
@@ -87,6 +101,30 @@ void SeekBar::SetEnhancedProgressColor(int val)
 {
 	if(_enhancedProgressColor!=val) {
 		_enhancedProgressColor = val;
+		Invalidate();
+	}
+}
+
+void SeekBar::SetThumbSize(int val)
+{
+	if(_thumbSize!=val) {
+		_thumbSize = val;
+		Invalidate();
+	}
+}
+
+void SeekBar::SetThumbColor(int val)
+{
+	if(_thumbColor!=val) {
+		_thumbColor = val;
+		Invalidate();
+	}
+}
+
+void SeekBar::SetThumbColorTraking(int val)
+{
+	if(_thumbColorTracking!=val) {
+		_thumbColorTracking = val;
 		Invalidate();
 	}
 }
@@ -158,17 +196,16 @@ void SeekBar::PaintStatusImage(HDC hDC)
 	}
 
 
-	int radius = 6;
-	int zjiin = 11;
+	int radius = _thumbSize/2;
 
 	RECT tmpRc{rcBar.right-radius, GetHeight()/2-radius, 0, 0};
 
-	trackBrush.SetColor(0xffeeeeee);
+	trackBrush.SetColor(_isSeeking?_thumbColorTracking:_thumbColor);
 
 
 	graphi.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);// SmoothingMode
 
-	graphi.FillPie(&trackBrush, (INT)tmpRc.left, tmpRc.top, zjiin, zjiin, 0, 360);
+	graphi.FillPie(&trackBrush, (INT)tmpRc.left, tmpRc.top, _thumbSize, _thumbSize, 0, 360);
 
 	//graphi.FillEllipse(&trackBrush, (INT)tmpRc.left, tmpRc.top
 	//	, zjiin
@@ -205,6 +242,7 @@ void SeekBar::DoEvent(TEventUI& event)
 		if(event.Type==UIEVENT_BUTTONUP) {
 			//LogIs(2, "UIEVENT_BUTTONDOWN!!!");
 			_isSeeking = false;
+			Invalidate();
 		}
 		if(event.Type==UIEVENT_MOUSEMOVE) {
 			SetProgress(_max * (event.ptMouse.x-dragDownLeft)*1.0/dragDownWidth, true);
@@ -212,7 +250,7 @@ void SeekBar::DoEvent(TEventUI& event)
 	}
 }
 
-void SeekBar::SetProgress(int progress, bool tracking)
+void SeekBar::SetProgress(LONG progress, bool tracking)
 {
 	if(progress < 0) progress = 0;
 	else if(progress > _max) progress = _max;
@@ -226,7 +264,7 @@ void SeekBar::SetProgress(int progress, bool tracking)
 	}
 }
 
-void SeekBar::SetMax(int max)
+void SeekBar::SetMax(LONG max)
 {
 	if (_max != max)
 	{
@@ -236,7 +274,7 @@ void SeekBar::SetMax(int max)
 	}
 }
 
-void SeekBar::SetMaxAndProgress(int progress, int max)
+void SeekBar::SetProgressAndMax(LONG progress, LONG max)
 {
 	if (_progress != progress || max!=_max)
 	{

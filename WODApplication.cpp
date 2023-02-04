@@ -49,7 +49,9 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 		}
 		if(*pstrClass=='s') {
 			//LogIs(L"CreateControl::%s %d", pstrClass, *pstrClass=='_');
-			return &_mainPlayer._seekbar;
+			if(_mainPlayer._seekbar.GetParent()==NULL)
+				return &_mainPlayer._seekbar;
+			return &_mainPlayer._volumebar;
 		}
 		if(*pstrClass=='v') {
 			//LogIs(L"CreateControl::%s %d", pstrClass, *pstrClass=='_');
@@ -502,7 +504,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			if (!_mainPlayer._seekbar._isSeeking)
 			{
-				_mainPlayer._seekbar.SetPositionAndMax(pos, _mainPlayer._mMediaPlayer->GetDuration());
+				_mainPlayer._seekbar.SetProgressAndMax(pos, _mainPlayer._mMediaPlayer->GetDuration());
 			}
 
 			_mainPlayer._mMediaPlayer->syncResolution();
@@ -570,7 +572,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 					_mainPlayer._mMediaPlayer->SetPosition(delta);
 				}
 				if(!_mainPlayer._isPlaying && !_mainPlayer._seekbar._isSeeking) {
-					_mainPlayer._seekbar.SetPositionAndMax(delta, _mainPlayer._mMediaPlayer->GetDuration());
+					_mainPlayer._seekbar.SetProgressAndMax(delta, _mainPlayer._mMediaPlayer->GetDuration());
 				}
 			}
 			break;

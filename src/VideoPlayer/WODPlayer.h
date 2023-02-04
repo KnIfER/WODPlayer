@@ -39,7 +39,8 @@ public:
 
     void SetPos(RECT rc, bool bNeedInvalidate = true) override;
 
-    SeekBarOld _seekbar;
+    SeekBar _seekbar;
+    SeekBar _volumebar;
     VideoPlayer* _mMediaPlayer;
     QkString _currentPath;
 //private:

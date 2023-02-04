@@ -72,9 +72,6 @@
     <ClCompile Include="src\VideoPlayer\ExternalPlayer.cpp">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClCompile>
-    <ClCompile Include="src\WndControl\Seekbar_old.cpp">
-      <Filter>Source Files\video_src\WndControl</Filter>
-    </ClCompile>
     <ClCompile Include="src\WndControl\SeekBar.cpp">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClCompile>
@@ -133,9 +130,6 @@
     </ClInclude>
     <ClInclude Include="src\database\bookmark.h">
       <Filter>Source Files\database</Filter>
-    </ClInclude>
-    <ClInclude Include="src\WndControl\Seekbar_old.h">
-      <Filter>Source Files\video_src\WndControl</Filter>
     </ClInclude>
     <ClInclude Include="src\WndControl\SeekBar.h">
       <Filter>Source Files\video_src\WndControl</Filter>

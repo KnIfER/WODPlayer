@@ -37,10 +37,9 @@ public:
 
 	void DoEvent(TEventUI& event) override;
 
-	void SetProgress(int progress, bool tracking=false);
-	void SetMax(int progress);
-
-	void SetMaxAndProgress(int progress, int max);
+	void SetProgress(LONG progress, bool tracking=false);
+	void SetMax(LONG progress);
+	void SetProgressAndMax(LONG progress, LONG max);
 
 
 	bool GetIsSeeking();
@@ -49,21 +48,31 @@ public:
 	void SetProgressColor(int  val);
 	void SetEnhancedTrackColor(int  val);
 	void SetEnhancedProgressColor(int  val);
+
+	void SetThumbSize(int  val);
+	void SetThumbColor(int  val);
+	void SetThumbColorTraking(int  val);
+
 	void SetEnhanceThickness(int  val);
 	void SetBarInset(int  val);
 //protected:
 	SeekBarTrackCallback _callback;
 	bool _isSeeking=false;
-	int _thickness = 3;
+	int _thickness;
 	int _trackColor;
 	int _progressColor;
 	int _enhancedTrackColor;
 	int _enhancedProgressColor;
-	int _enhanceThickness = 1;
-	int _barInset = 5;
 
-	int _max = 100000;
-	int _progress = 50000;
+	int _thumbSize;
+	int _thumbColor;
+	int _thumbColorTracking;
+
+	int _enhanceThickness;
+	int _barInset;
+
+	LONG _max;
+	LONG _progress;
 private:
 	int dragDownPos;
 	int dragDownLeft;
