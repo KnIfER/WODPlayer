@@ -30,6 +30,8 @@ extern WODApplication* XPP;
 
 extern int testSqlite();
 
+SeekBar* seekbar;
+
 WODApplication::WODApplication()
 {
 	_db = new WODBase();
@@ -58,6 +60,12 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 	return 0;
 }
 
+
+void seekchange(SeekBar* bar, int pos) {
+	XPP->_mainPlayer._mMediaPlayer->SetPosition(pos);
+}
+
+
 void WODApplication::InitWindow()
 {
 	m_pm._bIsLayoutOnly = true;
@@ -77,6 +85,9 @@ void WODApplication::InitWindow()
 	//_toolbar.Init();
 	//_toolbar.Init();
 	//_mainPlayer._seekbar.Init();
+
+	seekbar = static_cast<SeekBar*>(m_pm.FindControl(_T("seekbar")));
+	seekbar->_callback = (SeekBarTrackCallback)seekchange;
 
 	//LogIs(L"InitWindow::%ld %ld", _toolbar.GetHWND(), _mainPlayer._seekbar.GetHWND());
 	if(0) 
