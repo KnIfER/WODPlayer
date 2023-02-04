@@ -13,7 +13,14 @@
 		<VBox bkcolor="#FF000000"
 			height="-2"
 			>
-			<_s height="50" name="seek"/>
+			
+			<HBox bkcolor="#FF000000"
+				height="35"
+				>
+				<_s inset="0,10,0,10" minwidth="100" width="0" name="seekbar" barInset="10"/>
+				<_s inset="0,10,0,10" width="100"  bkcolor="#FF000000"
+					barInset="10"/>
+			</HBox>
 			<_t height="50"name="btns"/>
 		</VBox>
 	</WinFrame>
