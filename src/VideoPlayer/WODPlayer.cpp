@@ -24,6 +24,14 @@ void WODPlayer::newVideoView()
 	}
 }
 
+void WODPlayer::Release()
+{
+	if(_mMediaPlayer) {
+		_mMediaPlayer->Release();
+		delete _mMediaPlayer;
+	}
+}
+
 bool WODPlayer::PlayVideoFile(TCHAR* path)
 {
 	bool ret = false;
@@ -70,15 +78,17 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 	if(_hPlayer) {
 		//::MoveWindow(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
 		//::SetWindowPos(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
+	
+
+		::SetWindowPos(_mMediaPlayer->getHWND(), HWND_TOP, 
+			rc.left, 
+			rc.top, 
+			//1*(rect.right - rect.left), 
+			1*(rc.right - rc.left), 
+			rc.bottom-rc.top, 
+			SWP_SHOWWINDOW);
 	}
 
-	::SetWindowPos(_mMediaPlayer->getHWND(), HWND_TOP, 
-		rc.left, 
-		rc.top, 
-		//1*(rect.right - rect.left), 
-		1*(rc.right - rc.left), 
-		rc.bottom-rc.top, 
-		SWP_SHOWWINDOW);
 }
 
 bool WODPlayer::IsMediaPlayerWindow(HWND hwnd)

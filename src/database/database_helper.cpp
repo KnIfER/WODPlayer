@@ -12,6 +12,14 @@ WODBase::WODBase()
 {
 }
 
+WODBase::~WODBase() 
+{
+    if(db) {
+        sqlite3_close_v2(db);
+        db = 0;
+    }
+}
+
 bool WODBase::Init() 
 {
     const char *sql;

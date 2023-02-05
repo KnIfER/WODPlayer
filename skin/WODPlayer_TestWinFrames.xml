@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window caption="0,0,0,30"  inset="0,0,0,0" roundcorner="5,5,5,5"  inset="10,10,10,10" sizebox="4,4,4,4" showdirty="false" layered="false">
+ 
+<VBox bkcolor="#FFFFFFFF"
+	clipchild="false" 
+	vscrollbar="true"
+	name="top"
+	>
+	
+	<_v height="0" bkcolor="#FF555500" name="ch0"/>
+	
+	
+	<seekbarwnd height="25" name="btns"/>
+	<seekbarwnd height="25" name="btns"/>
+			
+	<WinFrame height="-2" name="ch1">
+		<VBox bkcolor="#FF000000"
+			height="-2"
+			>
+			<HBox bkcolor="#FF000000"
+				height="35"
+				>
+				<_s inset="0,10,0,10" minwidth="100" width="0" name="seekbar" barInset="10"/>
+				<_s inset="0,10,0,10" width="100"  bkcolor="#FF000000"
+					barInset="10"/>
+			</HBox>
+			
+			
+			<_t height="50"name="btns"/>
+			
+			<HBox bkcolor="#FF000000"
+				height="45"
+				>
+				<Button width="45" height="45" name="btn" 
+					bkimage="firewall_ok.png"
+					/>
+					
+				<Button width="45" height="45" name="btn" 
+					bkimage="play.png"
+					/>
+					
+				<Button width="45" height="45" name="btn" 
+					bkimage="stop.png"
+					/>
+					
+				<Button width="45" height="45" name="btn" 
+					bkimage="play.ico"
+					/>
+					
+				<Button width="45" height="45" name="btn" 
+					bkimage="..\\res\\play.ico"
+					/>
+			</HBox>
+			
+			<seekbarwnd height="25" name="btns"/>
+		</VBox>
+	</WinFrame>
+	
+	
+	<seekbarwnd height="25" name="btns"/>
+	
+	<btnlst height="-2"name="btns"/>
+			
+	<seekbarwnd height="25" name="btns"/>
+</VBox>
+
+
+
+</Window>

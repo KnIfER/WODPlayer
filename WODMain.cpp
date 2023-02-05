@@ -123,17 +123,21 @@ wWinMain(_In_ HINSTANCE hInstance,
 	CPaintManagerUI::SetResourcePath(CPaintManagerUI::GetInstancePath() + _T("..//skin//"));
 
 	XPP = new WODApplication();
+	//WODApplication app{};
+	//XPP = new WODApplication();
+	//XPP = &app;
 	XPP->Create(NULL, _T("无限播放器"), UI_WNDSTYLE_FRAME, WS_EX_APPWINDOW|WS_EX_ACCEPTFILES, 0, 0, 500, 500);
 	XPP->ShowWindow();
 	XPP->CenterWindow();
 	//XPP->init(hInstance, NULL);
 
 	//XPP->ShowModal();
+	CControlUI* btn = new CControlUI();
 
 	MSG    msg;
 	//while(running)
 	{
-		try {
+		//try {
 			while (GetMessage(&msg, NULL, 0, 0))
 			{
 				switch (msg.message)
@@ -167,13 +171,12 @@ wWinMain(_In_ HINSTANCE hInstance,
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-		} catch(...) {
-			LogIs(2, "Exception!");
-		}
+		//} catch(...) {
+		//	LogIs(2, "Exception!");
+		//}
+
 	}
-
-
-	return msg.wParam;
+	//delete XPP;
 }
 
 

@@ -9,7 +9,7 @@ class sqlite3;
 class WODBase{
 public:
 	WODBase();
-	~WODBase(){};
+	~WODBase();
 
 	bool Init();
 	

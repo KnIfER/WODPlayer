@@ -21,6 +21,7 @@ class WODApplication : public WindowImplBase, public INotifyUI
 {
 public:
     WODApplication();     
+    ~WODApplication(){};     
 
     LPCTSTR GetWindowClassName() const override
     { 
@@ -32,22 +33,14 @@ public:
         return CS_DBLCLKS; 
     }
 
-    void OnFinalMessage(HWND hWnd) override
-    { 
-        __super::OnFinalMessage(hWnd);
-        delete this;
-    }
 
-    LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) override
-    {
-        ::DestroyWindow(GetHWND());
-        bHandled = TRUE;
-        return 0;
-    }
+    LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) override;
+
     LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) override;
 
+    void OnFinalMessage(HWND hWnd) override;
 
-    CControlUI* viewTemplate;
+    //CControlUI* viewTemplate;
 
 
     void InitWindow() override;

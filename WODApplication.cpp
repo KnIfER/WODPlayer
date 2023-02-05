@@ -41,6 +41,12 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 	if(lstrcmp(pstrClass, L"seekbar")==0) {
 		return SeekBar::CreateControl();
 	}
+	if(lstrcmp(pstrClass, L"seekbarwnd")==0) {
+		//return new SeekBarOld();
+	}
+	if(lstrcmp(pstrClass, L"btnlst")==0) {
+		return new ButtonList();
+	}
 	if(*pstrClass=='_') {
 		pstrClass++;
 		if(*pstrClass=='t') {
@@ -89,7 +95,8 @@ void WODApplication::InitWindow()
 	//_mainPlayer._seekbar.Init();
 
 	seekbar = static_cast<SeekBar*>(m_pm.FindControl(_T("seekbar")));
-	seekbar->_callback = (SeekBarTrackCallback)seekchange;
+	if(seekbar)
+		seekbar->_callback = (SeekBarTrackCallback)seekchange;
 
 	//LogIs(L"InitWindow::%ld %ld", _toolbar.GetHWND(), _mainPlayer._seekbar.GetHWND());
 	if(0) 
@@ -134,13 +141,34 @@ void WODApplication::InitWindow()
 	//tg
 }
 
+LRESULT WODApplication::OnClose(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+{
+	//LogIs("OnClose");
+	::DestroyWindow(GetHWND());
+	bHandled = TRUE;
+	return 0;
+}
+
 LRESULT WODApplication::OnDestroy( UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled )
 {
-	//LogIs("OnDestroy UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled");
+	//LogIs("OnDestroy");
 	bHandled = TRUE;
+	_mainPlayer.Release();
+	if(_db){
+		delete _db;
+		_db = 0;
+	}
 	::PostQuitMessage(wParam);
 	return 0;
 }
+
+void WODApplication::OnFinalMessage( HWND hWnd )
+{
+	__super::OnFinalMessage(hWnd);
+	delete this;
+}
+
+
 
 void WODApplication::Notify( TNotifyUI &msg )
 {
@@ -329,6 +357,10 @@ BOOL PickFileDlg(HWND hOwner,
 
 bool WODApplication::PickFile()
 {
+	//if(1) {
+	//	m_pm.SetDPI(125);
+	//	return 1;
+	//}
 	TCHAR filepath[MAX_PATH]{};
 
 	// Build filter

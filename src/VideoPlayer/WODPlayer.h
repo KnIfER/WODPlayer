@@ -36,6 +36,8 @@ public:
 
     void newVideoView();
 
+    void Release();
+
 
     void SetPos(RECT rc, bool bNeedInvalidate = true) override;
 
