@@ -32,7 +32,7 @@ public:
 	void showWindow();
 
 	void SetPosition(LONG pos);
-	void SetPositionAndMax(LONG pos, LONG max);
+	void SetProgressAndMax(LONG pos, LONG max);
 	LONG GetPosition();
 	void SetMax(LONG val);
 	LONG GetMax();

@@ -66,7 +66,7 @@ void SeekBarOld::SetPosition(LONG pos)
 	SendWndMessage(TBM_SETPOS, true, pos);
 }
 
-void SeekBarOld::SetPositionAndMax(LONG pos, LONG max)
+void SeekBarOld::SetProgressAndMax(LONG pos, LONG max)
 {
 	SendWndMessage(TBM_SETPOS, max, pos);
 }
