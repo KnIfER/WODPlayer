@@ -33,22 +33,10 @@
     <ClCompile Include="WODApplication.cpp">
       <Filter>Source Files\video_src</Filter>
     </ClCompile>
-    <ClCompile Include="src\WndControl\TabLayout.cpp">
-      <Filter>Source Files\video_src\WndControl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\WndControl\ButtonList.cpp">
-      <Filter>Source Files\video_src\WndControl</Filter>
-    </ClCompile>
     <ClCompile Include="src\VideoPlayer\VideoPlayerInerface.cpp">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClCompile>
     <ClCompile Include="src\tab.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\toolbar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\comctl32.cpp">
@@ -75,8 +63,11 @@
     <ClCompile Include="src\WndControl\SeekBar.cpp">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClCompile>
-    <ClCompile Include="src\WndControl\Seekbar_old.cpp">
+    <ClCompile Include="src\WndControl\ButtonList.cpp">
       <Filter>Source Files\video_src\WndControl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\toolbar.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,12 +79,6 @@
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Source Files\video_src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\WndControl\TabLayout.h">
-      <Filter>Source Files\video_src\WndControl</Filter>
-    </ClInclude>
-    <ClInclude Include="src\WndControl\ButtonList.h">
-      <Filter>Source Files\video_src\WndControl</Filter>
     </ClInclude>
     <ClInclude Include="src\VideoPlayer\VideoPlayerInerface.h">
       <Filter>Source Files\video_src\VideoPlayer</Filter>
@@ -137,7 +122,7 @@
     <ClInclude Include="src\WndControl\SeekBar.h">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClInclude>
-    <ClInclude Include="src\WndControl\Seekbar_old.h">
+    <ClInclude Include="src\WndControl\ButtonList.h">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClInclude>
   </ItemGroup>

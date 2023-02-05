@@ -37,6 +37,8 @@ WODApplication::WODApplication()
 	_db = new WODBase();
 }
 
+#include "../WndControl/ButtonList.h"
+
 CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 	if(lstrcmp(pstrClass, L"seekbar")==0) {
 		return SeekBar::CreateControl();
@@ -49,10 +51,6 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 	}
 	if(*pstrClass=='_') {
 		pstrClass++;
-		if(*pstrClass=='t') {
-			//LogIs(L"CreateControl::%s %d", pstrClass, *pstrClass=='_');
-			return &_toolbar;
-		}
 		if(*pstrClass=='s') {
 			//LogIs(L"CreateControl::%s %d", pstrClass, *pstrClass=='_');
 			if(_mainPlayer._seekbar.GetParent()==NULL)
@@ -90,15 +88,11 @@ void WODApplication::InitWindow()
 	//    menu->GetText().Format(L"文件(&F)", i);
 	//    menuBar->Add(menu);
 	//}
-	//_toolbar.Init();
-	//_toolbar.Init();
-	//_mainPlayer._seekbar.Init();
 
 	seekbar = static_cast<SeekBar*>(m_pm.FindControl(_T("seekbar")));
 	if(seekbar)
 		seekbar->_callback = (SeekBarTrackCallback)seekchange;
 
-	//LogIs(L"InitWindow::%ld %ld", _toolbar.GetHWND(), _mainPlayer._seekbar.GetHWND());
 	if(0) 
 	{
 		LogIs("WODPlayer::init");
@@ -261,7 +255,7 @@ void WODApplication::ToggleFullScreen()
 				, 0, 0, 100, 100,
 				m_hWnd, NULL, NULL, this);
 		}
-		SetParent(_toolbar.GetHWND(), _hFullScreenBtmbar);
+		//SetParent(_toolbar.GetHWND(), _hFullScreenBtmbar);
 		SetParent(_mainPlayer._seekbar.GetHWND(), _hFullScreenBtmbar);
 
 		if (_mainPlayer._mMediaPlayer) _mainPlayer._mMediaPlayer->SetFullScreen(true);
@@ -278,7 +272,7 @@ void WODApplication::ToggleFullScreen()
 	}
 	else
 	{
-		SetParent(_toolbar.GetHWND(), m_hWnd);
+		//SetParent(_toolbar.GetHWND(), m_hWnd);
 		SetParent(_mainPlayer._seekbar.GetHWND(), m_hWnd);
 		ShowWindow(_hFullScreenBtmbar, SW_HIDE);
 		if (_mainPlayer._mMediaPlayer) _mainPlayer._mMediaPlayer->SetFullScreen(false);
@@ -300,11 +294,11 @@ bool WODApplication::IsFullScreen()
 
 void WODApplication::MarkPlaying(bool playing)
 {
-	_toolbar.ReplaceIcon(0, playing?IDI_PAUSE:IDI_PLAY);
-	RECT rc;
-	GetClientRect(_toolbar.GetHWND(), &rc);
-	rc.right = rc.bottom;
-	InvalidateRect(_toolbar.GetHWND(), &rc, TRUE);
+	//_toolbar.ReplaceIcon(0, playing?IDI_PAUSE:IDI_PLAY);
+	//RECT rc;
+	//GetClientRect(_toolbar.GetHWND(), &rc);
+	//rc.right = rc.bottom;
+	//InvalidateRect(_toolbar.GetHWND(), &rc, TRUE);
 
 	if(playing)
 		::SetTimer(m_hWnd, 1, 100, NULL);

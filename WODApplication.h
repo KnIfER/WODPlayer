@@ -65,7 +65,7 @@ public:
 
     WODPlayer _mainPlayer;
 	//TabLayout _tabLayout;
-	ButtonList _toolbar;
+	//ButtonList _toolbar;
 	int _barsHeight=10;
 	HWND _hFullScreenBtmbar;
     WODBase* _db;

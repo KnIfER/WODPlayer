@@ -16,6 +16,7 @@
 */
 #include "pch.h"
 #include "../resource.h"
+#include "ButtonList.h"
 
 extern VOID TOOLBAR_Register (void);
 

@@ -55,28 +55,28 @@ void hookLButtonDown(MSG & msg)
 		SetFocus(XPP->GetHWND());
 		return;
 	}
-	if (msg.hwnd==XPP->_toolbar.GetHWND())
-	{
-		if (GET_X_LPARAM(msg.lParam)>XPP->_toolbar.GetHeight()*5)
-		{
-			ReleaseCapture();
-			::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
-		}
-		return;
-	}
+	//if (msg.hwnd==XPP->_toolbar.GetHWND())
+	//{
+	//	if (GET_X_LPARAM(msg.lParam)>XPP->_toolbar.GetHeight()*5)
+	//	{
+	//		ReleaseCapture();
+	//		::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+	//	}
+	//	return;
+	//}
 }
 
 void hookLButtonDoubleClick(MSG & msg)
 {
 	//LogIs("hookLButtonDoubleClick");
-	if (msg.hwnd==XPP->_toolbar.GetHWND())
-	{
-		if (GET_X_LPARAM(msg.lParam)>XPP->_toolbar.GetHeight()*5)
-		{
-			XPP->_mainPlayer.Toggle();
-		}
-		return;
-	}
+	//if (msg.hwnd==XPP->_toolbar.GetHWND())
+	//{
+	//	if (GET_X_LPARAM(msg.lParam)>XPP->_toolbar.GetHeight()*5)
+	//	{
+	//		XPP->_mainPlayer.Toggle();
+	//	}
+	//	return;
+	//}
 	if (XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd))
 	{
 		XPP->_mainPlayer.Toggle();
@@ -86,14 +86,14 @@ void hookLButtonDoubleClick(MSG & msg)
 
 void hookMButtonClick(MSG & msg)
 {
-	if (msg.hwnd==XPP->_toolbar.GetHWND())
-	{
-		if (GET_X_LPARAM(msg.lParam)>XPP->_toolbar.GetHeight()*5)
-		{
-			XPP->ToggleFullScreen();
-		}
-		return;
-	}
+	//if (msg.hwnd==XPP->_toolbar.GetHWND())
+	//{
+	//	if (GET_X_LPARAM(msg.lParam)>XPP->_toolbar.GetHeight()*5)
+	//	{
+	//		XPP->ToggleFullScreen();
+	//	}
+	//	return;
+	//}
 	if (XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd))
 	{
 		XPP->ToggleFullScreen();

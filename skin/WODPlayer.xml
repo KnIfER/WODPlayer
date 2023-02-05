@@ -9,11 +9,11 @@
 	
 	<_v height="0" bkcolor="#FF555500" name="ch0"/>
 	
+			
 	<WinFrame height="-2" name="ch1">
 		<VBox bkcolor="#FF000000"
 			height="-2"
 			>
-			
 			<HBox bkcolor="#FF000000"
 				height="35"
 				>
@@ -21,7 +21,20 @@
 				<_s inset="0,10,0,10" width="100"  bkcolor="#FF000000"
 					barInset="10"/>
 			</HBox>
-			<_t height="50"name="btns"/>
+			
+			<_t height="50" name="btns"/>
+			
+			<HBox bkcolor="#FF000000"
+				height="48"
+				>
+				<Button width="48" height="48" name="btn" bkimage="play.png"/>
+				<Button width="48" height="48" name="btn" bkimage="stop.png"/>
+				<Button width="48" height="48" name="btn" bkimage="prev.png"/>
+				<Button width="48" height="48" name="btn" bkimage="nxt.png"/>
+				<Button width="48" height="48" name="btn" bkimage="folder.png"/>
+			</HBox>
+			
+			<btnlst height="50"/>
 		</VBox>
 	</WinFrame>
 	
