@@ -31,6 +31,8 @@ public:
 
 	void showWindow();
 
+	SIZE EstimateSize(const SIZE & szAvailable) override;
+
 
 	BOOL AddButtons(UINT buttonCount, LPTBBUTTON pButtonInfoArray) ;
 

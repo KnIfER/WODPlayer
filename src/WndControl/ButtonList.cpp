@@ -22,6 +22,18 @@ extern VOID TOOLBAR_Register (void);
 //ButtonList::ButtonList()
 //{
 //}
+SIZE ButtonList::EstimateSize(const SIZE& szAvailable)
+{
+	if (_manager && _LastScaleProfile!=_manager->GetDPIObj()->ScaleProfile())
+		OnDPIChanged();
+	if(m_bAutoCalcHeight) {
+		SIZE ret = m_cxyFixScaled;
+		SendWndMessage(TB_GETIDEALSIZE, 1, (LPARAM)&ret);
+		return ret;
+	}
+	//return __super::EstimateSize(szAvailable);
+	return m_cxyFixScaled;
+}
 
 void ButtonList::Init()
 {
@@ -34,7 +46,7 @@ void ButtonList::Init()
 			| WS_CLIPCHILDREN | WS_CLIPSIBLINGS 
 			| TBSTYLE_TOOLTIPS 
 			| TBSTYLE_FLAT 
-			//| CCS_NODIVIDER | CCS_NORESIZE | CCS_NOPARENTALIGN
+			| CCS_NODIVIDER | CCS_NORESIZE | CCS_NOPARENTALIGN
 			| CCS_BOTTOM
 			| CCS_NODIVIDER
 			;
