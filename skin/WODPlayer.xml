@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Window caption="0,0,0,30"  inset="0,0,0,0" roundcorner="5,5,5,5"  inset="10,10,10,10" sizebox="4,4,4,4" showdirty="false" layered="false">
  
+
+	<style>
+		 <Button
+			id="btn_style"
+			apply="true"
+			shared="true"
+			hotbkcolor="#2e008CFF" 
+			pushedbkcolor="#34008CFF" 
+			hotbordercolor="#34008CFF" 
+			pushedbordercolor="#67008CFF" 
+			bordersize="1"
+		 />
+	</style>
+ 
+ 
 <VBox bkcolor="#FFFFFFFF"
 	clipchild="false" 
 	vscrollbar="true"
 	name="top"
 	>
+
 	
 	<_v height="0" bkcolor="#FF555500" name="ch0"/>
 	
@@ -24,20 +40,19 @@
 			
 			<_t height="50" name="btns"/>
 			
-			<HBox bkcolor="#FF000000"
-				height="48"
+			<HBox  height="48"
 				>
-				<Button width="48" height="48" name="btn" bkimage="play.png"/>
-				<Button width="48" height="48" name="btn" bkimage="stop.png"/>
-				<Button width="48" height="48" name="btn" bkimage="prev.png"/>
-				<Button width="48" height="48" name="btn" bkimage="nxt.png"/>
-				<Button width="48" height="48" name="btn" bkimage="folder.png"/>
+				<Button width="48" name="btn" foreimage="play.png" />
+				<Button width="48" name="btn" foreimage="stop.png"/>
+				<Button width="48" name="btn" foreimage="prev.png"/>
+				<Button width="48" name="btn" foreimage="nxt.png"/>
+				<Button width="48" name="btn" foreimage="folder.png"/>
 			</HBox>
 			
-			<btnlst height="50"/>
+			<!--btnlst height="-2"/-->
 		</VBox>
 	</WinFrame>
-	
+
 </VBox>
 
 
