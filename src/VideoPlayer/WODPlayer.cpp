@@ -8,6 +8,7 @@ extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, int type);
 
 WODPlayer::WODPlayer() {
 	_timeMarked = -1;
+	_handleMsg = true;
 }
 
 void WODPlayer::newVideoView()
@@ -87,8 +88,24 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 			1*(rc.right - rc.left), 
 			rc.bottom-rc.top, 
 			SWP_SHOWWINDOW);
+		//LogIs(2, "youre   %ld", GetHWND());
 	}
 
+	//::SendMessage(GetHWND(), MM_PREPARED, 0, 0);
+}
+
+bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& ret)
+{
+	switch (uMsg)
+	{
+		case MM_PREPARED:
+		{
+			//LogIs(2, "MPM_PREPARED %d\n", wParam);
+			_seekbar.SetMax(wParam);
+			MarkPlaying(true);
+		} return 1;
+	}
+	return 0;
 }
 
 bool WODPlayer::IsMediaPlayerWindow(HWND hwnd)

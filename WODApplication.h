@@ -66,6 +66,7 @@ public:
     WODPlayer _mainPlayer;
 	//TabLayout _tabLayout;
 	//ButtonList _toolbar;
+    CControlUI* _playBtn;
 	int _barsHeight=10;
 	HWND _hFullScreenBtmbar;
     WODBase* _db;

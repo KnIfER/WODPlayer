@@ -75,6 +75,7 @@ void seekchange(SeekBar* bar, int pos) {
 void WODApplication::InitWindow()
 {
 	m_pm._bIsLayoutOnly = true;
+	_playBtn = m_pm.FindControl(_T("play"));
 	//ListView* pList = static_cast<ListView*>(m_pm.FindControl(_T("btn")));
 	//LogIs(L"WODApplication::InitWindow %s", (LPCWSTR)m_pm.FindControl(L"btn")->GetText());
 
@@ -131,6 +132,8 @@ void WODApplication::InitWindow()
 	//CHAR fullpath[_MAX_PATH*2];
 	//WideCharToMultiByte(CP_ACP, 0, test, -1, fullpath, _MAX_PATH*2, 0, 0);
 	//LogIs(2, fullpath);
+
+	//::SendMessage(m_hWnd, MM_PREPARED, 0, 0);
 
 	//tg
 }
@@ -294,7 +297,7 @@ bool WODApplication::IsFullScreen()
 
 void WODApplication::MarkPlaying(bool playing)
 {
-	//_toolbar.ReplaceIcon(0, playing?IDI_PAUSE:IDI_PLAY);
+	_playBtn->SetForeImage(playing?L"pause.png":L"play.png");
 	//RECT rc;
 	//GetClientRect(_toolbar.GetHWND(), &rc);
 	//rc.right = rc.bottom;
@@ -626,16 +629,6 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 	}
 	break;
-	case MM_PREPARED:
-	{
-		LogIs("MPM_PREPARED %d\n", wParam);
-		if (m_hWnd==m_hWnd)
-		{
-			_mainPlayer._seekbar.SetMax(wParam);
-		}
-		MarkPlaying(true);
-		break;
-	}
 	case WM_NOTIFY:
 	{
 		switch (((NMHDR FAR *) lParam)->code) 

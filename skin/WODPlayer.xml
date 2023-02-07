@@ -42,11 +42,11 @@
 			
 			<HBox  height="48"
 				>
-				<Button width="48" name="btn" foreimage="play.png" />
-				<Button width="48" name="btn" foreimage="stop.png"/>
-				<Button width="48" name="btn" foreimage="prev.png"/>
-				<Button width="48" name="btn" foreimage="nxt.png"/>
-				<Button width="48" name="btn" foreimage="folder.png"/>
+				<Button width="48" name="play" foreimage="play.png" />
+				<Button width="48" name="stop" foreimage="stop.png"/>
+				<Button width="48" name="prev" foreimage="prev.png"/>
+				<Button width="48" name="nxt" foreimage="nxt.png"/>
+				<Button width="48" name="folder" foreimage="folder.png"/>
 			</HBox>
 			
 			<!--btnlst height="-2"/-->
