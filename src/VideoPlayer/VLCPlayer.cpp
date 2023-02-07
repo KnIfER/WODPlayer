@@ -161,7 +161,9 @@ VLCPlayer::VLCPlayer(int & error_code, HINSTANCE hInstance, HWND hParent)
         const char** args = new const char*[] {
             "-I", "dummy", "--ignore-config",
                 // "--plugin-path=D:\plugins",
-                "--vout-filter=deinterlace", "--deinterlace-mode=blend"
+                "--vout-filter=deinterlace"
+                , "--deinterlace-mode=blend"
+                , "--input-repeat=2"
         };
 
         m_vlcInstance = libvlc_new(0, 0);
