@@ -2,22 +2,27 @@
 // Microsoft Visual C++ generated include file.
 // Used by WOD.rc
 //
-#define IDM_TOP                         101
-#define IDI_UP                          101
-#define IDB_TOOLBAR                     102
-#define IDM_START                       102
-#define IDR_MENU1                       103
-#define IDR_MENU_MAIN                   103
-#define IDM_STOP                        103
-#define IDI_PLAY                        104
-#define IDM_PREV                        104
-#define IDM_NXT                         105
-#define IDI_FOLDER                      106
-#define IDM_OPEN                        106
+//#define IDM_TOP                         101
+//#define IDI_UP                          101
+//#define IDB_TOOLBAR                     102
+//#define IDM_START                       102
+//#define IDR_MENU1                       103
+//#define IDR_MENU_MAIN                   103
+
+#define IDM_PLAY                        101
+#define IDM_STOP                        102
+#define IDM_PREV                        103
+#define IDM_NXT                         104
+#define IDM_OPEN                        105
+
+#define IDM_FOLDER                      106
 #define IDI_NXT                         107
 #define IDM_PAUSE                       107
 #define IDI_PREV                        108
 #define IDI_STOP                        109
+#define IDI_PLAY                        IDM_PLAY
+#define IDI_FOLDER                      IDM_OPEN
+#define IDM_START                       IDM_PLAY
 #define IDI_ICON1                       111
 #define IDI_PAUSE                       111
 #define ID_FILE_OPEN                    40001

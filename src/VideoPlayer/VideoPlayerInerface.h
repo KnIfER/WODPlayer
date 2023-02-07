@@ -17,6 +17,7 @@
 #pragma once
 
 #define MM_PREPARED              (WM_USER)
+#define MM_STOPPED               (WM_USER+1)
 
 #include "../WndControl/WindowBase.h"
 

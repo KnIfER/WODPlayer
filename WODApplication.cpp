@@ -133,8 +133,6 @@ void WODApplication::InitWindow()
 	//WideCharToMultiByte(CP_ACP, 0, test, -1, fullpath, _MAX_PATH*2, 0, 0);
 	//LogIs(2, fullpath);
 
-	//::SendMessage(m_hWnd, MM_PREPARED, 0, 0);
-
 	//tg
 }
 
@@ -391,7 +389,8 @@ bool WODApplication::PickFile()
 
 	if(ret)
 	{
-		MarkPlaying(_mainPlayer.PlayVideoFile(filepath));
+		_mainPlayer.PlayVideoFile(filepath);
+		//MarkPlaying(_mainPlayer.PlayVideoFile(filepath));
 	}
 	return false;
 }
@@ -612,7 +611,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	{
 		switch (wParam)
 		{
-		case IDM_START:
+		case IDM_PLAY:
 			_mainPlayer.Toggle();
 			break;
 		case IDM_STOP:

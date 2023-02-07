@@ -65,9 +65,6 @@
     <Image Include="res\prev.ico" />
     <Image Include="res\stop.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="src\readme.md" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

@@ -40,15 +40,13 @@
 			
 			<_t height="50" name="btns"/>
 			
-			<HBox  height="48"
-				>
-				<Button width="48" name="play" foreimage="play.png" />
-				<Button width="48" name="stop" foreimage="stop.png"/>
-				<Button width="48" name="prev" foreimage="prev.png"/>
-				<Button width="48" name="nxt" foreimage="nxt.png"/>
-				<Button width="48" name="folder" foreimage="folder.png"/>
+			<HBox  height="48">
+				<Button width="48" name="play" id="101" foreimage="play.png" />
+				<Button width="48" name="stop" id="102"  foreimage="stop.png"/>
+				<Button width="48" name="prev" id="103"  foreimage="prev.png"/>
+				<Button width="48" name="nxt" id="104" foreimage="nxt.png"/>
+				<Button width="48" name="folder" id="105" foreimage="folder.png"/>
 			</HBox>
-			
 			<!--btnlst height="-2"/-->
 		</VBox>
 	</WinFrame>

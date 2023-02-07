@@ -131,6 +131,11 @@ static void handleEvents(const libvlc_event_t *event, void *userData)
         LogIs("handleEvents::libvlc_MediaPlayerTimeChanged\n");
         PostMessage(player->getHParent(), WM_TIMER, 1, event->u.media_player_time_changed.new_time);
         break;
+    case libvlc_MediaPlayerStopped:
+        PostMessage(player->getHParent(), MM_STOPPED
+            , event->u.media_player_length_changed.new_length, 0);
+        break;
+    case libvlc_MediaPlayerPlaying:
     case libvlc_MediaPlayerLengthChanged:
         LogIs("handleEvents::libvlc_MediaPlayerLengthChanged\n");
         PostMessage(player->getHParent(), MM_PREPARED
@@ -186,6 +191,7 @@ VLCPlayer::VLCPlayer(int & error_code, HINSTANCE hInstance, HWND hParent)
 
             // 事件列表
             libvlc_event_e events[] {
+                libvlc_MediaPlayerStopped,
                 libvlc_MediaPlayerPositionChanged,
                 libvlc_MediaPlayerTimeChanged,
                 libvlc_MediaMetaChanged ,
