@@ -21,7 +21,7 @@ class SeekBar;
 
 typedef void*(*SeekBarTrackCallback)(SeekBar*, int);
 
-class SeekBar : public CContainerUI 
+class SeekBar : public CControlUI 
 {
 	DECLARE_QKCONTROL(SeekBar)
 public:

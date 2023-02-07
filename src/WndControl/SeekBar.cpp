@@ -236,7 +236,7 @@ void SeekBar::DoEvent(TEventUI& event)
 		dragDownLeft = rc.left;
 		dragDownWidth = rc.right - dragDownLeft;
 
-		SetProgress(_max * (dragDownPos-dragDownLeft)*1.0/dragDownWidth, true);
+		SetProgress((dragDownPos-dragDownLeft)*1.0/dragDownWidth * _max, true);
 	}
 	if(_isSeeking) {
 		if(event.Type==UIEVENT_BUTTONUP) {
@@ -245,7 +245,7 @@ void SeekBar::DoEvent(TEventUI& event)
 			Invalidate();
 		}
 		if(event.Type==UIEVENT_MOUSEMOVE) {
-			SetProgress(_max * (event.ptMouse.x-dragDownLeft)*1.0/dragDownWidth, true);
+			SetProgress((event.ptMouse.x-dragDownLeft)*1.0/dragDownWidth * _max, true);
 		}
 	}
 }
