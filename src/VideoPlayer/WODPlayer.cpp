@@ -75,21 +75,36 @@ bool WODPlayer::AddBookmark()
 
 void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 {
-	__super::SetPos(rc, bNeedInvalidate);
 	if(_hPlayer) {
 		//::MoveWindow(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
 		//::SetWindowPos(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
 	
+		if(_mMediaPlayer->_resX && _mMediaPlayer->_resY) 
+		//if(0) 
+		{
+			float width = rc.right - rc.left;
+			float height = rc.bottom-rc.top;
+			float ratio = min(width/_mMediaPlayer->_resX, height/_mMediaPlayer->_resY);
+			int w = _mMediaPlayer->_resX*ratio;
+			int h = _mMediaPlayer->_resY*ratio;
+			::SetWindowPos(_mMediaPlayer->getHWND(), HWND_TOP, 
+				(width-w)/2,  max(0, (height-h)/2), 
+				w,  h, 
+				SWP_SHOWWINDOW);
+		} else {
+			::SetWindowPos(_mMediaPlayer->getHWND(), HWND_TOP, 
+				rc.left, 
+				rc.top, 
+				//1*(rect.right - rect.left), 
+				1*(rc.right - rc.left), 
+				rc.bottom-rc.top, 
+				SWP_SHOWWINDOW);
+		}
 
-		::SetWindowPos(_mMediaPlayer->getHWND(), HWND_TOP, 
-			rc.left, 
-			rc.top, 
-			//1*(rect.right - rect.left), 
-			1*(rc.right - rc.left), 
-			rc.bottom-rc.top, 
-			SWP_SHOWWINDOW);
+		// 
 		//LogIs(2, "youre   %ld", GetHWND());
 	}
+	__super::SetPos(rc, bNeedInvalidate);
 
 	//::SendMessage(GetHWND(), MM_PREPARED, 0, 0);
 }
@@ -142,6 +157,34 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 		case MM_STOPPED:
 		{
 			MarkPlaying(false);
+		} return 1;
+		case WM_PAINT:
+		{
+			//if (WS_EX_LAYERED == (WS_EX_LAYERED & GetWindowLong(hWnd, GWL_EXSTYLE))) break;;
+			//RECT rcClient;
+			//::GetClientRect(GetHWND(), &rcClient);
+
+			PAINTSTRUCT ps = { 0 };
+			HDC hdc = ::BeginPaint(GetHWND(), &ps);
+
+			RECT rect = ps.rcPaint; 
+			//rect.bottom -= 50;
+
+			//rect.right = rect.left+(rect.right-rect.left)/2;
+
+			HBRUSH hbrush = CreateSolidBrush(TransparentKey);
+
+			FillRect(hdc, &rect, hbrush);
+
+			::EndPaint(GetHWND(), &ps);
+
+
+			//PAINTSTRUCT ps = { 0 };
+			//::BeginPaint(GetHWND(), &ps);
+			//CRenderEngine::DrawColor(, ps.rcPaint, 0xFF000000);
+			//::EndPaint(GetHWND(), &ps);
+
+			return 0;
 		} return 1;
 	}
 	return 0;

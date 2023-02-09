@@ -35,6 +35,8 @@ SeekBar* seekbar;
 WODApplication::WODApplication()
 {
 	_db = new WODBase();
+	_frameLess = 1;
+	//_roundwnd = 1;
 }
 
 #include "../WndControl/ButtonList.h"
@@ -74,8 +76,20 @@ void seekchange(SeekBar* bar, int pos) {
 
 void WODApplication::InitWindow()
 {
-	m_pm._bIsLayoutOnly = true;
+	//m_pm._bIsLayoutOnly = true;
 	_playBtn = m_pm.FindControl(_T("play"));
+
+	TransparentKey = RGB(0,1,0);
+
+	m_pm.GetShadow()->ShowShadow(true);
+	m_pm.GetShadow()->SetSize(5);
+	m_pm.GetShadow()->SetSharpness(9);
+	m_pm.GetShadow()->SetPosition(1,1);
+	m_pm.GetShadow()->SetColor(0x55888888);
+
+	SetWindowLong(m_hWnd, GWL_EXSTYLE, GetWindowLong(m_hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+	SetLayeredWindowAttributes(m_hWnd, TransparentKey, 0, LWA_COLORKEY);
+
 	//ListView* pList = static_cast<ListView*>(m_pm.FindControl(_T("btn")));
 	//LogIs(L"WODApplication::InitWindow %s", (LPCWSTR)m_pm.FindControl(L"btn")->GetText());
 
@@ -93,32 +107,6 @@ void WODApplication::InitWindow()
 	seekbar = static_cast<SeekBar*>(m_pm.FindControl(_T("seekbar")));
 	if(seekbar)
 		seekbar->_callback = (SeekBarTrackCallback)seekchange;
-
-	if(0) 
-	{
-		LogIs("WODPlayer::init");
-		//WOD_Register(hInstance);
-
-		m_hWnd = CreateWindowEx(WS_EX_ACCEPTFILES, L"Hello",      // window class name
-			TEXT("The Hello Program"),   // window caption
-			WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX  
-			| WS_MAXIMIZEBOX | WS_SIZEBOX
-			| WS_CLIPCHILDREN 
-			,
-			800,// initial x position
-			250,// initial y position
-			500,// initial x size
-			500,// initial y size
-			NULL,                 // parent window handle
-			NULL,            // window menu handle
-			0,   // program instance handle
-			this);      // creation parameters
-
-		//SetLayeredWindowAttributes(_hWnd, RGB(0,1,0), 0, LWA_COLORKEY);
-
-
-		//	_mainPlayer._seekbar.init(hInstance, _hWnd);
-	}
 
 	_mainPlayer.newVideoView();
 
@@ -167,12 +155,21 @@ void WODApplication::OnFinalMessage( HWND hWnd )
 
 void WODApplication::Notify( TNotifyUI &msg )
 {
+	//if (msg.sType==DUI_MSGTYPE_BUTTONDOWN)
+	//{
+	//	LogIs(2, "12");
+	//	if(msg.pSender->m_bStatic)
+	//	{
+	//		ReleaseCapture();
+	//		::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+	//		SetFocus(XPP->GetHWND());
+	//	}
+	//	//auto bRoot = builder.Create(L"<Window><Button/></Window>", TEXT("str"), 0, &m_pm);
+	//	//ASSERT(bRoot);
+	//}
 	if (msg.sType==L"click")
 	{
-		if(msg.pSender == m_pSearch)
-		{
-		}
-		else if( msg.sType == _T("itemclick") ) 
+		if( msg.sType == _T("itemclick") ) 
 		{
 		}
 		//auto bRoot = builder.Create(L"<Window><Button/></Window>", TEXT("str"), 0, &m_pm);
@@ -382,15 +379,9 @@ bool WODApplication::PickFile()
 
 	BOOL ret = PickFileDlg(m_hWnd, FALSE, TEXT("选择媒体文件"), filters, filepath, MAX_PATH, NULL, 0);
 
-	//if (false)
-	//{
-	//	newVideoView();
-	//}
-
 	if(ret)
 	{
 		_mainPlayer.PlayVideoFile(filepath);
-		//MarkPlaying(_mainPlayer.PlayVideoFile(filepath));
 	}
 	return false;
 }
@@ -411,40 +402,6 @@ TCHAR nxt_file[_MAX_PATH];
 
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-	//if (!running)
-	//{
-	//	return TRUE;
-	//}
-
-	//if(uMsg==WM_NCCREATE)
-	//{
-	//	WODApplication* app = (WODApplication*)((LPCREATESTRUCT)lParam)->lpCreateParams;
-	//	app->m_hWnd = hwnd;
-	//	SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)app);
-	//}
-
-	if(0)
-	if (uMsg==WM_PAINT)
-	{
-		//if (WS_EX_LAYERED == (WS_EX_LAYERED & GetWindowLong(hWnd, GWL_EXSTYLE))) break;;
-		RECT rcClient;
-		::GetClientRect(m_hWnd, &rcClient);
-
-		PAINTSTRUCT ps = { 0 };
-		HDC hdc = ::BeginPaint(m_hWnd, &ps);
-
-		RECT rect = rcClient;  
-
-		//rect.right = rect.left+(rect.right-rect.left)/2;
-
-		HBRUSH hbrush = CreateSolidBrush(RGB(0,1,0));
-
-		FillRect(hdc, &rect, hbrush);
-
-		::EndPaint(m_hWnd, &ps);
-		return 1;
-	}
-
 	switch (uMsg)
 	{
 	case WM_DROPFILES:
@@ -622,7 +579,14 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_OPEN:
 			PickFile();
 			break;
-		default:
+		case IDM_MIN:
+			SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0); 
+			break;
+		case IDM_MAX:
+			SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0); 
+			break;
+		case IDM_CLOSE:
+			Close();
 			break;
 		}
 
