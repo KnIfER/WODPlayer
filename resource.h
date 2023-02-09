@@ -14,6 +14,7 @@
 #define IDM_PREV                        103
 #define IDM_NXT                         104
 #define IDM_OPEN                        105
+#define IDM_FOLDER                      IDM_OPEN
 
 #define IDM_FOLDER                      106
 #define IDI_NXT                         107
@@ -25,6 +26,12 @@
 #define IDM_START                       IDM_PLAY
 #define IDI_ICON1                       111
 #define IDI_PAUSE                       111
+
+
+#define IDM_MIN                      110
+#define IDM_MAX                      111
+#define IDM_CLOSE                    112
+
 #define ID_FILE_OPEN                    40001
 #define ID_40002                        40002
 

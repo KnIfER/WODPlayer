@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Window caption="0,0,0,30"  inset="0,0,0,0" roundcorner="5,5,5,5"  inset="10,10,10,10" sizebox="4,4,4,4" showdirty="false" layered="false">
- 
+<Window caption="0,0,0,30" sizebox="4,4,6,6" inset="0,0,0,0" 
+
+inset="10,10,10,10" sizebox="8,8,8,8" showdirty="false" 
+layered="false"
+showshadow="true"
+>
+ <Font id="0" name="宋体" size="13" bold="false"/>
+ <Font id="1" name="宋体" size="12"/>
+ <Font id="2" name="宋体" size="30"/>
+ <Font id="edit" name="宋体" size="22"/>
+ <Font id="menu" name="Microsoft YaHei" size="18" shared="true"/>
+ <Font id="menu1" name="Microsoft YaHei" size="19" shared="true"/>
 
 	<style>
 		 <Button
@@ -13,43 +23,68 @@
 			pushedbordercolor="#67008CFF" 
 			bordersize="1"
 		 />
+		 <Default
+			id="btn_wnd"
+			apply="false"
+			shared="true"
+			pushedbkcolor="#8effffff" 
+			hotbkcolor="#34ffffff" 
+			bordersize="1"
+			textcolor="#FFffffff" 
+			width="55"
+			font="menu"
+		 />
 	</style>
  
  
-<VBox bkcolor="#FFFFFFFF"
+<VBox bkcolor="#FF0078d7"
 	clipchild="false" 
 	vscrollbar="true"
 	name="top"
+	inset="2,2,2,2"
 	>
+	
+	<HBox  bkcolor="#FF0078d7" height="35" >
+		<HBox minWidth="45">
+			<Button style="btn_wnd" width="34" bkimage="file='ic_launcher.png' size='24,24' align='center' " tooltip="无限播放器 WODPlayer"/>
+			<Button style="btn_wnd" id="110" text="文件"/>
+			<Button style="btn_wnd" id="110" text="书签" />
+		</HBox>
+		<!--Control static="true"/-->
+		<Button style="btn_wnd" id="110" text="—" />
+		<Button style="btn_wnd" id="111" text="☐" font="menu1"/>
+		<Button style="btn_wnd" id="112" text="X" inset="0,1,0,0" />
+	</HBox>
 
 	
-	<_v height="0" bkcolor="#FF555500" name="ch0"/>
+	<_v height="0" name="ch0"/>
 	
 			
 	<WinFrame height="-2" name="ch1">
-		<VBox bkcolor="#FF000000"
+		<VBox bkcolor="#FF555555"
 			height="-2"
 			>
-			<HBox bkcolor="#FF000000"
+			<HBox
 				height="35"
 				>
 				<_s inset="0,10,0,10" minwidth="100" width="0" name="seekbar" barInset="10"/>
-				<_s inset="0,10,0,10" width="100"  bkcolor="#FF000000"
-					barInset="10"/>
+				<_s inset="0,10,0,10" width="100"  barInset="10"/>
 			</HBox>
 			
 			<_t height="50" name="btns"/>
 			
-			<HBox  height="48">
+			<HBox  height="48"  static="true">
 				<Button width="48" name="play" id="101" foreimage="play.png" />
 				<Button width="48" name="stop" id="102"  foreimage="stop.png"/>
 				<Button width="48" name="prev" id="103"  foreimage="prev.png"/>
 				<Button width="48" name="nxt" id="104" foreimage="nxt.png"/>
 				<Button width="48" name="folder" id="105" foreimage="folder.png"/>
+				<!--Control static="true" bkcolor="#FF050555"/-->
 			</HBox>
 			<!--btnlst height="-2"/-->
 		</VBox>
 	</WinFrame>
+
 
 </VBox>
 
