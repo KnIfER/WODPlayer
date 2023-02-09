@@ -18,6 +18,7 @@
 #include "../resource.h"
 #include "database\database_helper.h"
 #include "virtual_keys.h"
+#include "WODMenus.h"
 
 
 struct DemoData
@@ -76,6 +77,23 @@ void seekchange(SeekBar* bar, int pos) {
 
 void WODApplication::InitWindow()
 {
+	initWodMenus(this);
+	CHorizontalLayoutUI* menuBar = static_cast<CHorizontalLayoutUI*>(m_pm.FindControl(_T("menuBar")));
+	if(menuBar) {
+		menuBar->RemoveAll();
+		for (size_t i = 0; i < Menus->size(); i++)
+		{
+			//auto menu = builder.Create(L"menu_item.xml", 0, 0, &m_pm);
+			////menu->SetFixedWidth(-1);
+			//menu->GetText().Format(L"Menu#%d", i);
+			//menuBar->Add(menu);
+			auto menu = new Button();
+			menu->SetText(Menus->at(i).name);
+			menuBar->Add(menu);
+			menu->SetAttribute(L"style", L"btn_wnd");
+		}
+	}
+
 	//m_pm._bIsLayoutOnly = true;
 	_playBtn = m_pm.FindControl(_T("play"));
 

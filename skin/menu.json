@@ -1,0 +1,13 @@
+{
+	{n:"文件", id:"file", ch:[
+		{n:"打开", id:"open", ch:[
+		
+		]}
+		, {n:"文件", id:"file", ch:[
+			
+		]}
+	]}
+	, {n:"书签", id:"bkmk", cmd:""}
+	, {n:"插件", id:"plugin", cmd:""}
+	
+}

@@ -45,8 +45,8 @@ showshadow="true"
 	>
 	
 	<HBox  bkcolor="#FF0078d7" height="35" >
-		<HBox minWidth="45">
-			<Button style="btn_wnd" width="34" bkimage="file='ic_launcher.png' size='24,24' align='center' " tooltip="无限播放器 WODPlayer"/>
+		<Button static="true" style="btn_wnd" width="34" bkimage="file='ic_launcher.png' size='24,24' align='center' " tooltip="无限播放器 WODPlayer"/>
+		<HBox minWidth="45" name="menuBar">
 			<Button style="btn_wnd" id="110" text="文件"/>
 			<Button style="btn_wnd" id="110" text="书签" />
 		</HBox>
