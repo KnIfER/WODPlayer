@@ -50,6 +50,7 @@ public:
 //private:
     bool _isPlaying;
     HWND _hPlayer;
+    RECT _exRect;
     WODApplication* _app;
     std::vector<BookMark> _bookmarks;
     __int64 _timeMarked;

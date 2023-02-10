@@ -87,11 +87,17 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 			float ratio = min(width/_mMediaPlayer->_resX, height/_mMediaPlayer->_resY);
 			int w = _mMediaPlayer->_resX*ratio;
 			int h = _mMediaPlayer->_resY*ratio;
+			_exRect.left = (width-w)/2;
+			_exRect.top = max(0, (height-h)/2);
+			_exRect.right = _exRect.left+w;
+			_exRect.bottom = _exRect.top+h;
 			::SetWindowPos(_mMediaPlayer->getHWND(), HWND_TOP, 
-				(width-w)/2,  max(0, (height-h)/2), 
+				_exRect.left,  _exRect.top, 
 				w,  h, 
 				SWP_SHOWWINDOW);
-		} else {
+		} 
+		else 
+		{
 			::SetWindowPos(_mMediaPlayer->getHWND(), HWND_TOP, 
 				rc.left, 
 				rc.top, 
@@ -167,6 +173,11 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 			PAINTSTRUCT ps = { 0 };
 			HDC hdc = ::BeginPaint(GetHWND(), &ps);
 
+			//::GetClientRect(_hPlayer, &_exRect);
+			::ExcludeClipRect(hdc, _exRect.left, _exRect.top, _exRect.right, _exRect.bottom);
+			//::ExcludeClipRect(hdc, 0, 0, 100, 100);
+
+
 			RECT rect = ps.rcPaint; 
 			//rect.bottom -= 50;
 
@@ -175,6 +186,8 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 			HBRUSH hbrush = CreateSolidBrush(TransparentKey);
 
 			FillRect(hdc, &rect, hbrush);
+
+
 
 			::EndPaint(GetHWND(), &ps);
 
