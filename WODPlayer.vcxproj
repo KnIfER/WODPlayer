@@ -29,6 +29,7 @@
     <ClCompile Include="src\VideoPlayer\VLCPlayer.cpp" />
     <ClCompile Include="src\VideoPlayer\WODPlayer.cpp" />
     <ClCompile Include="src\WndControl\ButtonList.cpp" />
+    <ClCompile Include="src\WndControl\PopupMenu.cpp" />
     <ClCompile Include="src\WndControl\SeekBar.cpp" />
     <ClCompile Include="WODMain.cpp" />
     <ClCompile Include="WODApplication.cpp" />
@@ -47,6 +48,7 @@
     <ClInclude Include="src\VideoPlayer\VLCPlayer.h" />
     <ClInclude Include="src\VideoPlayer\WODPlayer.h" />
     <ClInclude Include="src\WndControl\ButtonList.h" />
+    <ClInclude Include="src\WndControl\PopupMenu.h" />
     <ClInclude Include="src\WndControl\SeekBar.h" />
     <ClInclude Include="src\WndControl\virtual_keys.h" />
     <ClInclude Include="WODApplication.h" />
@@ -156,6 +158,7 @@
       <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;$(direct_includes);./richedit20;$(VLC_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

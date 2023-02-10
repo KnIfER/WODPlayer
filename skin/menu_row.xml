@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window caption="0,0,0,30" roundcorner="5,5,5,5" showdirty="false">
+ 	
+	<Button 
+		type="o"
+		bkcolor="#ffffFFFF" 
+		hotbkcolor="#ff0096c9" 
+		hottextcolor="#ffffffff" 
+		inset="10,0"
+		vscrollbar="true" 
+		hscrollbar="true"
+		hscrollbar="false"
+		menu="true"
+		autocalcwidth="true"
+		autocalcheight="true"
+		multiline="false"
+		align="center"
+		valign="vcenter"
+		font="menu"
+		/>
+</Window>

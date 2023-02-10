@@ -64,9 +64,7 @@ showshadow="true"
 		<VBox bkcolor="#FF555555"
 			height="-2"
 			>
-			<HBox
-				height="35"
-				>
+			<HBox height="35">
 				<_s inset="0,10,0,10" minwidth="100" width="0" name="seekbar" barInset="10"/>
 				<_s inset="0,10,0,10" width="100"  barInset="10"/>
 			</HBox>
