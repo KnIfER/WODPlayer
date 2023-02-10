@@ -53,5 +53,5 @@ public:
     RECT _exRect;
     WODApplication* _app;
     std::vector<BookMark> _bookmarks;
-    __int64 _timeMarked;
+    __int64 _timeMarked; // folder
 };

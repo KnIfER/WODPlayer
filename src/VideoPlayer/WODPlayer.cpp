@@ -68,6 +68,7 @@ bool WODPlayer::AddBookmark()
 		int duration = _mMediaPlayer->GetDuration();
 		//LogIs(2, L"%s", (LPCWSTR)_currentPath);
 		_app->_db->AddBookmark(_currentPath.GetData(threadBuffer), 0, _timeMarked, pos, duration, 0);
+
 		return true;
 	}
 	return false;

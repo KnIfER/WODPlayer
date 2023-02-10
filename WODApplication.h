@@ -33,15 +33,15 @@ public:
         return CS_DBLCLKS; 
     }
 
-
     LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) override;
 
     LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) override;
 
+    //LRESULT OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) override;
+
     void OnFinalMessage(HWND hWnd) override;
 
     //CControlUI* viewTemplate;
-
 
     void InitWindow() override;
 
@@ -52,11 +52,11 @@ public:
 
     void Notify( TNotifyUI &msg ) override;
 
-
     CControlUI* CreateControl(LPCTSTR pstrClass) override;
     
     LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) override;
 
+    void ResetWndOpacity();
 
     void ToggleFullScreen();
     bool IsFullScreen();

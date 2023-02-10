@@ -21,6 +21,7 @@
 
 #include "DuiLib\UIlib.h"
 #include <Duilib/Core/InsituDebug.h>
+#include "Utils/ProfileStd.h"
 
 #include "../WndControl/Seekbar_old.h"
 #include "../WndControl/SeekBar.h"

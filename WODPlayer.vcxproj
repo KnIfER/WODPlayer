@@ -24,6 +24,7 @@
     <ClCompile Include="src\tab.cpp" />
     <ClCompile Include="src\toolbar.cpp" />
     <ClCompile Include="src\Utils\ImageUtils.cpp" />
+    <ClCompile Include="src\Utils\ProfileStd.cpp" />
     <ClCompile Include="src\VideoPlayer\ExternalPlayer.cpp" />
     <ClCompile Include="src\VideoPlayer\VideoPlayerInerface.cpp" />
     <ClCompile Include="src\VideoPlayer\VLCPlayer.cpp" />
@@ -43,6 +44,7 @@
     <ClInclude Include="src\debug.h" />
     <ClInclude Include="src\heap.h" />
     <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\Utils\ProfileStd.h" />
     <ClInclude Include="src\Utils\WindowUtils.h" />
     <ClInclude Include="src\VideoPlayer\ExternalPlayer.h" />
     <ClInclude Include="src\VideoPlayer\VLCPlayer.h" />

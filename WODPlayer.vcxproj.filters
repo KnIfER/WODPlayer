@@ -75,6 +75,9 @@
     <ClCompile Include="src\WndControl\PopupMenu.cpp">
       <Filter>Source Files\video_src\WndControl</Filter>
     </ClCompile>
+    <ClCompile Include="src\Utils\ProfileStd.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WODApplication.h">
@@ -139,6 +142,9 @@
     </ClInclude>
     <ClInclude Include="src\WndControl\PopupMenu.h">
       <Filter>Source Files\video_src\WndControl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\ProfileStd.h">
+      <Filter>Source Files\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

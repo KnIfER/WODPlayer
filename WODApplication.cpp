@@ -77,21 +77,18 @@ void seekchange(SeekBar* bar, int pos) {
 
 void WODApplication::InitWindow()
 {
+	ResetWndOpacity();
 	initWodMenus(this);
 
 	//m_pm._bIsLayoutOnly = true;
 	_playBtn = m_pm.FindControl(_T("play"));
 
-	TransparentKey = RGB(0,1,0);
 
 	m_pm.GetShadow()->ShowShadow(true);
 	m_pm.GetShadow()->SetSize(5);
 	m_pm.GetShadow()->SetSharpness(9);
 	m_pm.GetShadow()->SetPosition(1,1);
 	m_pm.GetShadow()->SetColor(0x55888888);
-
-	SetWindowLong(m_hWnd, GWL_EXSTYLE, GetWindowLong(m_hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
-	SetLayeredWindowAttributes(m_hWnd, TransparentKey, 0, LWA_COLORKEY);
 
 	//ListView* pList = static_cast<ListView*>(m_pm.FindControl(_T("btn")));
 	//LogIs(L"WODApplication::InitWindow %s", (LPCWSTR)m_pm.FindControl(L"btn")->GetText());
@@ -113,6 +110,7 @@ void WODApplication::InitWindow()
 
 	_mainPlayer.newVideoView();
 
+	//_mainPlayer.PlayVideoFile(L"");
 
 	_db->Init();
 
@@ -147,6 +145,11 @@ LRESULT WODApplication::OnDestroy( UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam
 	::PostQuitMessage(wParam);
 	return 0;
 }
+
+//LRESULT WODApplication::OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+//{
+//	return __super::OnCreate(uMsg, wParam, lParam, bHandled);
+//}
 
 void WODApplication::OnFinalMessage( HWND hWnd )
 {
@@ -538,10 +541,10 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//int pos = _mainPlayer._mMediaPlayer->GetPosition();
 		}
 		break;
+		case IDM_BKMK_ADD:
 		case VK_P:
 		{
 			//WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
-
 			_mainPlayer.AddBookmark();
 		}
 		break;
@@ -575,6 +578,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		}
 	case WM_COMMAND:
 	{
+		bHandled = true;
 		switch (wParam)
 		{
 		case IDM_PLAY:
@@ -602,8 +606,30 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 		case IDM_FILE:
 		case IDM_BKMK:
+		case IDM_SKIN:
 			trackWodMenus((CControlUI*)lParam, wParam);
 			break;
+		case IDM_SKIN_NORM:
+		case IDM_SKIN_HOLLOW:
+		case IDM_SKIN_ALPHA_1 :
+		case IDM_SKIN_ALPHA_2 :
+		case IDM_SKIN_ALPHA_3 :
+		case IDM_SKIN_ALPHA_4 :
+		case IDM_SKIN_ALPHA_5 :
+		case IDM_SKIN_ALPHA_6 :
+		case IDM_SKIN_ALPHA_7 :
+		case IDM_SKIN_ALPHA_8 :
+		case IDM_SKIN_ALPHA_9 :
+		case IDM_SKIN_ALPHA_10:
+			PutProfInt("WndOp", wParam==IDM_SKIN_NORM?0
+				:wParam==IDM_SKIN_HOLLOW?1
+				:2);
+			if(wParam>IDM_SKIN_HOLLOW) 
+			{
+				PutProfInt("WndAlpha", 10*(wParam-(IDM_SKIN_HOLLOW)));
+			}
+			ResetWndOpacity();
+			return 1;
 		}
 
 	}
@@ -622,4 +648,30 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	}
 
 	return 0;
+}
+
+void WODApplication::ResetWndOpacity()
+{
+	// 0:normal 1:hollow 2:transparentz
+	int WndOp = GetProfInt("WndOp", 0);
+	if(WndOp==0) 
+	{
+		SetWindowLong(m_hWnd, GWL_EXSTYLE, GetWindowLong(m_hWnd, GWL_EXSTYLE) & ~WS_EX_LAYERED);
+	}
+	else 
+	{
+		SetWindowLong(m_hWnd, GWL_EXSTYLE, GetWindowLong(m_hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+		//int WndOp = GetProfInt("WndOp", 0);
+		TransparentKey = RGB(0,1,0);
+		int alpha = GetProfInt("WndAlpha", 100);
+		if(WndOp==1) 
+		{
+			SetLayeredWindowAttributes(m_hWnd, TransparentKey, 0, LWA_COLORKEY);
+		}
+		else
+		{
+			SetLayeredWindowAttributes(m_hWnd, TransparentKey, ceil(alpha/100.f*255), LWA_ALPHA);
+		}
+	}
+	SetLayeredWindowAttributes(m_hWnd, TransparentKey, 0, LWA_COLORKEY);
 }

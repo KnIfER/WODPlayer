@@ -30,6 +30,20 @@ void initWodMenus(WODApplication * xpp)
             , MenuDefine{L"bkmk_add", L"删除书签", IDM_BKMK_ADD}
         }}
         , MenuDefine{L"plugin", L"插件", IDM_PLUGIN}
+        , MenuDefine{L"skin", L"皮肤", IDM_SKIN, new std::vector<MenuDefine>{
+            MenuDefine{L"skin_norm", L"普通皮肤", IDM_SKIN_NORM}
+            , MenuDefine{L"skin_hollow", L"镂空", IDM_SKIN_HOLLOW}
+            , MenuDefine{L"skin_alpha_10s", L"透明度 100%", IDM_SKIN_ALPHA_10}
+            , MenuDefine{L"skin_alpha_9", L"透明度 90%",    IDM_SKIN_ALPHA_9}
+            , MenuDefine{L"skin_alpha_8", L"透明度 80%",    IDM_SKIN_ALPHA_8}
+            , MenuDefine{L"skin_alpha_7", L"透明度 70%",    IDM_SKIN_ALPHA_7}
+            , MenuDefine{L"skin_alpha_6", L"透明度 60%",    IDM_SKIN_ALPHA_6}
+            , MenuDefine{L"skin_alpha_5", L"透明度 50%",    IDM_SKIN_ALPHA_5}
+            , MenuDefine{L"skin_alpha_4", L"透明度 40%",    IDM_SKIN_ALPHA_4}
+            , MenuDefine{L"skin_alpha_3", L"透明度 30%",    IDM_SKIN_ALPHA_3}
+            , MenuDefine{L"skin_alpha_2", L"透明度 20%",    IDM_SKIN_ALPHA_2}
+            , MenuDefine{L"skin_alpha_1", L"透明度 10%",    IDM_SKIN_ALPHA_1}
+        }}
 	};
 
     CHorizontalLayoutUI* menuBar = static_cast<CHorizontalLayoutUI*>(xpp->m_pm.FindControl(_T("menuBar")));
@@ -149,7 +163,10 @@ class WODMenuAdapter : public MenuPopupAdapter
             auto control = msg.pSender;
             if(msg.sType == _T("click")) 
             {
-                SendMessage(XPP->m_pm.GetPaintWindow(), WM_COMMAND, control->GetID(), (LPARAM)msg.pSender);
+                LRESULT ret = ::SendMessage(XPP->m_pm.GetPaintWindow(), WM_COMMAND, control->GetID(), (LPARAM)msg.pSender);
+                if(ret==1)
+                    ::SetFocus(zindex>0?MenuChain[zindex-1]->GetHWND()
+                        :XPP->GetHWND());
             }
             if(msg.sType == _T("mouseenter"))
             {
