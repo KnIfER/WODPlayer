@@ -45,14 +45,14 @@ void hookMouseMove(MSG & msg)
 
 void hookLButtonDown(MSG & msg)
 {
-	if(XPP->IsFullScreen())
-		return;
+	//if(XPP->IsFullScreen())
+	//	return;
 	LogIs("hookLButtonDown");
-	if (XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd)||msg.hwnd==XPP->GetHWND())
+	if (XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd))
 	{
 		ReleaseCapture();
 		::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
-		SetFocus(XPP->GetHWND());
+		//SetFocus(XPP->GetHWND());
 		return;
 	}
 	//if (msg.hwnd==XPP->_toolbar.GetHWND())
@@ -104,6 +104,9 @@ void hookMButtonClick(MSG & msg)
 
 bool running=true;
 
+TCHAR usrDir[MAX_PATH];
+const TCHAR* configFileName = L"wod.ini";
+
 int APIENTRY 
 wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -121,6 +124,12 @@ wWinMain(_In_ HINSTANCE hInstance,
 
 	CPaintManagerUI::SetInstance(hInstance);
 	CPaintManagerUI::SetResourcePath(CPaintManagerUI::GetInstancePath() + _T("..//skin//"));
+
+	TCHAR usrDir[MAX_PATH];
+	::GetModuleFileName(NULL, usrDir, MAX_PATH);
+	::PathRemoveFileSpec(usrDir);
+	//::PathAppend();
+	loadProf(usrDir, configFileName);
 
 	XPP = new WODApplication();
 	//WODApplication app{};
@@ -174,9 +183,10 @@ wWinMain(_In_ HINSTANCE hInstance,
 		//} catch(...) {
 		//	LogIs(2, "Exception!");
 		//}
-
 	}
 	//delete XPP;
+
+	saveProf(usrDir, configFileName);
 }
 
 

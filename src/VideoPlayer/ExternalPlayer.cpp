@@ -65,7 +65,7 @@ void ExternalPlayer::syncResolution()
 	}
 }
 
-bool ExternalPlayer::PlayVideoFile(TCHAR* path)
+bool ExternalPlayer::PlayVideoFile(const TCHAR* path)
 {
 	LogIs(L"PlayVideoFile host :: path=%s, m_pAPlayer=%ld", path, _player);
 

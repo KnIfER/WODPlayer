@@ -38,7 +38,7 @@ typedef long (__cdecl* VW_GETPOSITION)(LONG_PTR);
 typedef long (__cdecl* VW_GETDURATION)(LONG_PTR);
 typedef void (__cdecl* VW_SETPOSITION)(LONG_PTR, long);
 typedef void (__cdecl* VW_SETFULLSCREEN)(LONG_PTR, bool);
-typedef bool (__cdecl* VW_PLAYVIDEOFILE)(LONG_PTR, TCHAR*);
+typedef bool (__cdecl* VW_PLAYVIDEOFILE)(LONG_PTR, const TCHAR*);
 typedef bool (__cdecl* VW_CLOSE)(LONG_PTR);
 typedef bool (__cdecl* VW_SYNCSIZE)(LONG_PTR, unsigned int*, unsigned int*);
 

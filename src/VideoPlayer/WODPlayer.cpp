@@ -33,7 +33,7 @@ void WODPlayer::Release()
 	}
 }
 
-bool WODPlayer::PlayVideoFile(TCHAR* path)
+bool WODPlayer::PlayVideoFile(const TCHAR* path)
 {
 	bool ret = false;
 	if (!_mMediaPlayer)
@@ -58,6 +58,8 @@ bool WODPlayer::PlayVideoFile(TCHAR* path)
 		}
 		_timeMarked = _app->_db->GetBookMarks(pStr, _bookmarks);
 	}
+	QkString filePath = path;
+	PutProfString("file", filePath.GetData(threadBuffer));
 	return false;
 }
 

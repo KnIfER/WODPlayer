@@ -251,7 +251,7 @@ long VLCPlayer::GetDuration()
     return libvlc_media_player_get_length(VPlayer);
 }
 
-bool VLCPlayer::PlayVideoFile(TCHAR* path)
+bool VLCPlayer::PlayVideoFile(const TCHAR* path)
 {
     if (!VPlayer)
     {

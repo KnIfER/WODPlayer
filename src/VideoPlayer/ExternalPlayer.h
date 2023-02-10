@@ -36,7 +36,7 @@ public:
 	long			GetPosition() override;
 	long			GetDuration() override;
 	void			SetPosition(long pos) override;
-	bool			PlayVideoFile(TCHAR* path) override;
+	bool			PlayVideoFile(const TCHAR* path) override;
 	void			Close() override;
 	void			Release() override;
 	void			syncResolution() override;

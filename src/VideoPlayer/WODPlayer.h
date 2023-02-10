@@ -31,7 +31,7 @@ public:
     void MarkPlaying(bool playing=true);
 
 
-    bool PlayVideoFile(TCHAR* path);
+    bool PlayVideoFile(const TCHAR* path);
     bool AddBookmark();
 
     void newVideoView();

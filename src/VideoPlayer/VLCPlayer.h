@@ -32,7 +32,7 @@ public:
 	long			GetPosition() override;
 	void			SetPosition(long pos) override;
 	long			GetDuration() override;
-	bool			PlayVideoFile(TCHAR* path) override;
+	bool			PlayVideoFile(const TCHAR* path) override;
 	void			SetFullScreen(bool val) override;
 	void			takeSnapShot(const char *psz_filepath);
 	void			syncResolution() override;

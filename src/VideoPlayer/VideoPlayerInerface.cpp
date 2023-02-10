@@ -31,7 +31,7 @@ VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, int type)
 	int error_code=-1;
 	VideoPlayer* ret;
 	type = 1;
-	type = 0;
+	//type = 0;
 	if (type==0)
 	{
 		ret = new ExternalPlayer(error_code, CPaintManagerUI::GetInstance(), xpp->GetHWND()
