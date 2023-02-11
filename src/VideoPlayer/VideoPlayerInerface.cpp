@@ -19,7 +19,7 @@
 
 #include "ExternalPlayer.h"
 
-#include "VLCPlayer.h"
+//#include "VLCPlayer.h"
 //#include "MFPlayer2.h"
 
 
@@ -42,11 +42,12 @@ VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, int type)
 		}
 		delete ret;
 	}
-	/*vlc 播放器不支持硬件加速
-	 	   启用此需要 vlc sdk，并设置相关路径于 VLCPaths.props，记得将相关源码(VLCPlayer.cpp)拖入项目。*/
+
+	// vlc
 	if (type==1)
 	{
-		ret = new VLCPlayer(error_code, CPaintManagerUI::GetInstance(), xpp->GetHWND());
+		ret = new ExternalPlayer(error_code, CPaintManagerUI::GetInstance(), xpp->GetHWND()
+			, L"D:\\Code\\FigureOut\\Textrument\\plugins\\DirectUILib\\WODPlayer\\bin\\plugins\\VLCExternalPlayer.dll");
 		if (SUCCEED)
 		{
 			return ret;

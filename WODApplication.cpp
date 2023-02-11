@@ -656,8 +656,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 void WODApplication::ResetWndOpacity()
 {
 	// 0:normal 1:hollow 2:transparentz
-	int WndOp = GetProfInt("WndOp", 0);
-	if(WndOp==0) 
+	_WndOp = GetProfInt("WndOp", 0);
+	if(_WndOp==0) 
 	{
 		SetWindowLong(m_hWnd, GWL_EXSTYLE, GetWindowLong(m_hWnd, GWL_EXSTYLE) & ~WS_EX_LAYERED);
 	}
@@ -667,7 +667,7 @@ void WODApplication::ResetWndOpacity()
 		//int WndOp = GetProfInt("WndOp", 0);
 		TransparentKey = RGB(0,1,0);
 		int alpha = GetProfInt("WndAlpha", 100);
-		if(WndOp==1) 
+		if(_WndOp==1) 
 		{
 			SetLayeredWindowAttributes(m_hWnd, TransparentKey, 0, LWA_COLORKEY);
 		}
@@ -676,5 +676,4 @@ void WODApplication::ResetWndOpacity()
 			SetLayeredWindowAttributes(m_hWnd, TransparentKey, ceil(alpha/100.f*255), LWA_ALPHA);
 		}
 	}
-	SetLayeredWindowAttributes(m_hWnd, TransparentKey, 0, LWA_COLORKEY);
 }

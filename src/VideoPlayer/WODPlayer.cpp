@@ -81,7 +81,7 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 	if(_hPlayer) {
 		//::MoveWindow(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
 		//::SetWindowPos(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
-	
+
 		if(_mMediaPlayer->_resX && _mMediaPlayer->_resY) 
 		//if(0) 
 		{
@@ -162,6 +162,10 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 			//LogIs(2, "MPM_PREPARED %d\n", wParam);
 			_seekbar.SetMax(wParam);
 			MarkPlaying(true);
+			//if(_app->_WndOp==1)
+			{
+				SetPos(GetPos());
+			}
 		} return 1;
 		case MM_STOPPED:
 		{
@@ -176,10 +180,12 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 			PAINTSTRUCT ps = { 0 };
 			HDC hdc = ::BeginPaint(GetHWND(), &ps);
 
+			HBRUSH hbrush1 = CreateSolidBrush(~TransparentKey);
+			FillRect(hdc, &_exRect, hbrush1);
+
 			//::GetClientRect(_hPlayer, &_exRect);
 			::ExcludeClipRect(hdc, _exRect.left, _exRect.top, _exRect.right, _exRect.bottom);
 			//::ExcludeClipRect(hdc, 0, 0, 100, 100);
-
 
 			RECT rect = ps.rcPaint; 
 			//rect.bottom -= 50;
@@ -199,6 +205,8 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 			//::BeginPaint(GetHWND(), &ps);
 			//CRenderEngine::DrawColor(, ps.rcPaint, 0xFF000000);
 			//::EndPaint(GetHWND(), &ps);
+
+			// todo clean up
 
 			return 0;
 		} return 1;

@@ -42,9 +42,6 @@
     <ClCompile Include="src\comctl32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VideoPlayer\VLCPlayer.cpp">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
-    </ClCompile>
     <ClCompile Include="src\database\database_helper.cpp">
       <Filter>Source Files\database</Filter>
     </ClCompile>
@@ -100,9 +97,6 @@
     </ClInclude>
     <ClInclude Include="src\heap.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\VideoPlayer\VLCPlayer.h">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
     </ClInclude>
     <ClInclude Include="src\WndControl\virtual_keys.h">
       <Filter>Source Files\video_src\WndControl</Filter>

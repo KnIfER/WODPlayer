@@ -21,10 +21,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 #include "VLCPlayer.h"
-#include "Resource.h"
+//#include "Resource.h"
 
-#include "VideoPlayerInerface.h"
-#include "DuiLib\Core\InsituDebug.h"
+//#include "VideoPlayerInerface.h"
+#include "InsituDebug.h"
 
 //#include "DuiLib/UIlib.h"
 //#define STB_IMAGE_IMPLEMENTATION
@@ -33,10 +33,12 @@
 typedef unsigned int ssize_t;
 #include "vlc/vlc.h"
 
+#define MM_PREPARED              (WM_USER)
+#define MM_STOPPED               (WM_USER+1)
+
 libvlc_instance_t *m_vlcInstance = NULL;
 #define VPlayer (libvlc_media_player_t*)mMediaPlayer
 
-extern HBRUSH bgBrush;
 #define kClassWindow L"VideoFrame1"
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -68,7 +70,7 @@ BOOL regWndClassWin(LPCTSTR lpcsClassName, DWORD dwStyle)
     wndclass.hInstance = ::GetModuleHandle(NULL);
     wndclass.hIcon = NULL;
     wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wndclass.hbrBackground = bgBrush;
+    wndclass.hbrBackground = CreateSolidBrush (RGB(29,29,29));
     wndclass.lpszMenuName = NULL;
     wndclass.lpszClassName = lpcsClassName;
 
@@ -152,10 +154,10 @@ static void handleEvents(const libvlc_event_t *event, void *userData)
 }
 
 
-VLCPlayer::VLCPlayer(int & error_code, HINSTANCE hInstance, HWND hParent)
+VLCPlayer::VLCPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND hParent)
 {
     error_code=1;
-    WindowBase::init(hInstance, hParent);
+    init(hPlugin, hParent);
     if (m_vlcInstance==NULL)
     {
         const char** args = new const char*[] {
@@ -345,8 +347,8 @@ void VLCPlayer::takeSnapShot(const char* psz_filepath) {
     libvlc_video_take_snapshot(VPlayer, 0, psz_filepath, 0, 0);
 }
 
-void VLCPlayer::syncResolution() {
-    libvlc_video_get_size(VPlayer, 0, &_resX, &_resY);
+void VLCPlayer::SynSize(unsigned int * x, unsigned int * y) {
+    libvlc_video_get_size(VPlayer, 0, x, y);
 }
 
 void copyimage_1(const char* psz_filepath)

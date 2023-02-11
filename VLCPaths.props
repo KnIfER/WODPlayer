@@ -14,6 +14,9 @@
     <ClCompile>
       <AdditionalIncludeDirectories>$(VLC_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(VLC_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="VLC_PATH">

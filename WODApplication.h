@@ -75,4 +75,6 @@ public:
 
     WNDPROC _SysWndProc=NULL;
     bool _isFullScreen=false;
+
+    int _WndOp;
 };
