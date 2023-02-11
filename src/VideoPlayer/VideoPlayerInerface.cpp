@@ -26,34 +26,86 @@
 #define SUCCEED error_code==0
 
 
-VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, int type)
+VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName)
 {
 	int error_code=-1;
 	VideoPlayer* ret;
-	type = 1;
-	//type = 0;
-	if (type==0)
+	if (0)
 	{
 		ret = new ExternalPlayer(error_code, CPaintManagerUI::GetInstance(), xpp->GetHWND()
-			, L"D:\\Code\\FigureOut\\XunLeiExternalPlayer\\bin\\XunLeiExternalPlayer.dll");
+			, L"D:/Code/FigureOut/XunLeiExternalPlayer/bin/XunLeiExternalPlayer.dll");
 		if (SUCCEED)
 		{
 			return ret;
 		}
 		delete ret;
 	}
-
 	// vlc
-	if (type==1)
+	TCHAR buffer[MAX_PATH];
+	::GetModuleFileName(CPaintManagerUI::GetInstance(), buffer, MAX_PATH);
+	::PathRemoveFileSpec(buffer);
+	::PathAppend(buffer, L"plugins");
+	::PathAppend(buffer, pluginName);
+	if(::PathFileExists(buffer)) 
 	{
-		ret = new ExternalPlayer(error_code, CPaintManagerUI::GetInstance(), xpp->GetHWND()
-			, L"D:\\Code\\FigureOut\\Textrument\\plugins\\DirectUILib\\WODPlayer\\bin\\plugins\\VLCExternalPlayer.dll");
+		QkString name = pluginName;
+		LPCWSTR dllDir = 0;
+		QkString testPath;
+		auto dir1 = GetProfString(name.GetData(threadBuffer));
+		if(dir1 && ::PathFileExistsA(dir1->c_str())) 
+		{
+			testPath = dir1->c_str();
+			dllDir = testPath;
+		}
+		if (!dllDir && name.EndWith(L"VLCExternalPlayer.dll")) // auto detect
+		{
+			testPath = buffer;
+			testPath.AsBuffer();
+			::PathRemoveFileSpec((LPWSTR)STR(testPath));
+			::PathAppend((LPWSTR)STR(testPath), L"libvlc.dll");
+			if(!::PathFileExists(STR(testPath))) 
+			{
+				testPath.Empty();
+				testPath = L"C:/";
+				testPath += L"Program Files";
+#ifndef _WIN64
+				testPath += L" (x86)";
+#endif
+				testPath += L"/VideoLAN/";
+				if(::PathFileExists(STR(testPath))) 
+				{
+					LPWSTR installed = (LPWSTR)STR(testPath);
+					testPath += L"vlc-3.0.18";
+					if(::PathFileExists(STR(testPath))) 
+					{
+						dllDir = testPath;
+					}
+					else
+					{
+						testPath.SetAt(testPath.GetLength()-10, 0);
+						testPath.RecalcSize();
+						testPath += L"VLC";
+						if(::PathFileExists(STR(testPath))) 
+						{
+							dllDir = testPath;
+						}
+					}
+				}
+
+			}
+		}
+		//LogIs(2, dllDir?dllDir:L"null");
+		ret = new ExternalPlayer(error_code, CPaintManagerUI::GetInstance(), xpp->GetHWND(), buffer, dllDir);
 		if (SUCCEED)
 		{
 			return ret;
 		}
 		delete ret;
 	}
+	else error_code = 2;
+
+	//::MessageBox(NULL, L"", TEXT("WODPlayer"), MB_OK);
+	LogIs(2, "播放器加载失败！\n请尝试切换播放插件。\n错误码：%d", error_code);
 
 	// MF 框架支持的格式太少，弃。
 	//if (type==2)
@@ -65,4 +117,5 @@ VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, int type)
 	//	}
 	//	delete ret;
 	//}
+	return 0;
 }

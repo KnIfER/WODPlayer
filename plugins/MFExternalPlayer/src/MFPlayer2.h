@@ -14,7 +14,7 @@
 
 #include "AudioSessionVolume.h"
 
-#include "VideoPlayer.h"
+//#include "VideoPlayer.h"
 
 #include <mfplay.h>
 
@@ -28,8 +28,38 @@ static const UINT WM_APP_ERROR = WM_APP + 2;    // wparam = HRESULT
 // Private window message to notify the application of an audio session event.
 static const UINT WM_AUDIO_EVENT = WM_APP + 4;
 
-class MFPlayer2 : public IMFPMediaPlayerCallback, public VideoPlayer
+class MFPlayer2 : public IMFPMediaPlayerCallback//, public VideoPlayer
 {
+public:
+    HWND getHWND() {
+        return _hWnd;
+    };
+    HWND getHParent() {
+        return _hParent;
+    };
+    HINSTANCE getInstace() {
+        return _hInst;
+    };
+    void init(HINSTANCE hInstance, HWND hParent) {
+        _hInst=hInstance;
+        _hParent=hParent;
+    };
+    LONG getHeight() {
+        RECT rc;
+        GetClientRect(_hWnd, &rc);
+        return rc.bottom;
+    };
+    LONG getWidth() {
+        RECT rc;
+        GetClientRect(_hWnd, &rc);
+        return rc.right;
+    };
+protected:
+    HINSTANCE _hInst;
+    HWND _hWnd;
+    HWND _hParent;
+    WNDPROC _SysWndProc=NULL;
+
 public:
     // Constructor is private. Call CreateSamplePlayer to instantiate.
     MFPlayer2(int & error_code, HINSTANCE hInstance, HWND hParent);
@@ -49,15 +79,19 @@ public:
 
     // Playback
     HRESULT OpenURL(const WCHAR *sURL);
-    void Play() override;
-    void Pause() override;
-    void			Stop() override;
-    bool			IsPlaying() override;
-    bool			IsPaused() override;
-    long			GetPosition() override;
-    void			SetPosition(long pos) override;
-    long			GetDuration() override;
-    bool            PlayVideoFile(TCHAR* path) override;
+
+    void			Stop() ;
+    void			Play() ;
+    void			Pause() ;
+    bool			IsPlaying() ;
+    bool			IsPaused() ;
+    long			GetPosition() ;
+    void			SetPosition(long pos) ;
+    long			GetDuration() ;
+    bool			PlayVideoFile(const TCHAR* path) ;
+    void			SetFullScreen(bool val){} ;
+    void			takeSnapShot(const char *psz_filepath){};
+    void			SynSize(unsigned int * x, unsigned int * y);
 
     HRESULT Shutdown();
     HRESULT GetState(MFP_MEDIAPLAYER_STATE *pState);

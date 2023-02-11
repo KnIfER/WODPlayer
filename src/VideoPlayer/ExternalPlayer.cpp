@@ -24,13 +24,17 @@
 
 
 
-ExternalPlayer::ExternalPlayer(int & error_code, HINSTANCE hInstance, HWND hParent, const TCHAR* dllPath)
+ExternalPlayer::ExternalPlayer(int & error_code, HINSTANCE hInstance, HWND hParent, const TCHAR* dllPath, const TCHAR* dllDir)
 {
 	error_code=1;
 	WindowBase::init(hInstance, hParent);
 	_player=0;
-	HMODULE hPlayer = vwInit(dllPath, true);
-	error_code = vwCreatePlayer({hPlayer, hInstance, hParent, &_player});
+	HMODULE hPlayer = vwInit(error_code, dllPath, true, dllDir);
+	if(!hPlayer) 
+	{
+		return;
+	}
+	error_code = vwCreatePlayer({hPlayer, hInstance, hParent, &_player, dllDir});
 	_hWnd = vwGetHWND(_player);
 	LogIs("vwCreatePlayer=%d, _player=%ld", error_code, _player);
 }

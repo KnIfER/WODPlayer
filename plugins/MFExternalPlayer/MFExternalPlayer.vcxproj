@@ -19,87 +19,46 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\comctl32.cpp" />
-    <ClCompile Include="src\database\database_helper.cpp" />
-    <ClCompile Include="src\tab.cpp" />
-    <ClCompile Include="src\toolbar.cpp" />
-    <ClCompile Include="src\Utils\ImageUtils.cpp" />
-    <ClCompile Include="src\Utils\ProfileStd.cpp" />
-    <ClCompile Include="src\VideoPlayer\ExternalPlayer.cpp" />
-    <ClCompile Include="src\VideoPlayer\VideoPlayerInerface.cpp" />
-    <ClCompile Include="src\VideoPlayer\WODPlayer.cpp" />
-    <ClCompile Include="src\WndControl\ButtonList.cpp" />
-    <ClCompile Include="src\WndControl\PopupMenu.cpp" />
-    <ClCompile Include="src\WndControl\SeekBar.cpp" />
-    <ClCompile Include="WODMain.cpp" />
-    <ClCompile Include="WODApplication.cpp" />
-    <ClCompile Include="WODMenus.cpp" />
+    <ClCompile Include="src\AudioSessionVolume.cpp" />
+    <ClCompile Include="src\InsituDebug.cpp" />
+    <ClCompile Include="src\MFPlayer2.cpp" />
+    <ClCompile Include="src\Pluginize.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\comctl32.h" />
-    <ClInclude Include="src\database\bookmark.h" />
-    <ClInclude Include="src\database\database_helper.h" />
-    <ClInclude Include="src\database\sqlite3.h" />
-    <ClInclude Include="src\debug.h" />
-    <ClInclude Include="src\heap.h" />
-    <ClInclude Include="src\pch.h" />
-    <ClInclude Include="src\Utils\ProfileStd.h" />
-    <ClInclude Include="src\Utils\WindowUtils.h" />
-    <ClInclude Include="src\VideoPlayer\ExternalPlayer.h" />
-    <ClInclude Include="src\VideoPlayer\WODPlayer.h" />
-    <ClInclude Include="src\WndControl\ButtonList.h" />
-    <ClInclude Include="src\WndControl\PopupMenu.h" />
-    <ClInclude Include="src\WndControl\SeekBar.h" />
-    <ClInclude Include="src\WndControl\virtual_keys.h" />
-    <ClInclude Include="WODApplication.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="src\VideoPlayer\VideoPlayerInerface.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="WODMenus.h" />
-    <ClInclude Include="WODMenuID.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="WOD.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\demo\res\icons.bmp" />
-    <Image Include="res\folder.ico" />
-    <Image Include="res\nxt.ico" />
-    <Image Include="res\pause.ico" />
-    <Image Include="res\play.ico" />
-    <Image Include="res\prev.ico" />
-    <Image Include="res\stop.ico" />
+    <ClInclude Include="src\AudioSessionVolume.h" />
+    <ClInclude Include="src\InsituDebug.h" />
+    <ClInclude Include="src\MFPlayer.h" />
+    <ClInclude Include="src\MFPlayer2.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{ef3d6f48-ad77-48aa-871d-710a5cba017d}</ProjectGuid>
-    <RootNamespace>WODPlayer</RootNamespace>
+    <ProjectGuid>{4FFC466F-2DFA-4C68-8F6C-094164135F0C}</ProjectGuid>
+    <RootNamespace>MFExternalPlayer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>WODPlayer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -112,32 +71,22 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="Program.props" />
-    <Import Project="..\dulib.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="Program.props" />
-    <Import Project="..\dulib.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="Program.props" />
-    <Import Project="..\dulib.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="Program.props" />
-    <Import Project="..\dulib.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -149,19 +98,16 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>UILIB_STATIC;_WINDOWS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;$(direct_includes);./richedit20;$(VLC_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>src;src/VideoPlayer;%(AdditionalIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(ProjectDir)bin/$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(VLC_LIPA);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mf.lib;mfplat.lib;mfuuid.lib;mfplay.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(SolutionDir)bin\plugins\$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(MF_LIPA);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -170,36 +116,33 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>UILIB_STATIC;_WINDOWS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;$(direct_includes);./richedit20;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>src;src/VideoPlayer;%(AdditionalIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(ProjectDir)bin/$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(VLC_LIPA);;%(AdditionalLibraryDirectories);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mf.lib;mfplat.lib;mfuuid.lib;mfplay.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(SolutionDir)bin\plugins\$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(MF_LIPA);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>UILIB_STATIC;_WINDOWS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;$(direct_includes);./richedit20;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>src;src/VideoPlayer;;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>bin/$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(VLC_LIPA_64)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mf.lib;mfplat.lib;mfuuid.lib;mfplay.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(MF_LIPA_64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -208,19 +151,17 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>UILIB_STATIC;_WINDOWS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;$(direct_includes);./richedit20;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>src;src/VideoPlayer;;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>bin/$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(VLC_LIPA_64)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mf.lib;mfplat.lib;mfuuid.lib;mfplay.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(MF_LIPA_64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

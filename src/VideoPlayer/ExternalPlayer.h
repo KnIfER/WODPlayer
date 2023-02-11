@@ -24,7 +24,7 @@
 class ExternalPlayer : public VideoPlayer
 {
 public:
-	ExternalPlayer(int & error_code, HINSTANCE hInstance, HWND hParent, const TCHAR* dllPath);
+	ExternalPlayer(int & error_code, HINSTANCE hInstance, HWND hParent, const TCHAR* dllPath, const TCHAR* dllDir=0);
 	~ExternalPlayer();
 
 public:

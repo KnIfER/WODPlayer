@@ -108,12 +108,11 @@ void WODApplication::InitWindow()
 	if(seekbar)
 		seekbar->_callback = (SeekBarTrackCallback)seekchange;
 
-	_mainPlayer.newVideoView();
-
 	auto file = GetProfString("file");
 	QkString path = file?file->c_str():"";
 	if(!path.IsEmpty())
 		_mainPlayer.PlayVideoFile(STR(path));
+	MarkPlaying(true);
 
 	_db->Init();
 
@@ -610,6 +609,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_FILE:
 		case IDM_BKMK:
 		case IDM_SKIN:
+		case IDM_PLUGIN:
 			trackWodMenus((CControlUI*)lParam, wParam);
 			break;
 		case IDM_SKIN_NORM:

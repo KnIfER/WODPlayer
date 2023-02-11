@@ -4,7 +4,7 @@
 #include "database/database_helper.h"
 //#include "VideoPlayer/VLCPlayer.h"
 
-extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, int type);
+extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName);
 
 WODPlayer::WODPlayer() {
 	_timeMarked = -1;
@@ -17,8 +17,15 @@ void WODPlayer::newVideoView()
 	{
 		delete _mMediaPlayer;
 		_mMediaPlayer = 0;
+		if(_hPlayer)
+		{
+			CloseWindow(_hPlayer);
+			_hPlayer = 0;
+		}
 	}
-	_mMediaPlayer = initVidePlayerImpl(this, 1);
+	_mMediaPlayer = initVidePlayerImpl(this, L"MFExternalPlayer.dll");
+	//_mMediaPlayer = initVidePlayerImpl(this, L"VLCExternalPlayer.dll");
+	//_mMediaPlayer = initVidePlayerImpl(this, L"XunLeiExternalPlayer\\XunLeiExternalPlayer.dll");
 	if (_mMediaPlayer)
 	{
 		_hPlayer = _mMediaPlayer->getHWND();
@@ -33,6 +40,20 @@ void WODPlayer::Release()
 	}
 }
 
+//class DummyPlayer : public VideoPlayer
+//{
+//public:
+//	void Play(){}
+//	void Stop(){}
+//	void Pause(){}
+//	bool IsPlaying(){}
+//	bool IsPaused(){}
+//	long GetPosition(){}
+//	void SetPosition(long pos){}
+//	long GetDuration(){}
+//	bool PlayVideoFile(const TCHAR* path){}
+//};
+
 bool WODPlayer::PlayVideoFile(const TCHAR* path)
 {
 	bool ret = false;
@@ -40,6 +61,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	{
 		newVideoView();
 	}
+	//ASSERT(_mMediaPlayer);
 	if (_mMediaPlayer)
 	{
 		ret = _mMediaPlayer->PlayVideoFile(path);

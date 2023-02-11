@@ -24,6 +24,7 @@ struct VWCreateOptions{
 	HINSTANCE hHost=0;
 	HWND hParent=0;
 	LONG_PTR* ret;
+	const TCHAR* dllDir=0;
 };
 
 typedef int (__cdecl* VW_CREATEPLAYER)(VWCreateOptions);
@@ -83,11 +84,15 @@ static void PRINTMSG(TCHAR* buff, const CHAR* name, int & printed_len)
 	func = (type)GetProcAddress(hMod, name);\
 	if(!func) PRINTMSG(PRINTBUFF, name, PRINTLEN);
 
-static HMODULE vwInit(const TCHAR* dllPath, bool blame=false)
+static HMODULE vwInit(int & error_code, const TCHAR* dllPath, bool blame=false, const TCHAR* dllDir=0)
 {
 	if(PathFileExists(dllPath))
 	{
 		const DWORD dwFlags = GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")), "AddDllDirectory") != NULL ? LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS : 0;
+		if(dllDir)
+		{
+			::SetDllDirectory(dllDir);
+		}
 		auto hPlayer = ::LoadLibraryEx(dllPath, NULL, dwFlags);
 		if(hPlayer) 
 		{
@@ -116,6 +121,8 @@ static HMODULE vwInit(const TCHAR* dllPath, bool blame=false)
 			}
 			return vwCreatePlayer!=0?hPlayer:0;
 		}
+		else error_code = 3;
 	}
+	else error_code = 2;
 	return 0;
 }

@@ -13,7 +13,6 @@
 #include "MFPlayer2.h"
 
 
-extern HBRUSH bgBrush;
 #define kClassWindow L"VideoFrame1"
 
 LRESULT CALLBACK MF_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -45,7 +44,7 @@ BOOL MF_regWndClassWin(LPCTSTR lpcsClassName, DWORD dwStyle)
     wndclass.hInstance = ::GetModuleHandle(NULL);
     wndclass.hIcon = NULL;
     wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wndclass.hbrBackground = bgBrush;
+    wndclass.hbrBackground = CreateSolidBrush (RGB(29,29,29));
     wndclass.lpszMenuName = NULL;
     wndclass.lpszClassName = lpcsClassName;
 
@@ -132,8 +131,12 @@ MFPlayer2::MFPlayer2(int & error_code, HINSTANCE hInstance, HWND hParent) :
             AddRef();
         }
 
+        error_code = -1;
         //SafeRelease(&pPlayer);
+        //return;
     }
+
+    //m_pPlayer->SetAspectRatioMode(MFVideoARMode_None);
 }
 
 
@@ -260,6 +263,7 @@ HRESULT MFPlayer2::OpenURL(const WCHAR *sURL)
 
     // Create a new media item for this URL.
     hr = m_pPlayer->CreateMediaItemFromURL(sURL, FALSE, 0, NULL);
+    //m_pPlayer->SetAspectRatioMode(MFVideoARMode_None);
 
     // The CreateMediaItemFromURL method completes asynchronously. When it does,
     // MFPlay sends an MFP_EVENT_TYPE_MEDIAITEM_CREATED event.
@@ -344,7 +348,7 @@ long MFPlayer2::GetDuration()
     return value;
 }
 
-bool MFPlayer2::PlayVideoFile(TCHAR* path)
+bool MFPlayer2::PlayVideoFile(const TCHAR* path)
 {
     return OpenURL(path);
 }
@@ -355,6 +359,23 @@ bool MFPlayer2::PlayVideoFile(TCHAR* path)
 //
 // Shutdown the MFPlay object.
 //-----------------------------------------------------------------------------
+
+void MFPlayer2::SynSize(unsigned int* x, unsigned int* y)
+{
+    if (m_pPlayer)
+    {
+        SIZE szVideo;
+        //MFVideoNormalizedRect rect;
+        //m_pPlayer->GetVideoSourceRect(&rect);
+        m_pPlayer->GetNativeVideoSize(&szVideo, 0);
+        m_pPlayer->SetAspectRatioMode(MFVideoARMode_None);
+        //*x = rect.right - rect.left;
+        //*y = rect.bottom - rect.top;
+        *x = szVideo.cx;
+        *y = szVideo.cy;
+        //LogIs("GetVideoSourceRect %d %d", x, y);
+    }
+}
 
 HRESULT MFPlayer2::Shutdown()
 {

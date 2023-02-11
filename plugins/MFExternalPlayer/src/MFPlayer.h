@@ -28,7 +28,7 @@
 #include <assert.h>
 #include <shlwapi.h>
 
-#include "resource.h"
+#include "InsituDebug.h"
 
 #include "MFPlayer2.h"
 //#include "slider.h"

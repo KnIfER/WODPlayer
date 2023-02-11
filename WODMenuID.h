@@ -19,6 +19,9 @@
 
 // 插件
 #define IDM_PLUGIN IDM + 3000
+#define IDM_PLUGIN_MF  IDM_PLUGIN+1
+#define IDM_PLUGIN_VLC IDM_PLUGIN+2
+#define IDM_PLUGIN_XL  IDM_PLUGIN+3
 
 
 

@@ -29,7 +29,11 @@ void initWodMenus(WODApplication * xpp)
             , MenuDefine{L"", L"", 0}
             , MenuDefine{L"bkmk_add", L"删除书签", IDM_BKMK_ADD}
         }}
-        , MenuDefine{L"plugin", L"插件", IDM_PLUGIN}
+        , MenuDefine{L"plugin", L"插件", IDM_PLUGIN, new std::vector<MenuDefine>{
+            MenuDefine{L"bkmk_add", L"Δ 原生MFPlayer", IDM_PLUGIN_MF}
+            , MenuDefine{L"bkmk_add", L"Δ VLCPlayer", IDM_PLUGIN_VLC}
+            , MenuDefine{L"bkmk_add", L"Δ 迅雷播放组件", IDM_PLUGIN_XL}
+        }}
         , MenuDefine{L"skin", L"皮肤", IDM_SKIN, new std::vector<MenuDefine>{
             MenuDefine{L"skin_norm", L"普通皮肤", IDM_SKIN_NORM}
             , MenuDefine{L"skin_hollow", L"镂空", IDM_SKIN_HOLLOW}
