@@ -184,6 +184,8 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 			//LogIs(2, "MPM_PREPARED %d\n", wParam);
 			_seekbar.SetMax(wParam);
 			MarkPlaying(true);
+			if(_mMediaPlayer)
+				_mMediaPlayer->syncResolution();
 			//if(_app->_WndOp==1)
 			{
 				SetPos(GetPos());

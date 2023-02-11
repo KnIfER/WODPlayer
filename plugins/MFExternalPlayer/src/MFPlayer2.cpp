@@ -89,9 +89,9 @@ MFPlayer2::MFPlayer2(int & error_code, HINSTANCE hInstance, HWND hParent) :
         , 0 , 0 , 840 , 680 , hParent , NULL , ::GetModuleHandle(NULL), NULL);
     if (hWnd)
     {
-
         _hWnd=hWnd;
     }
+    init(hInstance, hParent);
 
     hr = MFPCreateMediaPlayer(
         NULL,
@@ -206,6 +206,10 @@ STDMETHODIMP MFPlayer2::QueryInterface(REFIID riid, void** ppv)
 // Notifies the object of an MFPlay event.
 //-----------------------------------------------------------------------------
 
+
+#define MM_PREPARED              (WM_USER)
+#define MM_STOPPED               (WM_USER+1)
+
 void MFPlayer2::OnMediaPlayerEvent(MFP_EVENT_HEADER * pEventHeader)
 {
     if (FAILED(pEventHeader->hrEvent))
@@ -228,9 +232,14 @@ void MFPlayer2::OnMediaPlayerEvent(MFP_EVENT_HEADER * pEventHeader)
         OnRateSet(MFP_GET_RATE_SET_EVENT(pEventHeader));
         break;
 
+    case MFP_EVENT_TYPE_PLAY:
+        PostMessage(getHParent(), MM_PREPARED, GetDuration(), 0);
+        break;
+
     case MFP_EVENT_TYPE_PLAYBACK_ENDED:
     case MFP_EVENT_TYPE_STOP:
         SetPlaybackRate(1.0f);
+        PostMessage(getHParent(), MM_STOPPED, GetDuration(), 0);
         break;
 
     }

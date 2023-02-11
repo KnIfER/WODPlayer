@@ -112,7 +112,7 @@ void WODApplication::InitWindow()
 	QkString path = file?file->c_str():"";
 	if(!path.IsEmpty())
 		_mainPlayer.PlayVideoFile(STR(path));
-	MarkPlaying(true);
+	//MarkPlaying(true);
 
 	_db->Init();
 
