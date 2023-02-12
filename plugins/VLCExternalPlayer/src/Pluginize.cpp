@@ -28,7 +28,7 @@ extern "C" __declspec(dllexport) HWND vwGetHWND(VLCPlayer* player)
 
 extern "C" __declspec(dllexport) void vwRelease(VLCPlayer* player) 
 {
-	//player->Release();
+	player->Release();
 }
 
 extern "C" __declspec(dllexport) void vwPlay(VLCPlayer* player) 
@@ -87,8 +87,13 @@ extern "C" __declspec(dllexport) void vwClose(VLCPlayer* player)
 }
 
 
-extern "C" __declspec(dllexport) void vwSynSize(VLCPlayer* player, unsigned int* x, unsigned int* y) 
+extern "C" __declspec(dllexport) void vwSyncSize(VLCPlayer* player, unsigned int* x, unsigned int* y) 
 {
-	player->SynSize(x, y);
+	player->SyncSize(x, y);
 }
 
+
+extern "C" __declspec(dllexport) int vwInterface() 
+{
+	return 1;
+}

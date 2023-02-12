@@ -36,6 +36,7 @@ void hookMouseMove(MSG & msg)
 	GetWindowRect(XPP->GetHWND(), &rc);
 	if(scheduleExitFsc)
 	{
+		//LogIs("hookMouseMove", msg.pt.x, msg.pt.y);
 		if((GetKeyState(VK_LBUTTON) & 0x8000) != 0)
 		{
 			if(abs(scheduleExitFsc-yPos)>5)
@@ -68,7 +69,7 @@ void hookMouseMove(MSG & msg)
 
 void hookLButtonDown(MSG & msg)
 {
-	//LogIs("hookLButtonDown");
+	//LogIs("hookLButtonDown %d %d", msg.pt.x, msg.pt.y);
 	if (!XPP->_isFullScreen)
 	{
 		if(XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd)) 
@@ -79,9 +80,11 @@ void hookLButtonDown(MSG & msg)
 			return;
 		}
 	}
-	if(XPP->_topBarFscWnd->GetHWND()==msg.hwnd) 
+	else if(msg.pt.y<=4 || XPP->_topBarFscWnd->GetHWND()==msg.hwnd) 
 	{
 		scheduleExitFsc = msg.pt.y;
+		if(scheduleExitFsc==0)
+			scheduleExitFsc=1;
 		return;
 	}
 }

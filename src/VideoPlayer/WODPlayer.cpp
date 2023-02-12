@@ -19,24 +19,45 @@ void WODPlayer::newVideoView()
 		_mMediaPlayer = 0;
 		if(_hPlayer)
 		{
-			CloseWindow(_hPlayer);
+			DestroyWindow(_hPlayer);
 			_hPlayer = 0;
 		}
 	}
-	_mMediaPlayer = initVidePlayerImpl(this, L"MFExternalPlayer.dll");
-	//_mMediaPlayer = initVidePlayerImpl(this, L"VLCExternalPlayer.dll");
-	//_mMediaPlayer = initVidePlayerImpl(this, L"XunLeiExternalPlayer\\XunLeiExternalPlayer.dll");
+	QkString playerName;
+	auto playerName_ = GetProfString("player");
+	if(playerName_)
+		playerName = playerName_->c_str();
+	else 
+		playerName = L"VLCExternalPlayer.dll";
+	//playerName = L"MFExternalPlayer.dll";
+	//playerName = L"VLCExternalPlayer.dll";
+	//playerName = L"XunLeiExternalPlayer\\XunLeiExternalPlayer.dll";
+	_mMediaPlayer = initVidePlayerImpl(this, playerName);
 	if (_mMediaPlayer)
 	{
 		_hPlayer = _mMediaPlayer->getHWND();
 	}
 }
 
+void WODPlayer::Stop()
+{
+	if(_mMediaPlayer) {
+		_mMediaPlayer->Stop();
+	}
+}
+
+
 void WODPlayer::Release()
 {
+	if(_hPlayer)
+	{
+		DestroyWindow(_hPlayer);
+		_hPlayer = 0;
+	}
 	if(_mMediaPlayer) {
 		_mMediaPlayer->Release();
 		delete _mMediaPlayer;
+		_mMediaPlayer = 0;
 	}
 }
 
@@ -66,9 +87,9 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	{
 		ret = _mMediaPlayer->PlayVideoFile(path);
 	}
+	_currentPath = path;
 	if (ret)
 	{
-		_currentPath = path;
 		QkString tmp;
 		const char* pStr;
 		if(_currentPath.Find('\"')) {
@@ -79,9 +100,9 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 			pStr = _currentPath.GetData(threadBuffer);
 		}
 		_timeMarked = _app->_db->GetBookMarks(pStr, _bookmarks);
+		MarkPlaying();
+		return true;
 	}
-	QkString filePath = path;
-	PutProfString("file", filePath.GetData(threadBuffer));
 	return false;
 }
 
@@ -171,8 +192,8 @@ void WODPlayer::MarkPlaying(bool playing)
 	if (_isPlaying!=playing)
 	{
 		_isPlaying = playing;
-		_app->MarkPlaying(playing);
 	}
+	_app->MarkPlaying(playing);
 }
 
 bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& ret)

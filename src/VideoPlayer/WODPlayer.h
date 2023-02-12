@@ -36,6 +36,7 @@ public:
 
     void newVideoView();
 
+    void Stop();
     void Release();
 
 

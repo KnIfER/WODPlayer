@@ -71,6 +71,7 @@ public:
     STDMETHODIMP QueryInterface(REFIID iid, void** ppv);
     STDMETHODIMP_(ULONG) AddRef();
     STDMETHODIMP_(ULONG) Release();
+    void DoRelease();
 
     // IMFPMediaPlayerCallback methods
     void STDMETHODCALLTYPE OnMediaPlayerEvent(MFP_EVENT_HEADER * pEventHeader);
@@ -91,7 +92,7 @@ public:
     bool			PlayVideoFile(const TCHAR* path) ;
     void			SetFullScreen(bool val){} ;
     void			takeSnapShot(const char *psz_filepath){};
-    void			SynSize(unsigned int * x, unsigned int * y);
+    void			SyncSize(unsigned int * x, unsigned int * y);
 
     HRESULT Shutdown();
     HRESULT GetState(MFP_MEDIAPLAYER_STATE *pState);

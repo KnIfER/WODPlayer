@@ -28,7 +28,7 @@ extern "C" __declspec(dllexport) HWND vwGetHWND(MFPlayer2* player)
 
 extern "C" __declspec(dllexport) void vwRelease(MFPlayer2* player) 
 {
-	//player->Release();
+	player->DoRelease();
 }
 
 extern "C" __declspec(dllexport) void vwPlay(MFPlayer2* player) 
@@ -87,8 +87,13 @@ extern "C" __declspec(dllexport) void vwClose(MFPlayer2* player)
 }
 
 
-extern "C" __declspec(dllexport) void vwSynSize(MFPlayer2* player, unsigned int* x, unsigned int* y) 
+extern "C" __declspec(dllexport) void vwSyncSize(MFPlayer2* player, unsigned int* x, unsigned int* y) 
 {
-	player->SynSize(x, y);
+	player->SyncSize(x, y);
 }
 
+
+extern "C" __declspec(dllexport) int vwInterface() 
+{
+	return 1;
+}

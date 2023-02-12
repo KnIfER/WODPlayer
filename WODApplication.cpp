@@ -94,20 +94,6 @@ void WODApplication::InitWindow()
 	m_pm.GetShadow()->SetPosition(1,1);
 	m_pm.GetShadow()->SetColor(0x55888888);
 
-	//ListView* pList = static_cast<ListView*>(m_pm.FindControl(_T("btn")));
-	//LogIs(L"WODApplication::InitWindow %s", (LPCWSTR)m_pm.FindControl(L"btn")->GetText());
-
-	//CHorizontalLayoutUI* menuBar = static_cast<CHorizontalLayoutUI*>(m_pm.FindControl(_T("menuBar")));
-	//for (size_t i = 0; i < 10; i++)
-	//{
-	//    auto menu = builder.Create(L"menu_item.xml", 0, 0, &m_pm);
-	//    menu->SetFixedWidth(0);
-	//    menu->GetText().Format(L"菜单#%d", i);
-	//    menu->GetText().Format(L"文件#%d", i);
-	//    menu->GetText().Format(L"文件(&F)", i);
-	//    menuBar->Add(menu);
-	//}
-
 	seekbar = static_cast<SeekBar*>(m_pm.FindControl(_T("seekbar")));
 	if(seekbar)
 		seekbar->_callback = (SeekBarTrackCallback)seekchange;
@@ -117,18 +103,12 @@ void WODApplication::InitWindow()
 	if(!path.IsEmpty())
 		_mainPlayer.PlayVideoFile(STR(path));
 	//MarkPlaying(true);
-
 	_db->Init();
+
+	//tg
 
 	BOOL bHandled;
 	//HandleCustomMessage(WM_KEYDOWN, VK_P, 0, bHandled);
-
-	//QkString test="asdsad";
-	//CHAR fullpath[_MAX_PATH*2];
-	//WideCharToMultiByte(CP_ACP, 0, test, -1, fullpath, _MAX_PATH*2, 0, 0);
-	//LogIs(2, fullpath);
-
-	//tg
 }
 
 LRESULT WODApplication::OnClose(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
@@ -309,18 +289,24 @@ bool WODApplication::IsFullScreen()
 	//return _isFullScreen;
 }
 
+bool _playing = false;
+
 void WODApplication::MarkPlaying(bool playing)
 {
-	_playBtn->SetForeImage(playing?L"pause.png":L"play.png");
-	//RECT rc;
-	//GetClientRect(_toolbar.GetHWND(), &rc);
-	//rc.right = rc.bottom;
-	//InvalidateRect(_toolbar.GetHWND(), &rc, TRUE);
+	if(_playing!=playing)
+	{
+		_playing=playing;
+		_playBtn->SetForeImage(playing?L"pause.png":L"play.png");
+		//RECT rc;
+		//GetClientRect(_toolbar.GetHWND(), &rc);
+		//rc.right = rc.bottom;
+		//InvalidateRect(_toolbar.GetHWND(), &rc, TRUE);
 
-	if(playing)
-		::SetTimer(m_hWnd, 1, 100, NULL);
-	else
-		::KillTimer(m_hWnd, 1);
+		if(playing)
+			::SetTimer(m_hWnd, 1, 100, NULL);
+		else
+			::KillTimer(m_hWnd, 1);
+	}
 }
 
 extern bool running;
@@ -400,7 +386,11 @@ bool WODApplication::PickFile()
 
 	if(ret)
 	{
-		_mainPlayer.PlayVideoFile(filepath);
+		if (_mainPlayer.PlayVideoFile(filepath))
+		{
+			QkString filePath = filepath;
+			PutProfString("file", filePath.GetData(threadBuffer));
+		}
 	}
 	return false;
 }
@@ -418,6 +408,17 @@ bool IsKeyDown(int key) {
 TCHAR nxt_file[_MAX_PATH];
 //std::string threadBuffer;
 
+
+void Replay()
+{
+	::KillTimer(XPP->GetHWND(), 10086);
+	XPP->_mainPlayer.Stop();
+	XPP->MarkPlaying(false);
+	XPP->_mainPlayer.Release();
+	XPP->MarkPlaying(false);
+	nxt_file[0] = 0;
+	::SetTimer(XPP->GetHWND(), 10086, 100, 0);
+}
 
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
@@ -487,8 +488,17 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	{
 		if (wParam==10086)
 		{
-			_mainPlayer.PlayVideoFile(nxt_file);
 			::KillTimer(m_hWnd, 10086);
+			if(nxt_file[0]!=0)
+			{
+				if (_mainPlayer.PlayVideoFile(nxt_file))
+				{
+					QkString filePath = nxt_file;
+					PutProfString("file", filePath.GetData(threadBuffer));
+				}
+			}
+			else
+				_mainPlayer.PlayVideoFile(_mainPlayer._currentPath);
 		}
 		if ((wParam == 1)
 			&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
@@ -616,12 +626,27 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			Close();
 			break;
 
+
 		case IDM_FILE:
 		case IDM_BKMK:
 		case IDM_SKIN:
 		case IDM_PLUGIN:
 			trackWodMenus((CControlUI*)lParam, wParam);
 			break;
+
+		case IDM_PLUGIN_MF:
+			PutProfString("player", "MFExternalPlayer.dll");
+			Replay();
+			return 1;
+		case IDM_PLUGIN_VLC:
+			PutProfString("player", "VLCExternalPlayer.dll");
+			Replay();
+			return 1;
+		case IDM_PLUGIN_XL:
+			PutProfString("player", "XunLeiExternalPlayer\\XunLeiExternalPlayer.dll");
+			Replay();
+			return 1;
+
 		case IDM_SKIN_NORM:
 		case IDM_SKIN_HOLLOW:
 		case IDM_SKIN_ALPHA_1 :

@@ -55,6 +55,7 @@ protected:
 public:
 	VLCPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND hParent);
 	void			Stop() ;
+	void			Release() ;
 	void			Play() ;
 	void			Pause() ;
 	bool			IsPlaying() ;
@@ -65,7 +66,7 @@ public:
 	bool			PlayVideoFile(const TCHAR* path) ;
 	void			SetFullScreen(bool val) ;
 	void			takeSnapShot(const char *psz_filepath);
-	void			SynSize(unsigned int * x, unsigned int * y) ;
+	void			SyncSize(unsigned int * x, unsigned int * y) ;
 private:
 	LONG_PTR mMediaPlayer;
 };

@@ -217,6 +217,14 @@ void VLCPlayer::Stop()
     libvlc_media_player_stop(VPlayer);
 }
 
+
+void VLCPlayer::Release()
+{
+    libvlc_media_player_stop(VPlayer);
+    libvlc_media_player_release(VPlayer);
+    libvlc_release(m_vlcInstance);
+}
+
 void VLCPlayer::Play()
 {
     libvlc_media_player_play(VPlayer);
@@ -347,7 +355,7 @@ void VLCPlayer::takeSnapShot(const char* psz_filepath) {
     libvlc_video_take_snapshot(VPlayer, 0, psz_filepath, 0, 0);
 }
 
-void VLCPlayer::SynSize(unsigned int * x, unsigned int * y) {
+void VLCPlayer::SyncSize(unsigned int * x, unsigned int * y) {
     libvlc_video_get_size(VPlayer, 0, x, y);
 }
 

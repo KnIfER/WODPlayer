@@ -21,6 +21,35 @@
 #include "WindowBase.h"
 #include "VideoPlayerInerface.h"
 
+
+
+struct VWCreateOptions{
+	HINSTANCE hPlugin=0;
+	HINSTANCE hHost=0;
+	HWND hParent=0;
+	LONG_PTR* ret;
+	const TCHAR* dllDir=0;
+};
+
+typedef int (__cdecl* VW_CREATEPLAYER)(VWCreateOptions);
+typedef HWND (__cdecl* VW_GETHWND)(LONG_PTR);
+typedef void (__cdecl* VW_RELEASE)(LONG_PTR);
+typedef void (__cdecl* VW_PLAY)(LONG_PTR);
+typedef void (__cdecl* VW_PAUSE)(LONG_PTR);
+typedef void (__cdecl* VW_STOP)(LONG_PTR);
+typedef bool (__cdecl* VW_ISPLAYING)(LONG_PTR);
+typedef bool (__cdecl* VW_ISPAUSED)(LONG_PTR);
+typedef long (__cdecl* VW_GETPOSITION)(LONG_PTR);
+typedef long (__cdecl* VW_GETDURATION)(LONG_PTR);
+typedef void (__cdecl* VW_SETPOSITION)(LONG_PTR, long);
+typedef void (__cdecl* VW_SETFULLSCREEN)(LONG_PTR, bool);
+typedef bool (__cdecl* VW_PLAYVIDEOFILE)(LONG_PTR, const TCHAR*);
+typedef bool (__cdecl* VW_CLOSE)(LONG_PTR);
+typedef void (__cdecl* VW_SYNCSIZE)(LONG_PTR, unsigned int*, unsigned int*);
+typedef void (__cdecl* VW_INTERFACE)();
+
+// D:\Code\FigureOut\XunLeiExternalPlayer\bin\XunLeiExternalPlayer.dll
+
 class ExternalPlayer : public VideoPlayer
 {
 public:
@@ -40,6 +69,7 @@ public:
 	void			Close() override;
 	void			Release() override;
 	void			syncResolution() override;
+	HMODULE vwInit(int & error_code, const TCHAR* dllPath, bool blame=false, const TCHAR* dllDir=0);
 protected:
 	LONG_PTR _player;
 
@@ -49,4 +79,21 @@ protected:
 	{
 		return ((ExternalPlayer*)GetWindowLongPtr(hwnd, GWLP_USERDATA))->RunProc(hwnd, message, wParam, lParam);
 	}
+private:
+	VW_CREATEPLAYER vwCreatePlayer = nullptr;
+	VW_GETHWND vwGetHWND = nullptr;
+	VW_RELEASE vwRelease = nullptr;
+	VW_PLAY vwPlay = nullptr;
+	VW_PAUSE vwPause = nullptr;
+	VW_STOP vwStop = nullptr;
+	VW_ISPLAYING vwIsPlaying = nullptr;
+	VW_ISPAUSED vwIsPaused = nullptr;
+	VW_GETPOSITION vwGetPosition = nullptr;
+	VW_GETDURATION vwGetDuration = nullptr;
+	VW_SETPOSITION vwSetPosition = nullptr;
+	VW_SETFULLSCREEN vwSetFullScreen = nullptr;
+	VW_PLAYVIDEOFILE vwPlayVideoFile = nullptr;
+	VW_CLOSE vwClose = nullptr;
+	VW_SYNCSIZE vwSyncSize = nullptr;
+	VW_INTERFACE vwInterface = nullptr;
 };
