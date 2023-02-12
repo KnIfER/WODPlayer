@@ -25,12 +25,37 @@ struct DemoData
 
 WODApplication* XPP;
 
+int scheduleExitFsc = 0;
+extern RECT rcNScPos;
+
+
 void hookMouseMove(MSG & msg)
 {
 	int yPos = msg.pt.y;
 	RECT rc;
 	GetWindowRect(XPP->GetHWND(), &rc);
+	if(scheduleExitFsc)
+	{
+		if((GetKeyState(VK_LBUTTON) & 0x8000) != 0)
+		{
+			if(abs(scheduleExitFsc-yPos)>5)
+			{
+				rcNScPos.bottom += yPos - rcNScPos.top;
+				rcNScPos.top = yPos;
 
+				int xPos = msg.pt.x, w = (rcNScPos.right-rcNScPos.left)/2;
+				rcNScPos.left = xPos - w;
+				rcNScPos.right = xPos + w;
+
+				scheduleExitFsc = 0;
+				XPP->ToggleFullScreen();
+				ReleaseCapture();
+				::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+			}
+			return;
+		}
+		else scheduleExitFsc = 0;
+	}
 	if(XPP->_bottomBar->IsVisible() ^ (yPos >= rc.bottom - XPP->_bottomBar->GetHeight()))
 	{
 		XPP->_bottomBar->SetVisible(!XPP->_bottomBar->IsVisible());
@@ -53,6 +78,11 @@ void hookLButtonDown(MSG & msg)
 			//SetFocus(XPP->GetHWND());
 			return;
 		}
+	}
+	if(XPP->_topBarFscWnd->GetHWND()==msg.hwnd) 
+	{
+		scheduleExitFsc = msg.pt.y;
+		return;
 	}
 }
 

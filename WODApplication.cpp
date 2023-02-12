@@ -605,7 +605,12 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0); 
 			break;
 		case IDM_MAX:
-			SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0); 
+			if(_isFullScreen) 
+				ToggleFullScreen();
+			else if(::IsMaximized(GetHWND()))
+				SendMessage(WM_SYSCOMMAND, SC_RESTORE, 0); 
+			else
+				SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0); 
 			break;
 		case IDM_CLOSE:
 			Close();
