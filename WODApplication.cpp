@@ -82,7 +82,11 @@ void WODApplication::InitWindow()
 
 	//m_pm._bIsLayoutOnly = true;
 	_playBtn = m_pm.FindControl(_T("play"));
+	_bottomBar = static_cast<WinFrame*>(m_pm.FindControl(_T("ch1")));
 
+	_topBar = static_cast<WinFrame*>(m_pm.FindControl(_T("topBar")));
+	_topBarFscWnd = static_cast<WinFrame*>(m_pm.FindControl(_T("topW")));
+	_topBarFscH = static_cast<WinFrame*>(m_pm.FindControl(_T("topH")));
 
 	m_pm.GetShadow()->ShowShadow(true);
 	m_pm.GetShadow()->SetSize(5);
@@ -231,70 +235,71 @@ LRESULT WINAPI FullScreenBarsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
+void SetFloatHwnd(HWND hwnd)
+{
+	auto wndSty = GetWindowLong(hwnd, GWL_STYLE);
+	SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TOOLWINDOW);
+	SetParent(hwnd, 0);
+	SetWindowLong(hwnd, GWL_STYLE, (wndSty & ~WS_CHILD ) | WS_POPUP);
+	SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE)
+		| WS_EX_LAYERED 
+		| WS_EX_TOOLWINDOW
+		| WS_EX_TOPMOST
+	);
+}
+
 
 void WODApplication::ToggleFullScreen()
 {
 	HWND hThisFSc = m_hWnd;
 	DWORD style = GetWindowLong(hThisFSc, GWL_STYLE);
-	if (style&WS_CAPTION)
-		//if (!_isFullScreen)
+	if (!_isFullScreen)
 	{
-		if(_hFullScreenBtmbar == NULL)
-		{
-			// Register window class
-			WNDCLASS wc;
-			wc.cbClsExtra = 0;
-			wc.cbWndExtra = 0;
-			//wc.hbrBackground = CreateSolidBrush (RGB(112,112,255));
-			wc.hbrBackground = bgBrush;
-			wc.hCursor = ::LoadCursor(NULL, IDC_ARROW);
-			wc.hIcon = NULL;
-			wc.hInstance = CPaintManagerUI::GetInstance();
-			wc.lpfnWndProc = FullScreenBarsProc;
-			wc.lpszClassName = TEXT("FullScreenBarsHolder");
-			wc.lpszMenuName = 0;
-			wc.style = CS_GLOBALCLASS | CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
+		HWND _hFullScreenBtmbar = _bottomBar->GetHWND();
+		_bottomBar->SetFloat(true);
 
-			if(!::RegisterClass(&wc))
-			{
-				int nError = GetLastError();
-				if(nError != ERROR_CLASS_ALREADY_EXISTS)
-					return;
-			}
+		_topBar->GetParent()->Remove(_topBar);
+		_topBarFscH->Add(_topBar);
+		_topBarFscWnd->SetVisible(true);
 
-			_hFullScreenBtmbar = ::CreateWindow(wc.lpszClassName
-				, TEXT(""), WS_VISIBLE | WS_CHILD
-				, 0, 0, 100, 100,
-				m_hWnd, NULL, NULL, this);
-		}
-		//SetParent(_toolbar.GetHWND(), _hFullScreenBtmbar);
-		SetParent(_mainPlayer._seekbar.GetHWND(), _hFullScreenBtmbar);
+		SetFloatHwnd(_hFullScreenBtmbar);
+		SetFloatHwnd(_topBarFscH->GetHWND());
 
-		if (_mainPlayer._mMediaPlayer) _mainPlayer._mMediaPlayer->SetFullScreen(true);
+		::SetWindowPos(_hFullScreenBtmbar, HWND_TOPMOST, 0, 0, 100, 100, 0);
+		::SetWindowPos(_topBarFscH->GetHWND(), HWND_TOPMOST, 0, 0, 100, 100, 0);
+
+		SetLayeredWindowAttributes(_hFullScreenBtmbar, TransparentKey, 200, LWA_ALPHA);
+
 		_isFullScreen = true;
 		GetWindowRect(hThisFSc, &rcNScPos);
-		SetWindowLong(hThisFSc, GWL_STYLE , style&~dwNScStyle );
 		style = GetWindowLong(hThisFSc, GWL_EXSTYLE);
-		SetWindowLong(hThisFSc, GWL_EXSTYLE, style|WS_EX_TOPMOST);
 
 		int w = ::GetSystemMetrics(SM_CXSCREEN);
 		int h = ::GetSystemMetrics(SM_CYSCREEN);
 		::SetWindowPos(hThisFSc, NULL, 0, 0, w, h, 0);
-		ShowWindow(_hFullScreenBtmbar, SW_HIDE);
+
+		_topBarFscWnd->SetVisible(false);
+		_bottomBar->SetVisible(false);
+
+		_bottomBar->SetFloat(true);
+		m_pm.GetSizeBox().top = 0;
 	}
 	else
 	{
-		//SetParent(_toolbar.GetHWND(), m_hWnd);
+		_bottomBar->SetFloat(false);
 		SetParent(_mainPlayer._seekbar.GetHWND(), m_hWnd);
-		ShowWindow(_hFullScreenBtmbar, SW_HIDE);
-		if (_mainPlayer._mMediaPlayer) _mainPlayer._mMediaPlayer->SetFullScreen(false);
 		_isFullScreen = false;
-		SetWindowLong(hThisFSc, GWL_STYLE , style|dwNScStyle );
 		style = GetWindowLong(hThisFSc, GWL_EXSTYLE);
 		SetWindowLong(hThisFSc, GWL_EXSTYLE, style&~WS_EX_TOPMOST);
 
 		::SetWindowPos(hThisFSc, NULL, rcNScPos.left, rcNScPos.top
 			, rcNScPos.right-rcNScPos.left, rcNScPos.bottom-rcNScPos.top, 0);
+
+		_topBar->GetParent()->Remove(_topBar);
+		m_pm.GetRoot()->AddAt(_topBar, 0);
+		_bottomBar->SetVisible(true);
+		_topBarFscWnd->SetVisible(false);
+		m_pm.GetSizeBox().top = 4;
 	}
 }
 

@@ -40,11 +40,10 @@ showshadow="true"
 <VBox bkcolor="#FF0078d7"
 	clipchild="false" 
 	vscrollbar="true"
-	name="top"
+	name="root"
 	inset="2,2,2,2"
 	>
-	
-	<HBox  bkcolor="#FF0078d7" height="35" >
+	<HBox  bkcolor="#FF0078d7" height="35" name="topBar">
 		<Button static="true" style="btn_wnd" width="34" bkimage="file='ic_launcher.png' size='24,24' align='center' " tooltip="无限播放器 WODPlayer"/>
 		<HBox minWidth="45" name="menuBar">
 			<Button style="btn_wnd" id="110" text="文件"/>
@@ -55,12 +54,16 @@ showshadow="true"
 		<Button style="btn_wnd" id="111" text="☐" font="menu1"/>
 		<Button style="btn_wnd" id="112" text="X" inset="0,1,0,0" />
 	</HBox>
+	
+	<WinFrame height="-2" float="true" floatalign="top" name="topW">
+		<BOX height="-2" name="topH"></BOX>
+	</WinFrame>
 
 	
 	<_v height="0" name="ch0"/>
 	
-			
-	<WinFrame height="-2" name="ch1">
+	
+	<WinFrame height="-2" name="ch1" floatalign="bottom">
 		<VBox bkcolor="#FF555555"
 			height="-2"
 			>

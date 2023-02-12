@@ -29,41 +29,31 @@ void hookMouseMove(MSG & msg)
 {
 	int yPos = msg.pt.y;
 	RECT rc;
-	GetClientRect(XPP->GetHWND(), &rc);
-	if (IsWindowVisible(XPP->_hFullScreenBtmbar))
+	GetWindowRect(XPP->GetHWND(), &rc);
+
+	if(XPP->_bottomBar->IsVisible() ^ (yPos >= rc.bottom - XPP->_bottomBar->GetHeight()))
 	{
-		if (!XPP->_mainPlayer._seekbar._isSeeking && yPos<rc.bottom-XPP->_barsHeight-12)
-		{
-			ShowWindow(XPP->_hFullScreenBtmbar, SW_HIDE);
-		}
+		XPP->_bottomBar->SetVisible(!XPP->_bottomBar->IsVisible());
 	}
-	else if (yPos>=rc.bottom-XPP->_barsHeight) // -4
+	if(XPP->_topBarFscWnd->IsVisible() ^ (yPos <= rc.top + XPP->_topBar->GetHeight()))
 	{
-		ShowWindow(XPP->_hFullScreenBtmbar, SW_SHOW);
+		XPP->_topBarFscWnd->SetVisible(!XPP->_topBarFscWnd->IsVisible());
 	}
 }
 
 void hookLButtonDown(MSG & msg)
 {
-	//if(XPP->IsFullScreen())
-	//	return;
-	LogIs("hookLButtonDown");
-	if (XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd))
+	//LogIs("hookLButtonDown");
+	if (!XPP->_isFullScreen)
 	{
-		ReleaseCapture();
-		::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
-		//SetFocus(XPP->GetHWND());
-		return;
+		if(XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd)) 
+		{
+			ReleaseCapture();
+			::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+			//SetFocus(XPP->GetHWND());
+			return;
+		}
 	}
-	//if (msg.hwnd==XPP->_toolbar.GetHWND())
-	//{
-	//	if (GET_X_LPARAM(msg.lParam)>XPP->_toolbar.GetHeight()*5)
-	//	{
-	//		ReleaseCapture();
-	//		::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
-	//	}
-	//	return;
-	//}
 }
 
 void hookLButtonDoubleClick(MSG & msg)
@@ -159,7 +149,8 @@ wWinMain(_In_ HINSTANCE hInstance,
 					hookLButtonDown(msg);
 					break;
 				case WM_MOUSEMOVE:
-					if (XPP->IsFullScreen())
+				case WM_NCMOUSEMOVE:
+					if (XPP->_isFullScreen)
 						hookMouseMove(msg);
 					break;
 				case WM_MBUTTONUP:

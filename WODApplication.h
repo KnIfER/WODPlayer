@@ -68,7 +68,13 @@ public:
 	//ButtonList _toolbar;
     CControlUI* _playBtn;
 	int _barsHeight=10;
-	HWND _hFullScreenBtmbar;
+
+    WinFrame* _bottomBar;
+
+    CControlUI* _topBarFscH;
+    WinFrame* _topBarFscWnd;
+    CControlUI* _topBar;
+
     WODBase* _db;
     CDialogBuilder builder;
     Button* m_pSearch;
