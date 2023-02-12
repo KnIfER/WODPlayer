@@ -150,7 +150,7 @@ MFPlayer2::~MFPlayer2()
     {
         (void)m_pVolume->EnableNotifications(FALSE);
     }
-
+    LogIs("MFPlayer2::~MFPlayer2 解构");
     SafeRelease(&m_pPlayer);
     SafeRelease(&m_pVolume);
 }
@@ -180,6 +180,13 @@ ULONG MFPlayer2::Release()
         delete this;
     }
     return uCount;
+}
+
+void MFPlayer2::DoRelease()
+{
+    Stop();
+    Shutdown();
+    Release();
 }
 
 
@@ -237,6 +244,8 @@ void MFPlayer2::OnMediaPlayerEvent(MFP_EVENT_HEADER * pEventHeader)
         break;
 
     case MFP_EVENT_TYPE_PLAYBACK_ENDED:
+        Play();
+        break;
     case MFP_EVENT_TYPE_STOP:
         SetPlaybackRate(1.0f);
         PostMessage(getHParent(), MM_STOPPED, GetDuration(), 0);
@@ -359,7 +368,7 @@ long MFPlayer2::GetDuration()
 
 bool MFPlayer2::PlayVideoFile(const TCHAR* path)
 {
-    return OpenURL(path);
+    return SUCCEEDED(OpenURL(path));
 }
 
 
@@ -369,7 +378,7 @@ bool MFPlayer2::PlayVideoFile(const TCHAR* path)
 // Shutdown the MFPlay object.
 //-----------------------------------------------------------------------------
 
-void MFPlayer2::SynSize(unsigned int* x, unsigned int* y)
+void MFPlayer2::SyncSize(unsigned int* x, unsigned int* y)
 {
     if (m_pPlayer)
     {
