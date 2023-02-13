@@ -21,6 +21,8 @@ class SeekBar;
 
 typedef void*(*SeekBarTrackCallback)(SeekBar*, int);
 
+typedef void*(*SeekBarTrackDecorator)(SeekBar*, Gdiplus::Graphics &, Gdiplus::SolidBrush &, RECT &);
+
 class SeekBar : public CControlUI 
 {
 	DECLARE_QKCONTROL(SeekBar)
@@ -56,7 +58,8 @@ public:
 	void SetEnhanceThickness(int  val);
 	void SetBarInset(int  val);
 //protected:
-	SeekBarTrackCallback _callback;
+	SeekBarTrackCallback _callback = nullptr;
+	SeekBarTrackDecorator _decorator = nullptr;
 	bool _isSeeking=false;
 	int _thickness;
 	int _trackColor;

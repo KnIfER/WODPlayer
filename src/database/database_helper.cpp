@@ -41,7 +41,7 @@ id INTEGER PRIMARY KEY AUTOINCREMENT\
 , thumbnail INTEGER DEFAULT 0\
 , opt INTEGER DEFAULT 0\
 , param TEXT DEFAULT NULL\
-, folder TEXT DEFAULT NULL\
+, folder INTEGER DEFAULT 0\
 , layer INTEGER DEFAULT 0\
 , layerInfo TEXT DEFAULT NULL\
 , color INTEGER DEFAULT 0\
@@ -60,7 +60,7 @@ id INTEGER PRIMARY KEY AUTOINCREMENT\
 
 int WODBase::AddBookmark(const char* fullpath, char* markName, __int64 & folderId, int pos, int duration, int flag)
 {
-    LogIs(2, "AddBookmark %s %ld", fullpath, folderId);
+    //LogIs(2, "AddBookmark %s %ld", fullpath, folderId);
     sqlite3_exec(db, "begin", NULL, NULL, NULL);
     sqlite3_stmt *stmt1 = NULL;
     sqlite3_stmt *stmt2 = NULL;
@@ -86,7 +86,7 @@ int WODBase::AddBookmark(const char* fullpath, char* markName, __int64 & folderI
 
             sqlite3_bind_int(stmt1, num++, 0); // pos
             sqlite3_bind_int(stmt1, num++, duration); // duration
-            sqlite3_bind_int(stmt1, num++, 0); // folder
+            sqlite3_bind_int(stmt1, num++, 1); // folder
             sqlite3_bind_int(stmt1, num++, 0); // creation_time
 
             succ = sqlite3_step(stmt1);
@@ -157,7 +157,7 @@ __int64 WODBase::GetBookMarks(const char* fullpath, std::vector<BookMark>& _book
     ::PathRemoveFileSpecA(buffer_path);
 
     // 首先查询得 folder vid
-    localBuffer = "select id from timemarks where folder=0 and fname=\"";
+    localBuffer = "select id from timemarks where folder=1 and fname=\"";
     localBuffer += buffer_path+strlen(buffer_path)+1;
     localBuffer += "\" and fpath=\"";
     localBuffer += buffer_path;
@@ -168,13 +168,13 @@ __int64 WODBase::GetBookMarks(const char* fullpath, std::vector<BookMark>& _book
     char *errmsg = 0;
     int succ =  sqlite3_exec(db, localBuffer.c_str(), exec_callback1, &folderVid, &errmsg);
 
-    LogIs("\t首先查询得 folder vid=%ld succ=%d msg=%d", folderVid, succ, errmsg?errmsg:"");
+    LogIs("\t首先查询得 folder vid=%ld succ=%d msg=%d", folderVid, succ, errmsg?sqlite3_errmsg(db):"");
 
     if(folderVid>=0)
     {
         localBuffer = "select pos from timemarks where vid=";
         localBuffer += std::to_string(folderVid);
-        localBuffer += " and folder=0";
+        localBuffer += " and folder!=1";
         localBuffer += " order by pos asc, creation_time asc, id asc";
         LogIs("\tsql=%s", localBuffer.c_str());
         __int64 folderVid = -1;

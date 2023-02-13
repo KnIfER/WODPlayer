@@ -31,6 +31,7 @@
     <ClCompile Include="src\WndControl\ButtonList.cpp" />
     <ClCompile Include="src\WndControl\PopupMenu.cpp" />
     <ClCompile Include="src\WndControl\SeekBar.cpp" />
+    <ClCompile Include="src\WndControl\Shortcut\WODShortcut.cpp" />
     <ClCompile Include="WODMain.cpp" />
     <ClCompile Include="WODApplication.cpp" />
     <ClCompile Include="WODMenus.cpp" />
@@ -50,7 +51,7 @@
     <ClInclude Include="src\WndControl\ButtonList.h" />
     <ClInclude Include="src\WndControl\PopupMenu.h" />
     <ClInclude Include="src\WndControl\SeekBar.h" />
-    <ClInclude Include="src\WndControl\virtual_keys.h" />
+    <ClInclude Include="src\WndControl\Shortcut\virtual_keys.h" />
     <ClInclude Include="WODApplication.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\VideoPlayer\VideoPlayerInerface.h" />

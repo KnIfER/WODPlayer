@@ -28,6 +28,9 @@
     <Filter Include="Source Files\utils">
       <UniqueIdentifier>{6edef70d-d640-447d-9752-68528c448376}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\video_src\WndControl\Shortcut">
+      <UniqueIdentifier>{03fbbf8e-8c39-45da-86fc-e318f25b4e58}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WODApplication.cpp">
@@ -75,6 +78,9 @@
     <ClCompile Include="src\Utils\ProfileStd.cpp">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
+    <ClCompile Include="src\WndControl\Shortcut\WODShortcut.cpp">
+      <Filter>Source Files\video_src\WndControl\Shortcut</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WODApplication.h">
@@ -97,9 +103,6 @@
     </ClInclude>
     <ClInclude Include="src\heap.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\WndControl\virtual_keys.h">
-      <Filter>Source Files\video_src\WndControl</Filter>
     </ClInclude>
     <ClInclude Include="src\database\database_helper.h">
       <Filter>Source Files\database</Filter>
@@ -139,6 +142,9 @@
     </ClInclude>
     <ClInclude Include="src\Utils\ProfileStd.h">
       <Filter>Source Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WndControl\Shortcut\virtual_keys.h">
+      <Filter>Source Files\video_src\WndControl\Shortcut</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

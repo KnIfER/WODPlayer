@@ -75,6 +75,36 @@ void WODPlayer::Release()
 //	bool PlayVideoFile(const TCHAR* path){}
 //};
 
+void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::SolidBrush & brush, RECT & rc)
+{
+	brush.SetColor(0xffffffff);
+	graph.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);// SmoothingMode
+
+	//graph.FillRectangle(&brush, pControl->GetWidth()/2, 0
+	//	, 8
+	//	, pControl->GetHeight());
+
+	int w = 1;
+	int width = 3;
+	int H = pControl->GetHeight(), W = pControl->GetWidth(), MAX = pControl->_max;
+	int height = H*2/3;
+	int top = (H-height)/2;
+
+	//graph.FillEllipse(&brush, pControl->GetWidth()/2 - w, top
+	//		, width
+	//		, height);
+
+	WODPlayer* player = (WODPlayer*)pControl->GetTag();
+
+	for (size_t i = 0; i < player->_bookmarks.size(); i++)
+	{
+		auto when = player->_bookmarks.at(i).pos;
+		graph.FillRectangle(&brush, when*1.0/MAX*W - w, top
+			, width
+			, height);
+	}
+}
+
 bool WODPlayer::PlayVideoFile(const TCHAR* path)
 {
 	bool ret = false;
@@ -101,6 +131,11 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		}
 		_timeMarked = _app->_db->GetBookMarks(pStr, _bookmarks);
 		MarkPlaying();
+		if(!_seekbar._decorator)
+		{
+			_seekbar.SetTag((LONG_PTR)this);
+			_seekbar._decorator = (SeekBarTrackDecorator)TimeMarksDecorator;
+		}
 		return true;
 	}
 	return false;
@@ -114,6 +149,20 @@ bool WODPlayer::AddBookmark()
 		//LogIs(2, L"%s", (LPCWSTR)_currentPath);
 		_app->_db->AddBookmark(_currentPath.GetData(threadBuffer), 0, _timeMarked, pos, duration, 0);
 
+		int idx = 0;
+		for (size_t i = 0; i < _bookmarks.size(); i++)
+		{
+			if(_bookmarks[i].pos>=pos) {
+				if(_bookmarks[i].pos==pos) idx==-1;
+				idx = i;
+				break;
+			}
+		}
+		if(idx>=0)
+		{
+			_bookmarks.insert(_bookmarks.begin()+idx, {pos});
+		}
+		_seekbar.Invalidate();
 		return true;
 	}
 	return false;

@@ -151,12 +151,12 @@ void SeekBar::PaintStatusImage(HDC hDC)
 
 	RECT rc = m_rcItem;
 	ApplyInsetToRect(rc);
-	RECT rcBar = rc;
 	if(_barInset) {
-		rcBar.left += _barInset;
-		rcBar.right -= _barInset;
+		rc.left += _barInset;
+		rc.right -= _barInset;
 	}
-
+	RECT rcBar = rc;
+	//int rcLeft = rcBar.left, rcRight = rcBar.right;
 	rcBar.top = (GetHeight() - _thickness) / 2;
 	rcBar.bottom = rcBar.top + _thickness;
 
@@ -200,24 +200,14 @@ void SeekBar::PaintStatusImage(HDC hDC)
 
 	RECT tmpRc{rcBar.right-radius, GetHeight()/2-radius, 0, 0};
 
-	trackBrush.SetColor(_isSeeking?_thumbColorTracking:_thumbColor);
 
+	if(_decorator) _decorator(this, graphi, trackBrush, rc);
+
+	trackBrush.SetColor(_isSeeking?_thumbColorTracking:_thumbColor);
 
 	graphi.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);// SmoothingMode
 
 	graphi.FillPie(&trackBrush, (INT)tmpRc.left, tmpRc.top, _thumbSize, _thumbSize, 0, 360);
-
-	//graphi.FillEllipse(&trackBrush, (INT)tmpRc.left, tmpRc.top
-	//	, zjiin
-	//	, zjiin);
-
-
-
-	//if( (_trackColor & 0xFF000000)==0 ) return;
-	//Gdiplus::Graphics graphi( hDC );
-	//Gdiplus::SolidBrush brush(Gdiplus::Color((LOBYTE((color)>>24)), GetBValue(color), GetGValue(color), GetRValue(color)));
-	//graphi.FillRectangle(&brush, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
-
 }
 
 void SeekBar::DoEvent(TEventUI& event)

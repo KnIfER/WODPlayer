@@ -58,6 +58,8 @@ public:
 
     void ResetWndOpacity();
 
+    void buildAccelerator();
+
     void ToggleFullScreen();
     bool IsFullScreen();
     void MarkPlaying(bool playing=true);
@@ -83,4 +85,6 @@ public:
     bool _isFullScreen=false;
 
     int _WndOp;
+
+    HACCEL _hAccTable;
 };

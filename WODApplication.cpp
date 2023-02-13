@@ -17,7 +17,6 @@
 #include <pch.h>
 #include "../resource.h"
 #include "database\database_helper.h"
-#include "virtual_keys.h"
 #include "WODMenus.h"
 
 
@@ -98,12 +97,13 @@ void WODApplication::InitWindow()
 	if(seekbar)
 		seekbar->_callback = (SeekBarTrackCallback)seekchange;
 
+	_db->Init();
+
 	auto file = GetProfString("file");
 	QkString path = file?file->c_str():"";
 	if(!path.IsEmpty())
 		_mainPlayer.PlayVideoFile(STR(path));
 	//MarkPlaying(true);
-	_db->Init();
 
 	//tg
 
@@ -549,22 +549,15 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case VK_SPACE:
 			_mainPlayer.Toggle();
 			break;
-		case VK_C:
-		{
-			//if(IsKeyDown(VK_CONTROL)) {
-			//	VLCPlayer* player = (VLCPlayer*)_mainPlayer._mMediaPlayer;
-			//	player->takeSnapShot("G:\\IMG\\tmp.png");
-			//}
-			//int pos = _mainPlayer._mMediaPlayer->GetPosition();
-		}
-		break;
-		case IDM_BKMK_ADD:
-		case VK_P:
-		{
-			//WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
-			_mainPlayer.AddBookmark();
-		}
-		break;
+		//case VK_C:
+		//{
+		//	//if(IsKeyDown(VK_CONTROL)) {
+		//	//	VLCPlayer* player = (VLCPlayer*)_mainPlayer._mMediaPlayer;
+		//	//	player->takeSnapShot("G:\\IMG\\tmp.png");
+		//	//}
+		//	//int pos = _mainPlayer._mMediaPlayer->GetPosition();
+		//}
+		//break;
 		case VK_LEFT:
 		case VK_RIGHT:
 			if (_mainPlayer._mMediaPlayer)
@@ -596,7 +589,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	case WM_COMMAND:
 	{
 		bHandled = true;
-		switch (wParam)
+		switch (LOWORD(wParam))
 		{
 		case IDM_PLAY:
 			_mainPlayer.Toggle();
@@ -626,6 +619,11 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			Close();
 			break;
 
+		case IDM_BKMK_ADD:
+		{
+			//WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
+			_mainPlayer.AddBookmark();
+		} break;
 
 		case IDM_FILE:
 		case IDM_BKMK:

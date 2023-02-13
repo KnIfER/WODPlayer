@@ -161,6 +161,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 	XPP->Create(NULL, _T("无限播放器"), UI_WNDSTYLE_FRAME, WS_EX_APPWINDOW|WS_EX_ACCEPTFILES, 0, 0, 500, 500);
 	XPP->ShowWindow();
 	XPP->CenterWindow();
+	XPP->buildAccelerator();
 	//XPP->init(hInstance, NULL);
 
 	//XPP->ShowModal();
@@ -201,8 +202,11 @@ wWinMain(_In_ HINSTANCE hInstance,
 				default:
 					break;
 				}
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+				if (!TranslateAccelerator(XPP->GetHWND(), XPP->_hAccTable, &msg))
+				{
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
 			}
 		//} catch(...) {
 		//	LogIs(2, "Exception!");
