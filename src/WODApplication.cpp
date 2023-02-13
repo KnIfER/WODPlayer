@@ -420,6 +420,34 @@ void Replay()
 	::SetTimer(XPP->GetHWND(), 10086, 100, 0);
 }
 
+void SeekDelta(int delta, int level)
+{
+	auto & player = XPP->_mainPlayer._mMediaPlayer;
+	if (player)
+	{
+		int max=player->GetDuration();
+		int factor = 1;
+		if(level==1) {
+			factor = 5;
+		}
+		if(level==2) {
+			factor = 30;
+		}
+		//LogIs(2, "set= %d", delta*factor*1000);
+		delta = player->GetPosition()+delta*factor*1000;
+		bool set=0;
+		if(delta<0)  delta=0;
+		else if(delta>max) delta=max;
+		else set=1;
+		if(set || player->GetPosition()!=delta) {
+			player->SetPosition(delta);
+		}
+		if(!XPP->_mainPlayer._isPlaying && !XPP->_mainPlayer._seekbar._isSeeking) {
+			XPP->_mainPlayer._seekbar.SetProgressAndMax(delta, player->GetDuration());
+		}
+	}
+}
+
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 	switch (uMsg)
@@ -546,9 +574,6 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	case WM_KEYDOWN:
 		switch(wParam)
 		{
-		case VK_SPACE:
-			_mainPlayer.Toggle();
-			break;
 		//case VK_C:
 		//{
 		//	//if(IsKeyDown(VK_CONTROL)) {
@@ -558,31 +583,6 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		//	//int pos = _mainPlayer._mMediaPlayer->GetPosition();
 		//}
 		//break;
-		case VK_LEFT:
-		case VK_RIGHT:
-			if (_mainPlayer._mMediaPlayer)
-			{
-				int delta = wParam==VK_LEFT?-1:1, max=_mainPlayer._mMediaPlayer->GetDuration();
-				int factor = 1;
-				if(IsKeyDown(VK_CONTROL)) {
-					factor = 5;
-				}
-				if(IsKeyDown(VK_SHIFT)) {
-					factor = 30;
-				}
-				delta = _mainPlayer._mMediaPlayer->GetPosition()+delta*factor*1000;
-				bool set=0;
-				if(delta<0)  delta=0;
-				else if(delta>max) delta=max;
-				else set=1;
-				if(set || _mainPlayer._mMediaPlayer->GetPosition()!=delta) {
-					_mainPlayer._mMediaPlayer->SetPosition(delta);
-				}
-				if(!_mainPlayer._isPlaying && !_mainPlayer._seekbar._isSeeking) {
-					_mainPlayer._seekbar.SetProgressAndMax(delta, _mainPlayer._mMediaPlayer->GetDuration());
-				}
-			}
-			break;
 		default:
 			break;
 		}
@@ -607,6 +607,13 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_MIN:
 			SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0); 
 			break;
+		case IDM_MAXMISE:
+			if(_isFullScreen) 
+			{
+				ToggleFullScreen();
+				SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0); 
+				break;
+			}
 		case IDM_MAX:
 			if(_isFullScreen) 
 				ToggleFullScreen();
@@ -624,6 +631,27 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
 			_mainPlayer.AddBookmark();
 		} break;
+
+		case IDM_SHUTDOWN:
+			Close();
+			break;
+		case IDM_PAUSE:
+			_mainPlayer.Toggle();
+			break;
+		case IDM_SEEK_FORE: SeekDelta(1, 0); break;
+		case IDM_SEEK_FORE_FAST: SeekDelta(1, 1); break;
+		case IDM_SEEK_FORE_FASTER: SeekDelta(1, 2); break;
+		case IDM_SEEK_BACK: SeekDelta(-1, 0); break;
+		case IDM_SEEK_BACK_FAST: SeekDelta(-1, 1); break;
+		case IDM_SEEK_BACK_FASTER: SeekDelta(-1, 2); break;
+
+		case IDM_SPEED_UP:  _mainPlayer.SpeedDelta(0.1f); break;
+		case IDM_SPEED_DOWN:  _mainPlayer.SpeedDelta(-0.1f); break;
+		case IDM_SPEED_UP_FAST:  _mainPlayer.SpeedDelta(0.5f); break;
+		case IDM_SPEED_DOWN_FAST:  _mainPlayer.SpeedDelta(-0.5f); break;
+		case IDM_SPEED_UP_FASTER:  _mainPlayer.SpeedDelta(1); break;
+		case IDM_SPEED_DOWN_FASTER:  _mainPlayer.SpeedDelta(-1); break;
+		case IDM_SPEED_RESET: _mainPlayer.SpeedDelta(0); break;
 
 		case IDM_FILE:
 		case IDM_BKMK:

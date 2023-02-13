@@ -102,7 +102,7 @@ MFPlayer2::MFPlayer2(int & error_code, HINSTANCE hInstance, HWND hParent) :
         &m_pPlayer
     );
 
-    if (FAILED(hr)) 
+    if (SUCCEEDED(hr)) 
     { 
         // Also create the object that manages to audio session.
         // This can fail if the machine does not have an audio end-point.
@@ -131,7 +131,7 @@ MFPlayer2::MFPlayer2(int & error_code, HINSTANCE hInstance, HWND hParent) :
             AddRef();
         }
 
-        error_code = -1;
+        //error_code = -1;
         //SafeRelease(&pPlayer);
         //return;
     }
@@ -588,7 +588,6 @@ HRESULT MFPlayer2::UpdateVideo()
 HRESULT MFPlayer2::SetVolume(float fLevel)
 {
     HRESULT hr = S_OK;
-
     if (m_pVolume)
     {
         hr = m_pVolume->SetVolume(fLevel);
@@ -870,6 +869,25 @@ HRESULT MFPlayer2::SetPlaybackRate(float fRate)
     return hr;
 }
 
+float MFPlayer2::SetRate(float fRate)
+{
+    if(fRate!=0)
+    {
+        if (fRate == GetNominalRate())
+        {
+            return fRate;
+        }
+
+        if (SUCCEEDED(m_pPlayer->SetRate(fRate)))
+        {
+            m_fRate = fRate;
+            return m_fRate;
+        }
+    }
+    m_pPlayer->GetRate(&fRate);
+    return fRate;
+}
+
 
 //------------------------------------------------------------------------------
 // FastForward
@@ -1050,5 +1068,3 @@ void MFPlayer2::OnRateSet(MFP_RATE_SET_EVENT *pEvent)
 {
     m_fRate = pEvent->flRate;
 }
-
-

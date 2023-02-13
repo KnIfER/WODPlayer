@@ -97,3 +97,13 @@ extern "C" __declspec(dllexport) int vwInterface()
 {
 	return 1;
 }
+
+extern "C" __declspec(dllexport) float vwSetRate(VLCPlayer* player, float rate) 
+{
+	return player->SetRate(rate);
+}
+
+extern "C" __declspec(dllexport) int vwSetVolume(VLCPlayer* player, int value) 
+{
+	return player->SetVolume(value);
+}

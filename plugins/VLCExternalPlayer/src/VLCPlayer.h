@@ -67,6 +67,8 @@ public:
 	void			SetFullScreen(bool val) ;
 	void			takeSnapShot(const char *psz_filepath);
 	void			SyncSize(unsigned int * x, unsigned int * y) ;
+	float  			SetRate(float rate);
+	float		    SetVolume(int rate);
 private:
 	LONG_PTR mMediaPlayer;
 };

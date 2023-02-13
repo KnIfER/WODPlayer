@@ -359,6 +359,20 @@ void VLCPlayer::SyncSize(unsigned int * x, unsigned int * y) {
     libvlc_video_get_size(VPlayer, 0, x, y);
 }
 
+float VLCPlayer::SetRate(float rate)
+{
+    if(rate!=0 && libvlc_media_player_set_rate(VPlayer, rate)==0)
+        return rate;
+    return libvlc_media_player_get_rate(VPlayer);
+}
+
+float VLCPlayer::SetVolume(int value)
+{
+    if(value>=0 && libvlc_audio_set_volume(VPlayer, value)==0)
+        return value;
+    return libvlc_audio_get_volume(VPlayer);
+}
+
 void copyimage_1(const char* psz_filepath)
 {
    //int x=0,y=0,n;

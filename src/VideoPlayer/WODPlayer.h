@@ -39,6 +39,9 @@ public:
     void Stop();
     void Release();
 
+    float SpeedDelta(float delta);
+    int SetVolume(int volume);
+
 
     void SetPos(RECT rc, bool bNeedInvalidate = true) override;
     bool HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& ret) override;
@@ -55,4 +58,6 @@ public:
     WODApplication* _app;
     std::vector<BookMark> _bookmarks;
     __int64 _timeMarked; // folder
+    float speed = 1;
+    int volume = 100;
 };

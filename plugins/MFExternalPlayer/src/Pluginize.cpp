@@ -4,6 +4,7 @@
 #include <string>
 
 #include "MFPlayer2.h"
+#include "InsituDebug.h"
 
 
 struct VWCreateOptions{
@@ -96,4 +97,20 @@ extern "C" __declspec(dllexport) void vwSyncSize(MFPlayer2* player, unsigned int
 extern "C" __declspec(dllexport) int vwInterface() 
 {
 	return 1;
+}
+
+
+extern "C" __declspec(dllexport) float vwSetRate(MFPlayer2* player, float rate) 
+{
+	return player->SetRate(rate);
+}
+
+extern "C" __declspec(dllexport) int vwSetVolume(MFPlayer2* player, int value) 
+{
+	float ret = value*1.f/100;
+	if(value>=0)
+		player->SetVolume(ret);
+	player->GetVolume(&ret);
+	//LogIs("MFVOL=%d", ret);
+	return ret*100;
 }

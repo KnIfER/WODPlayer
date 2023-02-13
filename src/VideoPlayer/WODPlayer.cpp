@@ -6,9 +6,20 @@
 
 extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName);
 
+void volume_seekbar_change(SeekBar* bar, int pos) 
+{
+	WODPlayer* player = (WODPlayer*)bar->GetTag();
+	int val = player->SetVolume(pos);
+	//LogIs(2, "val = %d %d", val, pos);
+}
+
 WODPlayer::WODPlayer() {
 	_timeMarked = -1;
 	_handleMsg = true;
+
+	_volumebar.SetTag((LONG_PTR)this);
+	_volumebar.SetProgressAndMax(100, 100);
+	_volumebar._callback = (SeekBarTrackCallback)volume_seekbar_change;
 }
 
 void WODPlayer::newVideoView()
@@ -61,6 +72,43 @@ void WODPlayer::Release()
 	}
 }
 
+float WODPlayer::SpeedDelta(float delta)
+{
+	if(delta!=0)
+	{
+		float speed = this->speed;
+		if(delta!=0.1 && delta!=-0.1)
+		{
+			speed = floor(speed/delta)*delta;
+		}
+		speed += delta;
+		if(speed==0)
+		{
+			speed = delta;
+		}
+		if(speed<0)
+		{
+			speed = abs(delta);
+		}
+		if(speed>12)
+		{
+			speed = 12;
+		}
+		this->speed = _mMediaPlayer->SetRate(speed);
+		LogIs(1, "speed=%f", speed);
+	}
+	else
+	{
+		_mMediaPlayer->SetRate(speed=1);
+	}
+	return speed;
+}
+
+int WODPlayer::SetVolume(int volume)
+{
+	return _mMediaPlayer->SetVolume(volume);
+}
+
 //class DummyPlayer : public VideoPlayer
 //{
 //public:
@@ -86,7 +134,7 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 
 	int w = 1;
 	int width = 3;
-	int H = pControl->GetHeight(), W = pControl->GetWidth(), MAX = pControl->_max;
+	int H = pControl->GetHeight(), W = pControl->GetWidth(), max = pControl->_max;
 	int height = H*2/3;
 	int top = (H-height)/2;
 
@@ -99,7 +147,7 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 	for (size_t i = 0; i < player->_bookmarks.size(); i++)
 	{
 		auto when = player->_bookmarks.at(i).pos;
-		graph.FillRectangle(&brush, when*1.0/MAX*W - w, top
+		graph.FillRectangle(&brush, when*1.0/max*W - w, top
 			, width
 			, height);
 	}
@@ -118,7 +166,12 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		ret = _mMediaPlayer->PlayVideoFile(path);
 	}
 	_currentPath = path;
-	if (ret)
+	if(!_seekbar._decorator)
+	{
+		_seekbar.SetTag((LONG_PTR)this);
+		_seekbar._decorator = (SeekBarTrackDecorator)TimeMarksDecorator;
+	}
+	//if (ret)
 	{
 		QkString tmp;
 		const char* pStr;
@@ -131,11 +184,6 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		}
 		_timeMarked = _app->_db->GetBookMarks(pStr, _bookmarks);
 		MarkPlaying();
-		if(!_seekbar._decorator)
-		{
-			_seekbar.SetTag((LONG_PTR)this);
-			_seekbar._decorator = (SeekBarTrackDecorator)TimeMarksDecorator;
-		}
 		return true;
 	}
 	return false;
@@ -251,7 +299,7 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 	{
 		case MM_PREPARED:
 		{
-			//LogIs(2, "MPM_PREPARED %d\n", wParam);
+			//LogIs(2, "MPM_PREPARED max=%d\n", wParam);
 			_seekbar.SetMax(wParam);
 			MarkPlaying(true);
 			if(_mMediaPlayer)

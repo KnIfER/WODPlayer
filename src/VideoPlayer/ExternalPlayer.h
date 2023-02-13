@@ -46,6 +46,8 @@ typedef bool (__cdecl* VW_PLAYVIDEOFILE)(LONG_PTR, const TCHAR*);
 typedef bool (__cdecl* VW_CLOSE)(LONG_PTR);
 typedef void (__cdecl* VW_SYNCSIZE)(LONG_PTR, unsigned int*, unsigned int*);
 typedef void (__cdecl* VW_INTERFACE)();
+typedef float (__cdecl* VW_SETRATE)(LONG_PTR, float);
+typedef int (__cdecl* VW_SETVOLUME)(LONG_PTR, int);
 
 // D:\Code\FigureOut\XunLeiExternalPlayer\bin\XunLeiExternalPlayer.dll
 
@@ -68,6 +70,8 @@ public:
 	void			Close() override;
 	void			Release() override;
 	void			syncResolution() override;
+	float			SetRate(float rate) override;
+	int			 SetVolume(int volume) override;
 	HMODULE vwInit(int & error_code, const TCHAR* dllPath, bool blame=false, const TCHAR* dllDir=0);
 protected:
 	LONG_PTR _player;
@@ -95,4 +99,6 @@ private:
 	VW_CLOSE vwClose = nullptr;
 	VW_SYNCSIZE vwSyncSize = nullptr;
 	VW_INTERFACE vwInterface = nullptr;
+	VW_SETRATE vwSetRate = nullptr;
+	VW_SETVOLUME vwSetVolume = nullptr;
 };

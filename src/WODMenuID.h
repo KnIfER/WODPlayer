@@ -4,9 +4,35 @@
 
 // 文件
 #define IDM_FILE IDM
-#define IDM_FILE_OPEN IDM_FILE+1
-#define IDM_FILE_CLOSE IDM_FILE+2
-#define IDM_FILE_RECENT IDM_FILE+3
+#define IDM_FILE_OPEN    IDM_FILE+1
+#define IDM_FILE_CLOSE   IDM_FILE+2
+#define IDM_FILE_RECENT  IDM_FILE+3
+#define IDM_SHUTDOWN     IDM_FILE+4
+
+
+// 播放
+#define IDM_PLAY IDM + 1000
+#define IDM_FULLSCREEN        IDM_PLAY+1
+#define IDM_MAXMISE           IDM_PLAY+2
+#define IDM_PAUSE             IDM_PLAY+3
+
+#define IDM_SEEK_FORE         IDM_PLAY+4
+#define IDM_SEEK_FORE_FAST    IDM_PLAY+5
+#define IDM_SEEK_FORE_FASTER  IDM_PLAY+6
+#define IDM_SEEK_BACK         IDM_PLAY+7
+#define IDM_SEEK_BACK_FAST    IDM_PLAY+8
+#define IDM_SEEK_BACK_FASTER  IDM_PLAY+9
+
+#define IDM_SPEED_UP         IDM_PLAY+10
+#define IDM_SPEED_DOWN	     IDM_PLAY+11
+#define IDM_SPEED_UP_FAST        IDM_PLAY+12
+#define IDM_SPEED_DOWN_FAST	     IDM_PLAY+13
+#define IDM_SPEED_UP_FASTER      IDM_PLAY+14
+#define IDM_SPEED_DOWN_FASTER	 IDM_PLAY+15
+#define IDM_SPEED_RESET			 IDM_PLAY+16
+
+#define IDM_VOLUME_UP         IDM_PLAY+17
+#define IDM_VOLUME_DOWN		  IDM_PLAY+18
 
 
 // 书签

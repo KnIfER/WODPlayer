@@ -120,6 +120,7 @@ public:
     HRESULT CanFastForward(BOOL *pbCanFF);
     HRESULT CanRewind(BOOL *pbCanRewind);
     HRESULT SetPlaybackRate(float fRate);
+    float SetRate(float fRate);
     HRESULT FastForward();
     HRESULT Rewind();
     HRESULT FrameStep();

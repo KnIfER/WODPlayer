@@ -37,6 +37,8 @@ public:
 	virtual void Release(){};
 	virtual void Close(){};
 	virtual void syncResolution(){};
+	virtual float SetRate(float rate)=0;
+	virtual int SetVolume(int volume)=0;
 	//POINT _resolution; 
 	unsigned int _resX; 
 	unsigned int _resY; 

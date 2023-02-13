@@ -77,6 +77,8 @@ HMODULE ExternalPlayer::vwInit(int & error_code, const TCHAR* dllPath, bool blam
 			DEF_FUNC(hPlayer, vwSyncSize, VW_SYNCSIZE, "vwSyncSize");
 			DEF_FUNC(hPlayer, vwClose, VW_CLOSE, "vwClose");
 			DEF_FUNC(hPlayer, vwInterface, VW_INTERFACE, "vwInterface");
+			DEF_FUNC(hPlayer, vwSetRate, VW_SETRATE, "vwSetRate");
+			DEF_FUNC(hPlayer, vwSetVolume, VW_SETVOLUME, "vwSetVolume");
 			if(PRINTLEN!=PRINTLEN_0)
 			{
 				PRINTBUFF[PRINTLEN]='\0';
@@ -145,6 +147,24 @@ void ExternalPlayer::syncResolution()
 	{
 		vwSyncSize(_player, &_resX, &_resY);
 	}
+}
+
+float ExternalPlayer::SetRate(float rate)
+{
+	if(_player && vwSetRate) 
+	{
+		return vwSetRate(_player, rate);
+	}
+	return rate;
+}
+
+int ExternalPlayer::SetVolume(int volume)
+{
+	if(_player && vwSetVolume) 
+	{
+		return vwSetVolume(_player, volume);
+	}
+	return volume;
 }
 
 bool ExternalPlayer::PlayVideoFile(const TCHAR* path)
