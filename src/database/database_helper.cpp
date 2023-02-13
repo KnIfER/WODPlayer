@@ -126,7 +126,15 @@ int WODBase::AddBookmark(const char* fullpath, char* markName, __int64 & folderI
     sqlite3_exec(db, "commit", NULL, NULL, NULL);
     sqlite3_finalize(stmt1);
     sqlite3_finalize(stmt);
-    return -1;
+    return sqlite3_last_insert_rowid(db);
+}
+
+int WODBase::DelBookmark(__int64 rowId)
+{
+    std::string localBuffer = "delete from timemarks where id=";
+    localBuffer += std::to_string(rowId);
+    sqlite3_exec(db, localBuffer.c_str(), NULL, NULL, NULL);
+    return 0;
 }
 
 int exec_callback1(void *para, int columenCount, char **columnValue, char **columnName)
@@ -139,11 +147,10 @@ int exec_callback1(void *para, int columenCount, char **columnValue, char **colu
     return 0;
 }
 
+// todo atoi 精确度
 int exec_callback2(void *para, int columenCount, char **columnValue, char **columnName)
 {
-
-    ((std::vector<BookMark>*)para)->push_back(BookMark{atoi(columnValue[0])});
-
+    ((std::vector<BookMark>*)para)->push_back(BookMark{atoi(columnValue[0]), atoi(columnValue[1])});
     return 0;
 }
 
@@ -172,7 +179,7 @@ __int64 WODBase::GetBookMarks(const char* fullpath, std::vector<BookMark>& _book
 
     if(folderVid>=0)
     {
-        localBuffer = "select pos from timemarks where vid=";
+        localBuffer = "select pos,id from timemarks where vid=";
         localBuffer += std::to_string(folderVid);
         localBuffer += " and folder!=1";
         localBuffer += " order by pos asc, creation_time asc, id asc";

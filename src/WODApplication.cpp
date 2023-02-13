@@ -467,30 +467,41 @@ void SeekDelta(int delta, int level)
 
 void NavTimemark(int delta)
 {
-	auto & player = XPP->_mainPlayer;
-	int pos = player._mMediaPlayer->GetPosition();
-	if(player._bookmarks.size())
+	auto & wod = XPP->_mainPlayer;
+	auto & player = wod._mMediaPlayer;
+	auto & bkmks = wod._bookmarks;
+	int pos = player->GetPosition();
+	if(bkmks.size())
 	{
 		bool set = false;
-		for (size_t i = 0; i < player._bookmarks.size(); i++)
+		for (size_t i = 0; i < bkmks.size(); i++)
 		{
-			if (delta<0 && player._bookmarks[i].pos >= pos && i>0)
+			if (delta<0 && bkmks[i].pos >= pos)
 			{
-				player._mMediaPlayer->SetPosition(player._bookmarks[i-1].pos);
-				set = 1;
+				if (i>0)
+				{
+					wod.SelectBookMark(i-1);
+					set = 1;
+				}
 				break;
 			}
-			if (delta>0 && player._bookmarks[i].pos > pos)
+			if (delta>0 && bkmks[i].pos > pos)
 			{
-				player._mMediaPlayer->SetPosition(player._bookmarks[i].pos);
+				wod.SelectBookMark(i);
 				set = 1;
 				break;
 			}
 		}
 		if (!set)
 		{
-			player._mMediaPlayer->SetPosition(0);
+			//wod.SelectBookMark(delta<0?bkmks.size()-1:0);
+			if (delta<0 && bkmks[bkmks.size()-1].pos < pos)
+			{
+				wod.SelectBookMark(bkmks.size()-1);
+				set = 1;
+			}
 		}
+		wod._seekbar.Invalidate();
 	}
 }
 
@@ -670,10 +681,12 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			break;
 
 		case IDM_BKMK_ADD:
-		{
 			//WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
 			_mainPlayer.AddBookmark();
-		} break;
+			return 1;
+		case IDM_BKMK_DEL:
+			_mainPlayer.DelBookmark(_mainPlayer._selectedBookmark);
+			return 1;
 
 		case IDM_SHUTDOWN:
 			Close();
@@ -697,8 +710,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_SPEED_DOWN_FASTER:  _mainPlayer.SpeedDelta(-1); break;
 		case IDM_SPEED_RESET: _mainPlayer.SpeedDelta(0); break;
 
-		case IDM_BKMK_PRV: NavTimemark(-1); break;
-		case IDM_BKMK_NXT: NavTimemark(1); break;
+		case IDM_BKMK_PRV: NavTimemark(-1); return 1;
+		case IDM_BKMK_NXT: NavTimemark(1); return 1;
 
 		case IDM_FILE:
 		case IDM_BKMK:

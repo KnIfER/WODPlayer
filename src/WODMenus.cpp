@@ -25,9 +25,9 @@ void initWodMenus(WODApplication * xpp)
             MenuDefine{L"bkmk_add", L"上一书签", IDM_BKMK_PRV}
             , MenuDefine{L"bkmk_add", L"下一书签", IDM_BKMK_NXT}
             , MenuDefine{L"", L"", 0}
-            , MenuDefine{L"bkmk_add", L"添加书签", IDM_BKMK_DEL}
+            , MenuDefine{L"bkmk_add", L"添加书签", IDM_BKMK_ADD}
             , MenuDefine{L"", L"", 0}
-            , MenuDefine{L"bkmk_add", L"删除书签", IDM_BKMK_ADD}
+            , MenuDefine{L"bkmk_add", L"删除书签", IDM_BKMK_DEL}
         }}
         , MenuDefine{L"plugin", L"插件", IDM_PLUGIN, new std::vector<MenuDefine>{
             MenuDefine{L"bkmk_add", L"Δ 原生MFPlayer", IDM_PLUGIN_MF}

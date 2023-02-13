@@ -191,29 +191,60 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 
 bool WODPlayer::AddBookmark()
 {
-	if(_mMediaPlayer) {
+	if(_mMediaPlayer) { // todo use binary insert
 		int pos = _mMediaPlayer->GetPosition();
 		int duration = _mMediaPlayer->GetDuration();
 		//LogIs(2, L"%s", (LPCWSTR)_currentPath);
-		_app->_db->AddBookmark(_currentPath.GetData(threadBuffer), 0, _timeMarked, pos, duration, 0);
+		auto rowId = _app->_db->AddBookmark(_currentPath.GetData(threadBuffer), 0, _timeMarked, pos, duration, 0);
 
-		int idx = 0;
+		int idx = -1;
 		for (size_t i = 0; i < _bookmarks.size(); i++)
 		{
 			if(_bookmarks[i].pos>=pos) {
-				if(_bookmarks[i].pos==pos) idx==-1;
+				if(_bookmarks[i].pos==pos) return false;
 				idx = i;
 				break;
 			}
 		}
 		if(idx>=0)
 		{
-			_bookmarks.insert(_bookmarks.begin()+idx, {pos});
+			_selectedBookmark = idx;
+			_bookmarks.insert(_bookmarks.begin()+idx, {pos, rowId});
+		}
+		else
+		{
+			_selectedBookmark = _bookmarks.size();
+			_bookmarks.push_back({pos, rowId});
 		}
 		_seekbar.Invalidate();
 		return true;
 	}
 	return false;
+}
+
+void WODPlayer::SelectBookMark(int index)
+{
+	if (index>=0 && index<_bookmarks.size())
+	{
+		_mMediaPlayer->SetPosition(_bookmarks[index].pos);
+		_selectedBookmark = index;
+		if (!_isPlaying)
+		{
+			_seekbar.SetProgress(_bookmarks[index].pos);
+		}
+	}
+}
+
+void WODPlayer::DelBookmark(int index)
+{
+	if (index>=0 && index<_bookmarks.size())
+	{
+		const auto & bkmk =  _bookmarks[index];
+		_app->_db->DelBookmark(bkmk.rowID);
+		_bookmarks.erase(_bookmarks.begin()+index);
+		_seekbar.Invalidate();
+		_selectedBookmark = -1;
+	}
 }
 
 void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)

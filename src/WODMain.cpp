@@ -95,9 +95,10 @@ void hookMouseWheel(MSG & msg)
 {
 	//fwKeys = GET_KEYSTATE_WPARAM(wParam);
 	auto zDelta = GET_WHEEL_DELTA_WPARAM(msg.wParam);
-	if (IsKeyDown(VK_CONTROL))
+	if (IsKeyDown(VK_CONTROL) 
+		|| msg.hwnd==XPP->_mainPlayer._seekbar.GetHWND())
 	{
-		NavTimemark(zDelta);
+		NavTimemark(-zDelta);
 	}
 
 }

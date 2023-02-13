@@ -33,6 +33,8 @@ public:
 
     bool PlayVideoFile(const TCHAR* path);
     bool AddBookmark();
+    void SelectBookMark(int index);
+    void DelBookmark(int index);
 
     void newVideoView();
 
@@ -57,6 +59,7 @@ public:
     RECT _exRect;
     WODApplication* _app;
     std::vector<BookMark> _bookmarks;
+    int _selectedBookmark = -1;
     __int64 _timeMarked; // folder
     float speed = 1;
     int volume = 100;
