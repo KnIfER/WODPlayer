@@ -58,17 +58,17 @@ extern "C" __declspec(dllexport) bool vwIsPaused(MFPlayer2* player)
 
 extern "C" __declspec(dllexport) long vwGetPosition(MFPlayer2* player) 
 {
-	return player->GetPosition();
+	return player->GetPosition()/10000;
 }
 
 extern "C" __declspec(dllexport) long vwGetDuration(MFPlayer2* player) 
 {
-	return player->GetDuration();
+	return player->GetDuration()/10000;
 }
 
 extern "C" __declspec(dllexport) void vwSetPosition(MFPlayer2* player, long pos) 
 {
-	return player->SetPosition(pos);
+	return player->SetPosition(pos*10000);
 }
 
 extern "C" __declspec(dllexport) void vwSetFullScreen(MFPlayer2* player, bool val) 

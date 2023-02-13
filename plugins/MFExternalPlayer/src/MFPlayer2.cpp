@@ -240,7 +240,7 @@ void MFPlayer2::OnMediaPlayerEvent(MFP_EVENT_HEADER * pEventHeader)
         break;
 
     case MFP_EVENT_TYPE_PLAY:
-        PostMessage(getHParent(), MM_PREPARED, GetDuration(), 0);
+        PostMessage(getHParent(), MM_PREPARED, GetDuration()/10000, 0);
         break;
 
     case MFP_EVENT_TYPE_PLAYBACK_ENDED:
