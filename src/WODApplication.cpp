@@ -231,8 +231,8 @@ void SetFloatHwnd(HWND hwnd)
 
 void WODApplication::ToggleFullScreen()
 {
-	HWND hThisFSc = m_hWnd;
-	DWORD style = GetWindowLong(hThisFSc, GWL_STYLE);
+	HWND hWnd = m_hWnd;
+	DWORD style = GetWindowLong(hWnd, GWL_STYLE);
 	if (!_isFullScreen)
 	{
 		HWND _hFullScreenBtmbar = _bottomBar->GetHWND();
@@ -251,28 +251,45 @@ void WODApplication::ToggleFullScreen()
 		SetLayeredWindowAttributes(_hFullScreenBtmbar, TransparentKey, 200, LWA_ALPHA);
 
 		_isFullScreen = true;
-		GetWindowRect(hThisFSc, &rcNScPos);
-		style = GetWindowLong(hThisFSc, GWL_EXSTYLE);
+		GetWindowRect(hWnd, &rcNScPos);
 
-		int w = ::GetSystemMetrics(SM_CXSCREEN);
-		int h = ::GetSystemMetrics(SM_CYSCREEN);
-		::SetWindowPos(hThisFSc, NULL, 0, 0, w, h, 0);
+		style = GetWindowLong(hWnd, GWL_STYLE);
+		SetWindowLong(hWnd, GWL_STYLE , style & ~WS_THICKFRAME | WS_POPUP );
+
+		//style = GetWindowLong(hWnd, GWL_EXSTYLE);
+		//dwNScStyle = WS_EX_DLGMODALFRAME |
+		//	WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE;
+		//SetWindowLong(hWnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_TOPMOST);
 
 		_topBarFscWnd->SetVisible(false);
 		_bottomBar->SetVisible(false);
 
 		_bottomBar->SetFloat(true);
 		m_pm.GetSizeBox().top = 0;
+
+		int w = ::GetSystemMetrics(SM_CXSCREEN);
+		int h = ::GetSystemMetrics(SM_CYSCREEN);
+		::SetWindowPos(hWnd, NULL, 0, 0, w, h, 0);
+
+		//HMONITOR hmon = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+		//MONITORINFO mi = { sizeof(mi) };
+		//if (GetMonitorInfo(hmon, &mi))
+		//{
+		//	::SetWindowPos(hWnd, HWND_TOPMOST, mi.rcMonitor.left,
+		//		mi.rcMonitor.top,
+		//		mi.rcMonitor.right - mi.rcMonitor.left,
+		//		mi.rcMonitor.bottom - mi.rcMonitor.top, 0);
+		//}
 	}
 	else
 	{
 		_bottomBar->SetFloat(false);
 		SetParent(_mainPlayer._seekbar.GetHWND(), m_hWnd);
 		_isFullScreen = false;
-		style = GetWindowLong(hThisFSc, GWL_EXSTYLE);
-		SetWindowLong(hThisFSc, GWL_EXSTYLE, style&~WS_EX_TOPMOST);
+		style = GetWindowLong(hWnd, GWL_STYLE);
+		SetWindowLong(hWnd, GWL_STYLE , style | WS_THICKFRAME );
 
-		::SetWindowPos(hThisFSc, NULL, rcNScPos.left, rcNScPos.top
+		::SetWindowPos(hWnd, NULL, rcNScPos.left, rcNScPos.top
 			, rcNScPos.right-rcNScPos.left, rcNScPos.bottom-rcNScPos.top, 0);
 
 		_topBar->GetParent()->Remove(_topBar);
