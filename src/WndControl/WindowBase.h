@@ -17,7 +17,6 @@
 #pragma once
 #include <Windows.h>
 #include <Windowsx.h>
-#include "comctl32.h"
 
 class WindowBase 
 {

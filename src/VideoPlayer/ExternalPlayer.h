@@ -18,7 +18,6 @@
 
 #include <tchar.h>
 #include <atlbase.h>
-#include "WindowBase.h"
 #include "VideoPlayerInerface.h"
 
 

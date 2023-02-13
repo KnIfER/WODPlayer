@@ -1,5 +1,3 @@
-
-
 #include "WindowBase.h"
 #include "gdiplus.h"
 

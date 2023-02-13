@@ -19,48 +19,37 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\comctl32.cpp" />
     <ClCompile Include="src\database\database_helper.cpp" />
-    <ClCompile Include="src\tab.cpp" />
-    <ClCompile Include="src\toolbar.cpp" />
     <ClCompile Include="src\Utils\ImageUtils.cpp" />
     <ClCompile Include="src\Utils\ProfileStd.cpp" />
     <ClCompile Include="src\VideoPlayer\ExternalPlayer.cpp" />
     <ClCompile Include="src\VideoPlayer\VideoPlayerInerface.cpp" />
     <ClCompile Include="src\VideoPlayer\WODPlayer.cpp" />
-    <ClCompile Include="src\WndControl\ButtonList.cpp" />
     <ClCompile Include="src\WndControl\PopupMenu.cpp" />
     <ClCompile Include="src\WndControl\SeekBar.cpp" />
     <ClCompile Include="src\WndControl\Shortcut\WODShortcut.cpp" />
-    <ClCompile Include="WODMain.cpp" />
-    <ClCompile Include="WODApplication.cpp" />
-    <ClCompile Include="WODMenus.cpp" />
+    <ClCompile Include="src\WODMain.cpp" />
+    <ClCompile Include="src\WODApplication.cpp" />
+    <ClCompile Include="src\WODMenus.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\comctl32.h" />
     <ClInclude Include="src\database\bookmark.h" />
     <ClInclude Include="src\database\database_helper.h" />
     <ClInclude Include="src\database\sqlite3.h" />
-    <ClInclude Include="src\debug.h" />
-    <ClInclude Include="src\heap.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Utils\ProfileStd.h" />
     <ClInclude Include="src\Utils\WindowUtils.h" />
     <ClInclude Include="src\VideoPlayer\ExternalPlayer.h" />
     <ClInclude Include="src\VideoPlayer\WODPlayer.h" />
-    <ClInclude Include="src\WndControl\ButtonList.h" />
     <ClInclude Include="src\WndControl\PopupMenu.h" />
     <ClInclude Include="src\WndControl\SeekBar.h" />
     <ClInclude Include="src\WndControl\Shortcut\virtual_keys.h" />
-    <ClInclude Include="WODApplication.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="src\WODApplication.h" />
+    <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\VideoPlayer\VideoPlayerInerface.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="WODMenus.h" />
-    <ClInclude Include="WODMenuID.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="WOD.rc" />
+    <ClInclude Include="src\targetver.h" />
+    <ClInclude Include="src\WODMenus.h" />
+    <ClInclude Include="src\WODMenuID.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\demo\res\icons.bmp" />
@@ -70,6 +59,9 @@
     <Image Include="res\play.ico" />
     <Image Include="res\prev.ico" />
     <Image Include="res\stop.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\WOD.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

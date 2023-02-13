@@ -13,37 +13,28 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\video_src">
-      <UniqueIdentifier>{5fc36d1f-3008-4e22-a334-9d6a803defa3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\video_src\WndControl">
-      <UniqueIdentifier>{42d64097-32ba-4763-b3c5-f88fc5ac8697}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\video_src\VideoPlayer">
-      <UniqueIdentifier>{ddd610ef-a438-4e5a-9e66-d16d0c5520d9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\database">
       <UniqueIdentifier>{ef3c76de-0f5d-4dfd-be91-e9dbbd0e67e5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\utils">
       <UniqueIdentifier>{6edef70d-d640-447d-9752-68528c448376}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\video_src\WndControl\Shortcut">
+    <Filter Include="Source Files\VideoPlayer">
+      <UniqueIdentifier>{ddd610ef-a438-4e5a-9e66-d16d0c5520d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WndControl">
+      <UniqueIdentifier>{42d64097-32ba-4763-b3c5-f88fc5ac8697}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WndControl\Shortcut">
       <UniqueIdentifier>{03fbbf8e-8c39-45da-86fc-e318f25b4e58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WndControl\Wine">
+      <UniqueIdentifier>{6eddff32-f0e9-48fe-bac8-cdaf8c7b658a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WODApplication.cpp">
-      <Filter>Source Files\video_src</Filter>
-    </ClCompile>
     <ClCompile Include="src\VideoPlayer\VideoPlayerInerface.cpp">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\tab.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\comctl32.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\VideoPlayer</Filter>
     </ClCompile>
     <ClCompile Include="src\database\database_helper.cpp">
       <Filter>Source Files\database</Filter>
@@ -51,58 +42,37 @@
     <ClCompile Include="src\Utils\ImageUtils.cpp">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
-    <ClCompile Include="WODMain.cpp">
-      <Filter>Source Files\video_src</Filter>
-    </ClCompile>
     <ClCompile Include="src\VideoPlayer\WODPlayer.cpp">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
+      <Filter>Source Files\VideoPlayer</Filter>
     </ClCompile>
     <ClCompile Include="src\VideoPlayer\ExternalPlayer.cpp">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
+      <Filter>Source Files\VideoPlayer</Filter>
     </ClCompile>
     <ClCompile Include="src\WndControl\SeekBar.cpp">
-      <Filter>Source Files\video_src\WndControl</Filter>
+      <Filter>Source Files\WndControl</Filter>
     </ClCompile>
-    <ClCompile Include="src\WndControl\ButtonList.cpp">
-      <Filter>Source Files\video_src\WndControl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\toolbar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WODMenus.cpp">
+    <ClCompile Include="src\WODMenus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\WndControl\PopupMenu.cpp">
-      <Filter>Source Files\video_src\WndControl</Filter>
+      <Filter>Source Files\WndControl</Filter>
     </ClCompile>
     <ClCompile Include="src\Utils\ProfileStd.cpp">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
     <ClCompile Include="src\WndControl\Shortcut\WODShortcut.cpp">
-      <Filter>Source Files\video_src\WndControl\Shortcut</Filter>
+      <Filter>Source Files\WndControl\Shortcut</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WODApplication.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WODMain.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WODApplication.h">
-      <Filter>Source Files\video_src</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Source Files\video_src</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Source Files\video_src</Filter>
-    </ClInclude>
     <ClInclude Include="src\VideoPlayer\VideoPlayerInerface.h">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\comctl32.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\debug.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\heap.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\VideoPlayer</Filter>
     </ClInclude>
     <ClInclude Include="src\database\database_helper.h">
       <Filter>Source Files\database</Filter>
@@ -113,44 +83,45 @@
     <ClInclude Include="src\Utils\WindowUtils.h">
       <Filter>Source Files\utils</Filter>
     </ClInclude>
-    <ClInclude Include="src\pch.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\VideoPlayer\WODPlayer.h">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
+      <Filter>Source Files\VideoPlayer</Filter>
     </ClInclude>
     <ClInclude Include="src\VideoPlayer\ExternalPlayer.h">
-      <Filter>Source Files\video_src\VideoPlayer</Filter>
+      <Filter>Source Files\VideoPlayer</Filter>
     </ClInclude>
     <ClInclude Include="src\database\bookmark.h">
       <Filter>Source Files\database</Filter>
     </ClInclude>
     <ClInclude Include="src\WndControl\SeekBar.h">
-      <Filter>Source Files\video_src\WndControl</Filter>
+      <Filter>Source Files\WndControl</Filter>
     </ClInclude>
-    <ClInclude Include="src\WndControl\ButtonList.h">
-      <Filter>Source Files\video_src\WndControl</Filter>
-    </ClInclude>
-    <ClInclude Include="WODMenus.h">
+    <ClInclude Include="src\WODMenus.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="WODMenuID.h">
+    <ClInclude Include="src\WODMenuID.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\WndControl\PopupMenu.h">
-      <Filter>Source Files\video_src\WndControl</Filter>
+      <Filter>Source Files\WndControl</Filter>
     </ClInclude>
     <ClInclude Include="src\Utils\ProfileStd.h">
       <Filter>Source Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="src\WndControl\Shortcut\virtual_keys.h">
-      <Filter>Source Files\video_src\WndControl\Shortcut</Filter>
+      <Filter>Source Files\WndControl\Shortcut</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="WOD.rc">
-      <Filter>Source Files\video_src</Filter>
-    </ResourceCompile>
+    <ClInclude Include="src\resource.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\targetver.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WODApplication.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\demo\res\icons.bmp">
@@ -174,5 +145,10 @@
     <Image Include="res\pause.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\WOD.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

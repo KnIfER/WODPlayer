@@ -39,7 +39,7 @@ WODApplication::WODApplication()
 	//_roundwnd = 1;
 }
 
-#include "../WndControl/ButtonList.h"
+//#include "../WndControl/ButtonList.h"
 
 CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 	if(lstrcmp(pstrClass, L"seekbar")==0) {
@@ -49,7 +49,7 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 		//return new SeekBarOld();
 	}
 	if(lstrcmp(pstrClass, L"btnlst")==0) {
-		return new ButtonList();
+		//return new ButtonList();
 	}
 	if(*pstrClass=='_') {
 		pstrClass++;
