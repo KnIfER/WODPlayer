@@ -22,6 +22,12 @@ void WODApplication::buildAccelerator()
 	_accelerators.push_back({FVIRTKEY, VK_RETURN, IDM_MAXMISE});
 	_accelerators.push_back({FVIRTKEY, VK_SPACE, IDM_PAUSE});
 
+	// bookmark
+	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_PRIOR, IDM_BKMK_PRV});
+	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_NEXT, IDM_BKMK_NXT});
+	_accelerators.push_back({FVIRTKEY|FSHIFT|FCONTROL, VK_LEFT, IDM_BKMK_PRV});
+	_accelerators.push_back({FVIRTKEY|FSHIFT|FCONTROL, VK_RIGHT, IDM_BKMK_NXT});
+
 	// seek
 	_accelerators.push_back({FVIRTKEY, VK_RIGHT, IDM_SEEK_FORE});
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_RIGHT, IDM_SEEK_FORE_FAST});
@@ -29,6 +35,7 @@ void WODApplication::buildAccelerator()
 	_accelerators.push_back({FVIRTKEY, VK_LEFT, IDM_SEEK_BACK});
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_LEFT, IDM_SEEK_BACK_FAST});
 	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_LEFT, IDM_SEEK_BACK_FASTER});
+
 
 	// speed
 	_accelerators.push_back({FVIRTKEY, VK_C, IDM_SPEED_UP});

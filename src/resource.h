@@ -9,7 +9,7 @@
 //#define IDR_MENU1                       103
 //#define IDR_MENU_MAIN                   103
 
-#define IDM_PLAY                        101
+#define IDI_PLAY                        101
 #define IDM_STOP                        102
 #define IDM_PREV                        103
 #define IDM_NXT                         104
@@ -21,7 +21,6 @@
 #define IDM_PAUSE                       107
 #define IDI_PREV                        108
 #define IDI_STOP                        109
-#define IDI_PLAY                        IDM_PLAY
 #define IDI_FOLDER                      IDM_OPEN
 #define IDM_START                       IDM_PLAY
 #define IDI_ICON1                       111

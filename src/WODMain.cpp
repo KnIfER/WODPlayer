@@ -89,6 +89,19 @@ void hookLButtonDown(MSG & msg)
 	}
 }
 
+extern void NavTimemark(int delta);
+
+void hookMouseWheel(MSG & msg)
+{
+	//fwKeys = GET_KEYSTATE_WPARAM(wParam);
+	auto zDelta = GET_WHEEL_DELTA_WPARAM(msg.wParam);
+	if (IsKeyDown(VK_CONTROL))
+	{
+		NavTimemark(zDelta);
+	}
+
+}
+
 void hookLButtonDoubleClick(MSG & msg)
 {
 	//LogIs("hookLButtonDoubleClick");
@@ -181,6 +194,9 @@ wWinMain(_In_ HINSTANCE hInstance,
 					break;
 				case WM_LBUTTONDOWN:
 					hookLButtonDown(msg);
+					break;
+				case WM_MOUSEWHEEL:
+					hookMouseWheel(msg);
 					break;
 				case WM_MOUSEMOVE:
 				case WM_NCMOUSEMOVE:

@@ -39,8 +39,7 @@ __declspec(selectany)  std::string threadBuffer;
 __declspec(selectany)  DWORD TransparentKey;
 
 
-
-
+extern bool IsKeyDown(int key);
 
 
 

@@ -206,7 +206,7 @@ void WOD_Register(HINSTANCE hInstance)
 }
 
 
-static DWORD dwNScStyle = WS_CAPTION|WS_BORDER|WS_SIZEBOX; 
+static DWORD dwNScStyle = WS_CAPTION|WS_THICKFRAME; 
 RECT rcNScPos;
 
 
@@ -254,7 +254,7 @@ void WODApplication::ToggleFullScreen()
 		GetWindowRect(hWnd, &rcNScPos);
 
 		style = GetWindowLong(hWnd, GWL_STYLE);
-		SetWindowLong(hWnd, GWL_STYLE , style & ~WS_THICKFRAME | WS_POPUP );
+		SetWindowLong(hWnd, GWL_STYLE , style & ~dwNScStyle | WS_POPUP );
 
 		//style = GetWindowLong(hWnd, GWL_EXSTYLE);
 		//dwNScStyle = WS_EX_DLGMODALFRAME |
@@ -412,11 +412,6 @@ bool WODApplication::PickFile()
 	return false;
 }
 
-bool IsKeyDown(int key) {
-	return (::GetKeyState(key) & 0x80000000) != 0;
-}
-
-
 #include <Windows.h>
 #include <GdiPlus.h>
 #pragma comment(lib, "GdiPlus")//Visual Studio specific
@@ -424,6 +419,11 @@ bool IsKeyDown(int key) {
 
 TCHAR nxt_file[_MAX_PATH];
 //std::string threadBuffer;
+
+
+bool IsKeyDown(int key) {
+	return (::GetKeyState(key) & 0x80000000) != 0;
+}
 
 
 void Replay()
@@ -461,6 +461,35 @@ void SeekDelta(int delta, int level)
 		}
 		if(!XPP->_mainPlayer._isPlaying && !XPP->_mainPlayer._seekbar._isSeeking) {
 			XPP->_mainPlayer._seekbar.SetProgressAndMax(delta, player->GetDuration());
+		}
+	}
+}
+
+void NavTimemark(int delta)
+{
+	auto & player = XPP->_mainPlayer;
+	int pos = player._mMediaPlayer->GetPosition();
+	if(player._bookmarks.size())
+	{
+		bool set = false;
+		for (size_t i = 0; i < player._bookmarks.size(); i++)
+		{
+			if (delta<0 && player._bookmarks[i].pos >= pos && i>0)
+			{
+				player._mMediaPlayer->SetPosition(player._bookmarks[i-1].pos);
+				set = 1;
+				break;
+			}
+			if (delta>0 && player._bookmarks[i].pos > pos)
+			{
+				player._mMediaPlayer->SetPosition(player._bookmarks[i].pos);
+				set = 1;
+				break;
+			}
+		}
+		if (!set)
+		{
+			player._mMediaPlayer->SetPosition(0);
 		}
 	}
 }
@@ -608,9 +637,6 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		bHandled = true;
 		switch (LOWORD(wParam))
 		{
-		case IDM_PLAY:
-			_mainPlayer.Toggle();
-			break;
 		case IDM_FILE_CLOSE:
 		case IDM_STOP:
 			if (_mainPlayer._mMediaPlayer)
@@ -652,6 +678,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_SHUTDOWN:
 			Close();
 			break;
+		case IDI_PLAY:
 		case IDM_PAUSE:
 			_mainPlayer.Toggle();
 			break;
@@ -669,6 +696,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_SPEED_UP_FASTER:  _mainPlayer.SpeedDelta(1); break;
 		case IDM_SPEED_DOWN_FASTER:  _mainPlayer.SpeedDelta(-1); break;
 		case IDM_SPEED_RESET: _mainPlayer.SpeedDelta(0); break;
+
+		case IDM_BKMK_PRV: NavTimemark(-1); break;
+		case IDM_BKMK_NXT: NavTimemark(1); break;
 
 		case IDM_FILE:
 		case IDM_BKMK:
@@ -748,6 +778,9 @@ void WODApplication::ResetWndOpacity()
 		if(_WndOp==1) 
 		{
 			SetLayeredWindowAttributes(m_hWnd, TransparentKey, 0, LWA_COLORKEY);
+			RECT rc; GetClientRect(_mainPlayer.GetHWND(), &rc);
+			::InvalidateRect(_mainPlayer.GetHWND(), 0, true);
+			//::SendMessage(_mainPlayer.GetHWND(), WM_SIZE, 0, 0);
 		}
 		else
 		{

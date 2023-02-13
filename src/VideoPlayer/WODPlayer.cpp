@@ -260,7 +260,7 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 
 bool WODPlayer::IsMediaPlayerWindow(HWND hwnd)
 {
-	return hwnd==_hPlayer||IsChild(_hPlayer, hwnd);
+	return hwnd==_hWnd||IsChild(_hWnd, hwnd);
 }
 
 HWND WODPlayer::GetMediaPlayerHWND()
