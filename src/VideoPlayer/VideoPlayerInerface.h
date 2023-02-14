@@ -36,11 +36,11 @@ public:
 	virtual void SetFullScreen(bool val){};
 	virtual void Release(){};
 	virtual void Close(){};
-	virtual void syncResolution(){};
+	virtual void syncResolution(unsigned int & _resX, unsigned int & _resY){};
 	virtual float SetRate(float rate)=0;
 	virtual int SetVolume(int volume)=0;
 	//POINT _resolution; 
-	unsigned int _resX; 
-	unsigned int _resY; 
+	//unsigned int _resX; 
+	//unsigned int _resY; 
 
 };

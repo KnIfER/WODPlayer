@@ -253,16 +253,19 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 		//::MoveWindow(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
 		//::SetWindowPos(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
 
-		if(_mMediaPlayer->_resX && _mMediaPlayer->_resY) 
-		//if(0) 
+		if(_srcWidth && _srcHeight) 
 		{
 			float width = rc.right - rc.left;
 			float height = rc.bottom-rc.top;
-			float ratio = min(width/_mMediaPlayer->_resX, height/_mMediaPlayer->_resY);
-			int w = _mMediaPlayer->_resX*ratio;
-			int h = _mMediaPlayer->_resY*ratio;
+
+			float ratio = min(width/_srcWidth, height/_srcHeight)*_scale;
+
+			int w = _srcWidth*ratio;
+			int h = _srcHeight*ratio;
+
 			_exRect.left = (width-w)/2;
-			_exRect.top = max(0, (height-h)/2);
+			//_exRect.top = max(0, (height-h)/2);
+			_exRect.top = (height-h)/2;
 			_exRect.right = _exRect.left+w;
 			_exRect.bottom = _exRect.top+h;
 			::SetWindowPos(_mMediaPlayer->getHWND(), HWND_TOP, 
@@ -334,7 +337,7 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 			_seekbar.SetMax(wParam);
 			MarkPlaying(true);
 			if(_mMediaPlayer)
-				_mMediaPlayer->syncResolution();
+				_mMediaPlayer->syncResolution(_srcWidth, _srcHeight);
 			//if(_app->_WndOp==1)
 			{
 				SetPos(GetPos());

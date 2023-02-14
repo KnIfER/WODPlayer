@@ -141,7 +141,7 @@ void ExternalPlayer::Release()
 	}
 }
 
-void ExternalPlayer::syncResolution()
+void ExternalPlayer::syncResolution(unsigned int & _resX, unsigned int & _resY)
 {
 	if (_player && vwSyncSize)
 	{

@@ -69,7 +69,7 @@ public:
 	bool			PlayVideoFile(const TCHAR* path) override;
 	void			Close() override;
 	void			Release() override;
-	void			syncResolution() override;
+	void			syncResolution(unsigned int & _resX, unsigned int & _resY) override;
 	float			SetRate(float rate) override;
 	int			 SetVolume(int volume) override;
 	HMODULE vwInit(int & error_code, const TCHAR* dllPath, bool blame=false, const TCHAR* dllDir=0);

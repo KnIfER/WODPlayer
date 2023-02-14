@@ -606,7 +606,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				_mainPlayer._seekbar.SetProgressAndMax(pos, _mainPlayer._mMediaPlayer->GetDuration());
 			}
 
-			_mainPlayer._mMediaPlayer->syncResolution();
+			_mainPlayer._mMediaPlayer->syncResolution(_mainPlayer._srcWidth, _mainPlayer._srcHeight);
 			//LogIs(3, "setPosition:: %d %d max=%d curr=%d\n", _mainPlayer._mMediaPlayer->m_nPosition, _mainPlayer._mMediaPlayer->m_nDuration, _mainPlayer._seekbar.GetMax(), _mainPlayer._seekbar.GetPosition());
 		}
 	}

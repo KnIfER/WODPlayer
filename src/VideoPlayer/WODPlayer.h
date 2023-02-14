@@ -63,4 +63,19 @@ public:
     __int64 _timeMarked; // folder
     float speed = 1;
     int volume = 100;
+
+    unsigned int _srcWidth;
+    unsigned int _srcHeight;
+
+    float _scale = 1;
+
+    float _minScale = 1;
+    bool _bNewImage = false;
+    bool _bFit = true;
+
+    int _translationX = 0;
+    int _translationY = 0;
+    bool _moving = false;
+    int _moveLastX = 0;
+    int _moveLastY = 0;
 };
