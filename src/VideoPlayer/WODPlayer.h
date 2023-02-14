@@ -46,8 +46,10 @@ public:
 
 
     void SetPos(RECT rc, bool bNeedInvalidate = true) override;
-    bool HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& ret) override;
+    bool HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT * ret) override;
 
+
+    void DoEvent(TEventUI& event) override;
 
     SeekBar _seekbar;
     SeekBar _volumebar;

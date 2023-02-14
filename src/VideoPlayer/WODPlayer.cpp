@@ -258,7 +258,9 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 			float width = rc.right - rc.left;
 			float height = rc.bottom-rc.top;
 
-			float ratio = min(width/_srcWidth, height/_srcHeight)*_scale;
+			_minScale = min(width/_srcWidth, height/_srcHeight);
+
+			float ratio = _minScale*_scale;
 
 			int w = _srcWidth*ratio;
 			int h = _srcHeight*ratio;
@@ -266,6 +268,28 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 			_exRect.left = (width-w)/2;
 			//_exRect.top = max(0, (height-h)/2);
 			_exRect.top = (height-h)/2;
+
+			if (_scale > 1)
+			{
+				_exRect.left += _translationX;
+				_exRect.top += _translationY;
+
+				if (h > height)
+				{
+					if(_exRect.top>0) {_exRect.top=0; _translationY=-(height-h)/2;}
+					else if(_exRect.top<-h+height) {_exRect.top=-h+height; _translationY=-h+height-(height-h)/2;}
+				}
+				else if (_exRect.top < 0) {_exRect.left=0; _translationX=-(width-w)/2;}
+				else if (_exRect.top > -h+height) {_exRect.top=-h+height; _translationX=-h+height-(height-h)/2;}
+				if (w > width)
+				{
+					if(_exRect.left>0) {_exRect.left=0; _translationX=-(width-w)/2;}
+					else if(_exRect.left<-w+width) {_exRect.left=-w+width; _translationX=-w+width-(width-w)/2;}
+				}
+				else if (_exRect.left < 0) {_exRect.left=0; _translationX=-(width-w)/2;}
+				else if (_exRect.left > -w+width) {_exRect.left=-w+width; _translationX=-w+width-(width-w)/2;}
+			}
+
 			_exRect.right = _exRect.left+w;
 			_exRect.bottom = _exRect.top+h;
 			::SetWindowPos(_mMediaPlayer->getHWND(), HWND_TOP, 
@@ -327,7 +351,7 @@ void WODPlayer::MarkPlaying(bool playing)
 	_app->MarkPlaying(playing);
 }
 
-bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& ret)
+bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT * ret)
 {
 	switch (uMsg)
 	{
@@ -346,6 +370,35 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 		case MM_STOPPED:
 		{
 			MarkPlaying(false);
+		} return 1;
+		case WM_LBUTTONDOWN:
+		{
+			_moving = true;
+			POINT pt;
+			::GetCursorPos(&pt);
+			_moveLastX = pt.x;
+			_moveLastY = pt.y;
+			::SetCapture(GetHWND());
+		} return 1;
+		case WM_LBUTTONUP:
+		{
+			_moving = false;
+			::ReleaseCapture();
+		} return 1;
+		case WM_MOUSEMOVE:
+		{
+			if (_moving)
+			{
+				POINT pt;
+				::GetCursorPos(&pt);
+				int X = pt.x; //LOWORD(event.lParam);
+				int Y = pt.y; //HIWORD(event.lParam);
+				_translationX += X-_moveLastX;
+				_translationY += Y-_moveLastY;
+				_moveLastX = X;
+				_moveLastY = Y;
+				NeedUpdate();
+			}
 		} return 1;
 		case WM_PAINT:
 		{
@@ -388,4 +441,40 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 		} return 1;
 	}
 	return 0;
+}
+
+void WODPlayer::DoEvent(TEventUI& event)
+{
+	if (event.Type == UIEVENT_SCROLLWHEEL)
+	{
+		if(::GetKeyState(VK_CONTROL) < 0)
+		{
+			float delta = 0.25;
+			float scale = _scale;
+			int zDelta = (int) (short) HIWORD(event.wParam);
+			//LogIs(2, "%d %d", event.wParam, LOWORD(event.wParam));
+			if (zDelta < 0) // SB_LINEDOWN
+			{
+				_scale -= delta;
+				if (_scale <= 1)
+				{
+					_bFit = true;
+					_scale = 1;
+					_translationX = 0;
+					_translationY = 0;
+				}
+			}
+			else
+			{
+				_scale += delta;
+				if (_scale > 1)
+				{
+					_bFit = false;
+				}
+			}
+			NeedUpdate();
+		}
+		return;
+	}
+	__super::DoEvent(event);
 }

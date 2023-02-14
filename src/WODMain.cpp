@@ -70,14 +70,18 @@ void hookMouseMove(MSG & msg)
 void hookLButtonDown(MSG & msg)
 {
 	//LogIs("hookLButtonDown %d %d", msg.pt.x, msg.pt.y);
-	if (!XPP->_isFullScreen)
+	if(XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd)) 
 	{
-		if(XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd)) 
+		if (!XPP->_isFullScreen && ::GetKeyState(VK_CONTROL) >= 0)
 		{
 			ReleaseCapture();
 			::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
 			//SetFocus(XPP->GetHWND());
 			return;
+		}
+		if(XPP->_mainPlayer.GetHWND() != msg.hwnd && ::GetKeyState(VK_CONTROL) < 0) 
+		{
+			XPP->_mainPlayer.HandleCustomMessage(msg.message, msg.wParam, msg.lParam, 0);
 		}
 	}
 	else if(msg.pt.y<=4 || XPP->_topBarFscWnd->GetHWND()==msg.hwnd) 
@@ -95,8 +99,7 @@ void hookMouseWheel(MSG & msg)
 {
 	//fwKeys = GET_KEYSTATE_WPARAM(wParam);
 	auto zDelta = GET_WHEEL_DELTA_WPARAM(msg.wParam);
-	if (IsKeyDown(VK_CONTROL) 
-		|| msg.hwnd==XPP->_mainPlayer._seekbar.GetHWND())
+	if (msg.hwnd==XPP->_mainPlayer._seekbar.GetHWND() || IsKeyDown(VK_MENU))
 	{
 		NavTimemark(-zDelta);
 	}
