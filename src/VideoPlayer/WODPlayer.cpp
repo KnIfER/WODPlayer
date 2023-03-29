@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "resource.h"
 #include "database/database_helper.h"
+#include "utils/PathUtils.h"
 //#include "VideoPlayer/VLCPlayer.h"
 
 extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName);
@@ -198,20 +199,35 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	//if (ret)
 	{
 		QkString tmp;
-		const char* pStr;
-		if(_currentPath.Find('\"')) {
-			tmp = _currentPath;
-			tmp.Replace(L"\"", L"\"\"");
-			pStr = tmp.GetData(threadBuffer);
-		} else {
-			pStr = _currentPath.GetData(threadBuffer);
+
+		_timeMarked = -1;
+
+		QkString pathBuffer;
+		pathBuffer.EnsureCapacity(_currentPath.GetLength() + 30);
+		pathBuffer.AsBuffer();
+
+		if (DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath))
+		{
+			pathBuffer.RecalcSize();
+			if(pathBuffer.Find('\"')) {
+				pathBuffer.Replace(L"\"", L"\"\"");
+			}
+			int fullPathLen = pathBuffer.GetLength();
+			if (DuiLib::PathRemoveFileSpecW((LPWSTR)pathBuffer.GetData()))
+			{
+				pathBuffer.RecalcSize();
+				size_t basePathLen = pathBuffer.GetLength();
+				_timeMarked = _app->_db->GetBookMarks(pathBuffer.GetData(threadBuffer1)
+					, pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1), _bookmarks);
+			}
 		}
-		_timeMarked = _app->_db->GetBookMarks(pStr, _bookmarks);
+
 		MarkPlaying();
 		return true;
 	}
 	return false;
 }
+
 
 bool WODPlayer::AddBookmark()
 {
@@ -219,7 +235,36 @@ bool WODPlayer::AddBookmark()
 		int pos = _mMediaPlayer->GetPosition();
 		int duration = _mMediaPlayer->GetDuration();
 		//LogIs(2, L"%s", (LPCWSTR)_currentPath);
-		auto rowId = _app->_db->AddBookmark(_currentPath.GetData(threadBuffer), 0, _timeMarked, pos, duration, 0);
+
+
+		QkString pathBuffer;
+		pathBuffer.EnsureCapacity(_currentPath.GetLength() + 30);
+		pathBuffer.AsBuffer();
+
+		int rowId = -1;
+
+		if (DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath))
+		{
+			pathBuffer.RecalcSize();
+			if(pathBuffer.Find('\"')) {
+				pathBuffer.Replace(L"\"", L"\"\"");
+			}
+			int fullPathLen = pathBuffer.GetLength();
+			if (DuiLib::PathRemoveFileSpecW((LPWSTR)pathBuffer.GetData()))
+			{
+				pathBuffer.RecalcSize();
+				size_t basePathLen = pathBuffer.GetLength();
+				//if(basePathLen>0 && pathBuffer[basePathLen-1]=='\\')
+				//{ // todo optimize
+				//    basePathLen--;
+				//	DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath);
+				//	pathBuffer.SetAt(basePathLen, '\0');
+				//	pathBuffer.RecalcSize();
+				//}
+				rowId = _app->_db->AddBookmark(pathBuffer.GetData(threadBuffer1)
+					, pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1), 0, _timeMarked, pos, duration, 0);
+			}
+		}
 
 		int idx = -1;
 		for (size_t i = 0; i < _bookmarks.size(); i++)
@@ -551,10 +596,13 @@ void WODPlayer::DoEvent(TEventUI& event)
 			float ratio = _minScale*_scale;
 			int w = _srcWidth*ratio;
 			int h = _srcHeight*ratio;
-			::SetWindowPos(_mMediaPlayer->getHWND(), 0, 
-				_exRect.left,  _exRect.top, 
-				w,  h, 
-				SWP_SHOWWINDOW);
+			if (_mMediaPlayer)
+			{
+				::SetWindowPos(_mMediaPlayer->getHWND(), 0, 
+					_exRect.left,  _exRect.top, 
+					w,  h, 
+					SWP_SHOWWINDOW);
+			}
 			//NeedUpdate();
 			//SetTimer(0x999, 800, true);
 			SetPos(m_rcItem);

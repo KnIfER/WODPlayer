@@ -37,6 +37,8 @@ extern LONG_PTR WOD_IMG_UTILS(const char* msg, HWND hWnd=0, LONG_PTR wParam=0, L
 
 __declspec(selectany)  std::string threadBuffer;
 
+__declspec(selectany)  std::string threadBuffer1;
+
 __declspec(selectany)  DWORD TransparentKey;
 
 

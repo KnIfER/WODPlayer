@@ -68,7 +68,6 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 	return 0;
 }
 
-
 void seekchange(SeekBar* bar, int pos) {
 	XPP->_mainPlayer._mMediaPlayer->SetPosition(pos);
 }
@@ -406,7 +405,7 @@ bool WODApplication::PickFile()
 		if (_mainPlayer.PlayVideoFile(filepath))
 		{
 			QkString filePath = filepath;
-			PutProfString("file", filePath.GetData(threadBuffer));
+			PutProfString("file", "");
 		}
 	}
 	return false;
@@ -468,6 +467,7 @@ void SeekDelta(int delta, int level)
 void NavTimemark(int delta)
 {
 	auto & wod = XPP->_mainPlayer;
+	if(!wod._mMediaPlayer) return;
 	auto & player = wod._mMediaPlayer;
 	auto & bkmks = wod._bookmarks;
 	int pos = player->GetPosition();
@@ -522,60 +522,63 @@ void NavPlayList(int delta)
 	}
 }
 
+LRESULT WODApplication::HandleDropFiles(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	HDROP hDropInfo = (HDROP)wParam;
+	UINT  nFileCount = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
+	TCHAR szFileName[_MAX_PATH] = TEXT("");
+	DWORD dwAttribute;
+	nxt_file[0] = 0;
+	// 获取拖拽进来文件和文件夹
+	for (UINT i = 0; i < nFileCount; i++)
+	{
+		::DragQueryFile(hDropInfo, i, szFileName, sizeof(szFileName));
+		dwAttribute = ::GetFileAttributes(szFileName);
+		// 是否为文件夹
+		if (dwAttribute & FILE_ATTRIBUTE_DIRECTORY)
+		{          
+		}
+		else
+		{
+			//CHAR buffer[256]={0};
+			//WideCharToMultiByte (CP_ACP, 0, szFileName
+			//	, -1, buffer, 256, 0, 0) ;
+			//MarkPlaying();
+			//LogIs(2, szFileName);
+			if (!nxt_file[0])
+			{
+				_playList.clear();
+				_playIdx = 0;
+				lstrcpy(nxt_file, szFileName);
+			}
+			_playList.push_back(szFileName);
+		}
+	}
+	if (nxt_file[0] && _mainPlayer._mMediaPlayer)
+	{
+		if (_mainPlayer.PlayVideoFile(nxt_file))
+		{
+			QkString filePath = nxt_file;
+			PutProfString("file", "");
+		}
+		//_mainPlayer._mMediaPlayer->Close();
+		//::KillTimer(m_hWnd, 10086);
+		//::SetTimer(m_hWnd, 10086, 200, 0);
+	}
+	// filepath
+
+	::DragFinish(hDropInfo);
+	return true;
+}
+
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 	switch (uMsg)
 	{
-	case WM_DROPFILES:
-	{
-		HDROP hDropInfo = (HDROP)wParam;
-		UINT  nFileCount = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
-		TCHAR szFileName[_MAX_PATH] = TEXT("");
-		DWORD dwAttribute;
-		nxt_file[0] = 0;
-		// 获取拖拽进来文件和文件夹
-		for (UINT i = 0; i < nFileCount; i++)
-		{
-			::DragQueryFile(hDropInfo, i, szFileName, sizeof(szFileName));
-			dwAttribute = ::GetFileAttributes(szFileName);
-			// 是否为文件夹
-			if (dwAttribute & FILE_ATTRIBUTE_DIRECTORY)
-			{          
-			}
-			else
-			{
-				//CHAR buffer[256]={0};
-				//WideCharToMultiByte (CP_ACP, 0, szFileName
-				//	, -1, buffer, 256, 0, 0) ;
-				//MarkPlaying();
-				//LogIs(2, szFileName);
-				if (!nxt_file[0])
-				{
-					_playList.clear();
-					_playIdx = 0;
-					lstrcpy(nxt_file, szFileName);
-				}
-				_playList.push_back(szFileName);
-			}
-		}
-		if (nxt_file[0] && _mainPlayer._mMediaPlayer)
-		{
-			if (_mainPlayer.PlayVideoFile(nxt_file))
-			{
-				QkString filePath = nxt_file;
-				PutProfString("file", filePath.GetData(threadBuffer));
-			}
-			//_mainPlayer._mMediaPlayer->Close();
-			//::KillTimer(m_hWnd, 10086);
-			//::SetTimer(m_hWnd, 10086, 200, 0);
-		}
-		// filepath
-
-		::DragFinish(hDropInfo);
-		return true;
-	};
-	break;
-
+	//case WM_DROPFILES:
+	//{
+	//	return HandleDropFiles(uMsg, wParam, lParam);
+	//} break;
 
 	case WM_SETFOCUS:
 	{
@@ -611,7 +614,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				if (_mainPlayer.PlayVideoFile(nxt_file))
 				{
 					QkString filePath = nxt_file;
-					PutProfString("file", filePath.GetData(threadBuffer));
+					PutProfString("file", "");
 				}
 			}
 			else

@@ -13,10 +13,10 @@ public:
 
 	bool Init();
 	
-	int AddBookmark(const char* fullpath, char* markName, __int64 & folderId, int pos, int duration, int flag);
+	int AddBookmark(const char* folder, const char* filename, char* markName, __int64 & folderId, int pos, int duration, int flag);
 	int DelBookmark(__int64 rowId);
 	
-	__int64 GetBookMarks(const char* fullpath, std::vector<BookMark> & _bookmarks);
+	__int64 GetBookMarks(const char* folder, const char* filename, std::vector<BookMark> & _bookmarks);
 
 private:
 	sqlite3* db;

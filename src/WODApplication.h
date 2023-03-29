@@ -54,6 +54,8 @@ public:
 
     CControlUI* CreateControl(LPCTSTR pstrClass) override;
     
+    LRESULT HandleDropFiles(UINT uMsg, WPARAM wParam, LPARAM lParam);
+    
     LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) override;
 
     void ResetWndOpacity();

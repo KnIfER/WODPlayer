@@ -219,6 +219,9 @@ wWinMain(_In_ HINSTANCE hInstance,
 					running=false;
 					break;
 					break;
+				case WM_DROPFILES:
+					XPP->HandleDropFiles(msg.message, msg.wParam, msg.lParam);
+					break;
 				case WM_LBUTTONDOWN:
 					hookLButtonDown(msg);
 					break;

@@ -72,14 +72,15 @@ id INTEGER PRIMARY KEY AUTOINCREMENT\
     return 0;
 }
 
-int WODBase::AddBookmark(const char* fullpath, char* markName, __int64 & folderId, int pos, int duration, int flag)
+int WODBase::AddBookmark(const char* folder, const char* filename, char* markName, __int64 & folderId, int pos, int duration, int flag)
 {
     //LogIs(2, "AddBookmark %s %ld", fullpath, folderId);
     sqlite3_exec(db, "begin", NULL, NULL, NULL);
     sqlite3_stmt *stmt1 = NULL;
     sqlite3_stmt *stmt2 = NULL;
     sqlite3_stmt *stmt = NULL;
-    if(folderId==-1) {
+    //if(folderId==-1) {
+    if(1) {
         const char *sql = "INSERT INTO timemarks(vid, fname, fpath, pos, duration, folder, creation_time) VALUES(?, ?, ?, ? ,?, ?, ?)";
         int succ = sqlite3_prepare_v2(db, sql, -1, &stmt1, NULL);
         if (succ != SQLITE_OK) {
@@ -91,11 +92,21 @@ int WODBase::AddBookmark(const char* fullpath, char* markName, __int64 & folderI
             int num = 1;
             sqlite3_bind_int(stmt1, num++, 0); // vid
 
-            ::PathCanonicalizeA(buffer_path, fullpath);
-            ::PathRemoveFileSpecA(buffer_path);
+            //PathCanonicalizeW(buffer_path, fullpath);
+            //LogIs(2, "PathCanonicalizeA %s %ld", buffer_path, folderId);
+            //::PathRemoveFileSpecA(buffer_path);
+            //LogIs(2, "PathRemoveFileSpecA %s %ld", buffer_path, folderId);
 
-            sqlite3_bind_text(stmt1, num++, buffer_path+strlen(buffer_path)+1, -1, NULL); // 文件名
-            sqlite3_bind_text(stmt1, num++, buffer_path, -1, NULL); // 父目录
+            //size_t basePathLen = strlen(buffer_path);
+            //if(basePathLen>0 && buffer_path[basePathLen-1]=='\\')
+            //{
+            //    basePathLen--;
+            //    ::PathCanonicalizeA(buffer_path, fullpath);
+            //    buffer_path[basePathLen]='\0';
+            //}
+
+            sqlite3_bind_text(stmt1, num++, filename, -1, NULL); // 文件名
+            sqlite3_bind_text(stmt1, num++, folder, -1, NULL); // 父目录
             //LogIs(2, "%s \n %s", buffer_path, buffer_path+strlen(buffer_path)+1);
 
             sqlite3_bind_int(stmt1, num++, 0); // pos
@@ -168,20 +179,28 @@ int exec_callback2(void *para, int columenCount, char **columnValue, char **colu
     return 0;
 }
 
-__int64 WODBase::GetBookMarks(const char* fullpath, std::vector<BookMark>& _bookmarks)
+__int64 WODBase::GetBookMarks(const char* folder, const char* filename, std::vector<BookMark>& _bookmarks)
 {
     _bookmarks.clear();
     char buffer_path[MAX_PATH];
     std::string localBuffer;
 
-    ::PathCanonicalizeA(buffer_path, fullpath);
-    ::PathRemoveFileSpecA(buffer_path);
+    //::PathCanonicalizeA(buffer_path, fullpath);
+    //::PathRemoveFileSpecA(buffer_path);
+
+    //size_t basePathLen = strlen(buffer_path);
+    //if(basePathLen>0 && buffer_path[basePathLen-1]=='\\')
+    //{
+    //    basePathLen--;
+    //    ::PathCanonicalizeA(buffer_path, fullpath);
+    //    buffer_path[basePathLen]='\0';
+    //}
 
     // 首先查询得 folder vid
     localBuffer = "select id from timemarks where folder=1 and fname=\"";
-    localBuffer += buffer_path+strlen(buffer_path)+1;
+    localBuffer += filename;
     localBuffer += "\" and fpath=\"";
-    localBuffer += buffer_path;
+    localBuffer += folder;
     localBuffer += "\"";
     localBuffer += " limit 1";
     LogIs("\nsql=%s", localBuffer.c_str());
