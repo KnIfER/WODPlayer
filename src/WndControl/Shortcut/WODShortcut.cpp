@@ -14,6 +14,8 @@ std::vector<ACCEL> _accelerators;
 void WODApplication::buildAccelerator()
 {
 
+	_accelerators.push_back({FVIRTKEY, VK_I, IDM_BKMK_ADD});
+	_accelerators.push_back({FVIRTKEY, VK_O, IDM_BKMK_ADD});
 	_accelerators.push_back({FVIRTKEY, VK_P, IDM_BKMK_ADD});
 
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_W, IDM_SHUTDOWN});
@@ -22,12 +24,25 @@ void WODApplication::buildAccelerator()
 	_accelerators.push_back({FVIRTKEY, VK_RETURN, IDM_MAXMISE});
 	_accelerators.push_back({FVIRTKEY, VK_SPACE, IDM_PAUSE});
 
+	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_DELETE, IDM_DELETE});
+	_accelerators.push_back({FVIRTKEY|FCONTROL|FSHIFT, VK_DELETE, IDM_DELETE_FOREVER});
+
+	_accelerators.push_back({FVIRTKEY, VK_PRIOR, IDM_PLAY_PRV});
+	_accelerators.push_back({FVIRTKEY, VK_NEXT, IDM_PLAY_NXT});
+
 	// bookmark
 	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_PRIOR, IDM_BKMK_PRV});
 	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_NEXT, IDM_BKMK_NXT});
 	_accelerators.push_back({FVIRTKEY|FSHIFT|FCONTROL, VK_LEFT, IDM_BKMK_PRV});
 	_accelerators.push_back({FVIRTKEY|FSHIFT|FCONTROL, VK_RIGHT, IDM_BKMK_NXT});
-	//_accelerators.push_back({FVIRTKEY, VK_H, IDM_BKMK_DEL});
+	// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+	_accelerators.push_back({FVIRTKEY, VK_OEM_4, IDM_BKMK_PRV});
+	_accelerators.push_back({FVIRTKEY, VK_OEM_6, IDM_BKMK_NXT});
+
+	_accelerators.push_back({FVIRTKEY, VK_OEM_1, IDM_BKMK_DEL});
+	_accelerators.push_back({FVIRTKEY, VK_OEM_7, IDM_BKMK_DEL});
+
+	_accelerators.push_back({FVIRTKEY, VK_H, IDM_BKMK_RETURN});
 	_accelerators.push_back({FVIRTKEY|FALT, VK_P, IDM_BKMK_DEL});
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_P, IDM_BKMK_DEL});
 

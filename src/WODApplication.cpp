@@ -79,7 +79,7 @@ void WODApplication::InitWindow()
 	ResetWndOpacity();
 	initWodMenus(this);
 
-	//m_pm._bIsLayoutOnly = true;
+	m_pm._bIsLayoutOnly = true;
 	_playBtn = m_pm.FindControl(_T("play"));
 	_bottomBar = static_cast<WinFrame*>(m_pm.FindControl(_T("ch1")));
 
@@ -505,6 +505,23 @@ void NavTimemark(int delta)
 	}
 }
 
+void NavPlayList(int delta)
+{
+	auto & wod = XPP->_mainPlayer;
+	auto & player = wod._mMediaPlayer;
+	auto & lst = XPP->_playList;
+	if(lst.size())
+	{
+		XPP->_playIdx += delta;
+		XPP->_playIdx %= lst.size();
+		if(XPP->_playIdx<0) XPP->_playIdx=0;
+		if(lst[XPP->_playIdx]!=wod._currentPath)
+		{
+			wod.PlayVideoFile(lst[XPP->_playIdx]);
+		}
+	}
+}
+
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 	switch (uMsg)
@@ -515,34 +532,44 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		UINT  nFileCount = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
 		TCHAR szFileName[_MAX_PATH] = TEXT("");
 		DWORD dwAttribute;
-
+		nxt_file[0] = 0;
 		// 获取拖拽进来文件和文件夹
 		for (UINT i = 0; i < nFileCount; i++)
 		{
 			::DragQueryFile(hDropInfo, i, szFileName, sizeof(szFileName));
 			dwAttribute = ::GetFileAttributes(szFileName);
-
 			// 是否为文件夹
 			if (dwAttribute & FILE_ATTRIBUTE_DIRECTORY)
 			{          
 			}
 			else
 			{
-				// filepath
-				if (_mainPlayer._mMediaPlayer)
-				{
-					_mainPlayer._mMediaPlayer->Close();
-					lstrcpy(nxt_file, szFileName);
-					::KillTimer(m_hWnd, 10086);
-					::SetTimer(m_hWnd, 10086, 200, 0);
-				}
 				//CHAR buffer[256]={0};
 				//WideCharToMultiByte (CP_ACP, 0, szFileName
 				//	, -1, buffer, 256, 0, 0) ;
-
-				MarkPlaying();
+				//MarkPlaying();
+				//LogIs(2, szFileName);
+				if (!nxt_file[0])
+				{
+					_playList.clear();
+					_playIdx = 0;
+					lstrcpy(nxt_file, szFileName);
+				}
+				_playList.push_back(szFileName);
 			}
 		}
+		if (nxt_file[0] && _mainPlayer._mMediaPlayer)
+		{
+			if (_mainPlayer.PlayVideoFile(nxt_file))
+			{
+				QkString filePath = nxt_file;
+				PutProfString("file", filePath.GetData(threadBuffer));
+			}
+			//_mainPlayer._mMediaPlayer->Close();
+			//::KillTimer(m_hWnd, 10086);
+			//::SetTimer(m_hWnd, 10086, 200, 0);
+		}
+		// filepath
 
 		::DragFinish(hDropInfo);
 		return true;
@@ -568,6 +595,11 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	}
 	//case WM_PAINT: case WM_CLOSE: case WM_DESTROY:
 	//case WM_SIZE: // old layout code see ::  https://github.com/KnIfER/WODPlayer/blob/9a19f3e5f0893ba82c1a8a3566e5b55f7a3e6290/src/WndControl/WODWindow.cpp#L425
+
+	case WM_LBUTTONUP:
+	{
+		::ReleaseCapture();
+	} return 0;
 
 	case WM_TIMER:
 	{
@@ -607,6 +639,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			}
 
 			_mainPlayer._mMediaPlayer->syncResolution(_mainPlayer._srcWidth, _mainPlayer._srcHeight);
+
+
 			//LogIs(3, "setPosition:: %d %d max=%d curr=%d\n", _mainPlayer._mMediaPlayer->m_nPosition, _mainPlayer._mMediaPlayer->m_nDuration, _mainPlayer._seekbar.GetMax(), _mainPlayer._seekbar.GetPosition());
 		}
 	}
@@ -650,14 +684,49 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		{
 		case IDM_FILE_CLOSE:
 		case IDM_STOP:
-			if (_mainPlayer._mMediaPlayer)
-				_mainPlayer._mMediaPlayer->Stop();
+			_mainPlayer.Stop();
 			MarkPlaying(false);
 			break;
 		case IDM_FILE_OPEN:
 		case IDM_OPEN:
 			PickFile();
 			break;
+		case IDM_DELETE:
+		case IDM_DELETE_FOREVER: {
+			_mainPlayer.Stop();
+			MarkPlaying(false);
+			BOOL bDelOK = 0;
+			if(LOWORD(wParam)==IDM_DELETE_FOREVER)
+			{
+				//extern int MoveToVacuum(PCZZWSTR path);
+				//bDelOK = !MoveToVacuum(_mainPlayer._currentPath);
+				bDelOK = ::DeleteFile(_mainPlayer._currentPath);
+				//LogIs(2, L"del~~~ %d %s", bDelOK, _mainPlayer._currentPath);
+			}
+			else
+			{
+				extern int MoveToTrash(PCZZWSTR path);
+				bDelOK = !MoveToTrash(_mainPlayer._currentPath);
+			}
+			if (bDelOK)
+			{
+				auto & wod = XPP->_mainPlayer;
+				auto & player = wod._mMediaPlayer;
+				auto & lst = XPP->_playList;
+
+				if(lst.size() && XPP->_playIdx<lst.size())
+				{
+					lst.erase(lst.begin()+XPP->_playIdx);
+					if(XPP->_playIdx==lst.size()) 
+						XPP->_playIdx --;
+					if(XPP->_playIdx<0) XPP->_playIdx=0;
+					if(lst.size())
+					{
+						wod.PlayVideoFile(lst[XPP->_playIdx]);
+					}
+				}
+			}
+		} break;
 		case IDM_MIN:
 			SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0); 
 			break;
@@ -665,7 +734,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			if(_isFullScreen) 
 			{
 				ToggleFullScreen();
-				SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0); 
+				//SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0); 
 				break;
 			}
 		case IDM_MAX:
@@ -686,6 +755,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			return 1;
 		case IDM_BKMK_DEL:
 			_mainPlayer.DelBookmark(_mainPlayer._selectedBookmark);
+			return 1;
+		case IDM_BKMK_RETURN:
+			_mainPlayer.SelectBookMark(_mainPlayer._selectedBookmark);
 			return 1;
 
 		case IDM_SHUTDOWN:
@@ -712,6 +784,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 		case IDM_BKMK_PRV: NavTimemark(-1); return 1;
 		case IDM_BKMK_NXT: NavTimemark(1); return 1;
+
+		case IDM_PLAY_PRV: NavPlayList(-1); return 1;
+		case IDM_PLAY_NXT: NavPlayList(1); return 1;
 
 		case IDM_FILE:
 		case IDM_BKMK:

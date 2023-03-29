@@ -162,13 +162,13 @@ VLCPlayer::VLCPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
     {
         const char** args = new const char*[] {
             "-I", "dummy", "--ignore-config",
-                // "--plugin-path=D:\plugins",
+                // "--plugin-path=C:\\Program Files (x86)\\VideoLAN\\vlc-3.0.18\\plugins",
                 "--vout-filter=deinterlace"
                 , "--deinterlace-mode=blend"
                 , "--input-repeat=2"
         };
 
-        m_vlcInstance = libvlc_new(0, 0);
+        m_vlcInstance = libvlc_new(6, args);
     }
 
     if (!m_vlcInstance)

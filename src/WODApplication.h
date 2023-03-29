@@ -87,4 +87,7 @@ public:
     int _WndOp;
 
     HACCEL _hAccTable;
+
+    std::vector<QkString> _playList;
+    int _playIdx;
 };

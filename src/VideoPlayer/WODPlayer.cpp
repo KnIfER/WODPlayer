@@ -126,7 +126,7 @@ int WODPlayer::SetVolume(int volume)
 void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::SolidBrush & brush, RECT & rc)
 {
 	brush.SetColor(0xffffffff);
-	graph.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);// SmoothingMode
+	//graph.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);// SmoothingMode
 
 	//graph.FillRectangle(&brush, pControl->GetWidth()/2, 0
 	//	, 8
@@ -134,7 +134,7 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 
 	int w = 1;
 	int width = 3;
-	int H = pControl->GetHeight(), W = pControl->GetWidth(), max = pControl->_max;
+	int H = pControl->GetHeight(), W = rc.right-rc.left, max = pControl->_max;
 	int height = H*2/3;
 	int top = (H-height)/2;
 
@@ -142,14 +142,38 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 	//		, width
 	//		, height);
 
+	Gdiplus::Pen pen(pControl->_trackColor);
+
 	WODPlayer* player = (WODPlayer*)pControl->GetTag();
 
 	for (size_t i = 0; i < player->_bookmarks.size(); i++)
 	{
 		auto when = player->_bookmarks.at(i).pos;
-		graph.FillRectangle(&brush, when*1.0/max*W - w, top
+		int left = rc.left+when*1.0/max*W - w;
+		graph.FillRectangle(&brush, left, top
 			, width
 			, height);
+
+		if((i%2)==0)
+		{
+			graph.FillRectangle(&brush, left+w, top
+				, width+w
+				, 2);
+			graph.FillRectangle(&brush, left+w, top+height-w-w
+				, width+w
+				, 2);
+			//graph.DrawLine(&pen, left+w, top, left+width+w+w+100, top);
+		}
+		else
+		{
+			graph.FillRectangle(&brush, left-width, top
+				, width+w
+				, 2);
+			graph.FillRectangle(&brush, left-width, top+height-w-w
+				, width+w
+				, 2);
+			//graph.DrawLine(&pen, left+w, top, left+width+w+w+100, top);
+		}
 	}
 }
 
@@ -249,10 +273,10 @@ void WODPlayer::DelBookmark(int index)
 
 void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 {
+	__super::SetPos(rc, bNeedInvalidate);
 	if(_hPlayer) {
 		//::MoveWindow(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
 		//::SetWindowPos(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
-
 		if(_srcWidth && _srcHeight) 
 		{
 			float width = rc.right - rc.left;
@@ -269,18 +293,20 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 			//_exRect.top = max(0, (height-h)/2);
 			_exRect.top = (height-h)/2;
 
+			int minY = -h+height-height/2;
+			_exRect.left += _translationX;
+			_exRect.top += _translationY;
+
 			if (_scale > 1)
 			{
-				_exRect.left += _translationX;
-				_exRect.top += _translationY;
-
 				if (h > height)
 				{
+					//if(_app->_isFullScreen) minY -= _app->_bottomBar->GetHeight();
 					if(_exRect.top>0) {_exRect.top=0; _translationY=-(height-h)/2;}
-					else if(_exRect.top<-h+height) {_exRect.top=-h+height; _translationY=-h+height-(height-h)/2;}
+					else if(_exRect.top<minY) {_exRect.top=minY; _translationY=minY-(height-h)/2;}
 				}
 				else if (_exRect.top < 0) {_exRect.left=0; _translationX=-(width-w)/2;}
-				else if (_exRect.top > -h+height) {_exRect.top=-h+height; _translationX=-h+height-(height-h)/2;}
+				//else if (_exRect.top > minY) {_exRect.top=minY; _translationX=minY-(height-h)/2;}
 				if (w > width)
 				{
 					if(_exRect.left>0) {_exRect.left=0; _translationX=-(width-w)/2;}
@@ -288,6 +314,9 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 				}
 				else if (_exRect.left < 0) {_exRect.left=0; _translationX=-(width-w)/2;}
 				else if (_exRect.left > -w+width) {_exRect.left=-w+width; _translationX=-w+width-(width-w)/2;}
+			}
+			else {
+				if (_exRect.top < minY) {_exRect.top=minY; _translationY=minY-(height-h)/2;}
 			}
 
 			_exRect.right = _exRect.left+w;
@@ -311,7 +340,6 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 		// 
 		//LogIs(2, "youre   %ld", GetHWND());
 	}
-	__super::SetPos(rc, bNeedInvalidate);
 
 	//::SendMessage(GetHWND(), MM_PREPARED, 0, 0);
 }
@@ -351,6 +379,14 @@ void WODPlayer::MarkPlaying(bool playing)
 	_app->MarkPlaying(playing);
 }
 
+// doubled draw buffer for all instances
+HDC         hdcMem = nullptr;
+HBITMAP     hbmMem = nullptr;
+HANDLE      hOld;
+PAINTSTRUCT ps;
+HDC         _hdc;
+UINT win_width, win_height;
+
 bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT * ret)
 {
 	switch (uMsg)
@@ -384,7 +420,7 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 		{
 			_moving = false;
 			::ReleaseCapture();
-		} return 1;
+		} return 0;
 		case WM_MOUSEMOVE:
 		{
 			if (_moving)
@@ -400,6 +436,9 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 				NeedUpdate();
 			}
 		} return 1;
+		//case WM_ERASEBKGND:
+		//{
+		//} return 1;
 		case WM_PAINT:
 		{
 			//if (WS_EX_LAYERED == (WS_EX_LAYERED & GetWindowLong(hWnd, GWL_EXSTYLE))) break;;
@@ -409,35 +448,58 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 			PAINTSTRUCT ps = { 0 };
 			HDC hdc = ::BeginPaint(GetHWND(), &ps);
 
-			HBRUSH hbrush1 = CreateSolidBrush(~TransparentKey);
-			FillRect(hdc, &_exRect, hbrush1);
-
-			//::GetClientRect(_hPlayer, &_exRect);
-			::ExcludeClipRect(hdc, _exRect.left, _exRect.top, _exRect.right, _exRect.bottom);
-			//::ExcludeClipRect(hdc, 0, 0, 100, 100);
-
 			RECT rect = ps.rcPaint; 
-			//rect.bottom -= 50;
 
-			//rect.right = rect.left+(rect.right-rect.left)/2;
+			auto rcPaint = ps.rcPaint;
+			//rcPaint.right = rcPaint.right - rcPaint.left;
+			//rcPaint.bottom = rcPaint.bottom - rcPaint.top;
+			//// Create an off-screen DC for double-buffering
+			//if (!hdcMem || win_width<rcPaint.right || win_height< rcPaint.bottom)
+			//{
+			//	if (hdcMem)
+			//	{
+			//		DeleteObject(hbmMem);
+			//		DeleteDC (hdcMem);
+			//	}
+			//	hdcMem = CreateCompatibleDC(hdc);
+			//	hbmMem = CreateCompatibleBitmap(hdc, rcPaint.right, rcPaint.bottom);
+			//	SelectObject(hdcMem, hbmMem);
 
-			HBRUSH hbrush = CreateSolidBrush(TransparentKey);
+			//	win_width = rcPaint.right;
+			//	win_height = rcPaint.bottom;
+			//}
+			//_hdc = hdc;
+			//hdc = hdcMem;
 
-			FillRect(hdc, &rect, hbrush);
+			{
+				HBRUSH hbrush1 = CreateSolidBrush(~TransparentKey);
+				FillRect(hdc, &_exRect, hbrush1);
 
+				//::GetClientRect(_hPlayer, &_exRect);
+				::ExcludeClipRect(hdc, _exRect.left, _exRect.top, _exRect.right, _exRect.bottom);
 
+				HBRUSH hbrush = CreateSolidBrush(TransparentKey);
+				FillRect(hdc, &rect, hbrush);
+
+				//PAINTSTRUCT ps = { 0 };
+				//::BeginPaint(GetHWND(), &ps);
+				CRenderEngine::DrawColor(_hdc, ps.rcPaint, 0xFF000000);
+				//::EndPaint(GetHWND(), &ps);
+
+				// todo clean up
+			}
+
+			if (hdcMem)
+			{	
+				BitBlt(_hdc, rcPaint.left, rcPaint.top, rcPaint.right, rcPaint.bottom, hdcMem, 0, 0, SRCCOPY);
+				//DeleteObject(hbmMem); DeleteDC (hdcMem); hdcMem = NULL;
+			}
 
 			::EndPaint(GetHWND(), &ps);
 
 
-			//PAINTSTRUCT ps = { 0 };
-			//::BeginPaint(GetHWND(), &ps);
-			//CRenderEngine::DrawColor(, ps.rcPaint, 0xFF000000);
-			//::EndPaint(GetHWND(), &ps);
 
-			// todo clean up
-
-			return 0;
+			//return 0;
 		} return 1;
 	}
 	return 0;
@@ -445,9 +507,16 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 
 void WODPlayer::DoEvent(TEventUI& event)
 {
+	if (event.Type == UIEVENT_TIMER)
+	{
+		if(event.wParam==0x999) {
+			SetPos(m_rcItem);
+			KillTimer(0x999);
+		}
+	}
 	if (event.Type == UIEVENT_SCROLLWHEEL)
 	{
-		if(::GetKeyState(VK_CONTROL) < 0)
+		if(_app->_isFullScreen || ::GetKeyState(VK_CONTROL) < 0)
 		{
 			float delta = 0.25;
 			float scale = _scale;
@@ -472,7 +541,25 @@ void WODPlayer::DoEvent(TEventUI& event)
 					_bFit = false;
 				}
 			}
-			NeedUpdate();
+			//NeedUpdate();
+			//::LockWindowUpdate(_hPlayer);
+			//::SendMessage(GetHWND(), WM_SETREDRAW , FALSE, 0);
+
+			float width = GetWidth();
+			float height = GetHeight();
+			_minScale = min(width/_srcWidth, height/_srcHeight);
+			float ratio = _minScale*_scale;
+			int w = _srcWidth*ratio;
+			int h = _srcHeight*ratio;
+			::SetWindowPos(_mMediaPlayer->getHWND(), 0, 
+				_exRect.left,  _exRect.top, 
+				w,  h, 
+				SWP_SHOWWINDOW);
+			//NeedUpdate();
+			//SetTimer(0x999, 800, true);
+			SetPos(m_rcItem);
+			//::SendMessage(GetHWND(), WM_SETREDRAW , TRUE, 0);
+			//::LockWindowUpdate(NULL);
 		}
 		return;
 	}

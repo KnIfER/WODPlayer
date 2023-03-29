@@ -19,6 +19,7 @@
 #include <Windowsx.h>
 #include "VideoPlayerInerface.h"
 
+#define SKIP_SKIA_RENDERER
 #include "DuiLib\UIlib.h"
 #include <Duilib/Core/InsituDebug.h>
 #include "Utils/ProfileStd.h"

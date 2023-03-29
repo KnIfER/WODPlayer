@@ -4,10 +4,12 @@
 
 // 文件
 #define IDM_FILE IDM
-#define IDM_FILE_OPEN    IDM_FILE+1
-#define IDM_FILE_CLOSE   IDM_FILE+2
-#define IDM_FILE_RECENT  IDM_FILE+3
-#define IDM_SHUTDOWN     IDM_FILE+4
+#define IDM_FILE_OPEN            IDM_FILE+1
+#define IDM_FILE_CLOSE           IDM_FILE+2
+#define IDM_FILE_RECENT          IDM_FILE+3
+#define IDM_SHUTDOWN             IDM_FILE+4
+#define IDM_DELETE               IDM_FILE+5
+#define IDM_DELETE_FOREVER       IDM_FILE+6
 
 
 // 播放
@@ -34,6 +36,9 @@
 #define IDM_VOLUME_UP         IDM_PLAY+17
 #define IDM_VOLUME_DOWN		  IDM_PLAY+18
 
+#define IDM_PLAY_PRV          IDM_PLAY+19
+#define IDM_PLAY_NXT		  IDM_PLAY+20
+
 
 // 书签
 #define IDM_BKMK IDM + 2000
@@ -41,6 +46,7 @@
 #define IDM_BKMK_NXT IDM_BKMK+2
 #define IDM_BKMK_DEL IDM_BKMK+3
 #define IDM_BKMK_ADD IDM_BKMK+4
+#define IDM_BKMK_RETURN IDM_BKMK+5
 
 
 // 插件

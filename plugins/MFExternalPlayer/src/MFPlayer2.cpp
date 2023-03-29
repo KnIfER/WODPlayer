@@ -281,6 +281,7 @@ HRESULT MFPlayer2::OpenURL(const WCHAR *sURL)
 
     // Create a new media item for this URL.
     hr = m_pPlayer->CreateMediaItemFromURL(sURL, FALSE, 0, NULL);
+    m_pPlayer->SetAspectRatioMode(MFVideoARMode_None);
     //m_pPlayer->SetAspectRatioMode(MFVideoARMode_None);
 
     // The CreateMediaItemFromURL method completes asynchronously. When it does,

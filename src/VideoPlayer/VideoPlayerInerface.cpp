@@ -76,6 +76,7 @@ VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName)
 				{
 					LPWSTR installed = (LPWSTR)STR(testPath);
 					testPath += L"vlc-3.0.18";
+					//testPath += L"vlc-3.0.1x";
 					if(::PathFileExists(STR(testPath))) 
 					{
 						dllDir = testPath;

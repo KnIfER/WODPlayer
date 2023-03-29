@@ -26,6 +26,7 @@ struct DemoData
 WODApplication* XPP;
 
 int scheduleExitFsc = 0;
+int scheduleMoveWnd = 0;
 extern RECT rcNScPos;
 
 
@@ -37,7 +38,7 @@ void hookMouseMove(MSG & msg)
 	if(scheduleExitFsc)
 	{
 		//LogIs("hookMouseMove", msg.pt.x, msg.pt.y);
-		if((GetKeyState(VK_LBUTTON) & 0x8000) != 0)
+		if((GetKeyState(VK_LBUTTON) & 0x8000) != 0) // 从全屏窗口拖拽下标题栏
 		{
 			if(abs(scheduleExitFsc-yPos)>5)
 			{
@@ -72,14 +73,16 @@ void hookLButtonDown(MSG & msg)
 	//LogIs("hookLButtonDown %d %d", msg.pt.x, msg.pt.y);
 	if(XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd)) 
 	{
-		if (!XPP->_isFullScreen && ::GetKeyState(VK_CONTROL) >= 0)
+		//LogIs(2, "hookLButtonDown %d %d", msg.pt.x, msg.pt.y);
+		if (!XPP->_isFullScreen && ::GetKeyState(VK_CONTROL) >= 0) // 拖拽窗体
 		{
-			ReleaseCapture();
-			::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+			scheduleMoveWnd = 1;
+			//ReleaseCapture();
+			//::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
 			//SetFocus(XPP->GetHWND());
-			return;
+			//return;
 		}
-		if(XPP->_mainPlayer.GetHWND() != msg.hwnd && ::GetKeyState(VK_CONTROL) < 0) 
+		if(XPP->_mainPlayer.GetHWND() != msg.hwnd && (XPP->_isFullScreen || ::GetKeyState(VK_CONTROL) < 0)) 
 		{
 			XPP->_mainPlayer.HandleCustomMessage(msg.message, msg.wParam, msg.lParam, 0);
 		}
@@ -163,7 +166,27 @@ wWinMain(_In_ HINSTANCE hInstance,
 	//InitCommonControlsEx(&icc);
 
 	CPaintManagerUI::SetInstance(hInstance);
+#ifdef _DEBUG
 	CPaintManagerUI::SetResourcePath(CPaintManagerUI::GetInstancePath() + _T("..//skin//"));
+#else
+	CPaintManagerUI::SetResourceType(UILIB_ZIPRESOURCE);
+	//CPaintManagerUI::SetResourceZip(_T("skin.zip"));
+	//CPaintManagerUI::SetResourcePath(strResourcePath.GetData());
+	HRSRC hResource = ::FindResource(CPaintManagerUI::GetResourceDll(), _T("IDR_ZIPRES"), _T("ZIPRES"));
+	if( hResource != NULL ) {
+		DWORD dwSize = 0;
+		HGLOBAL hGlobal = ::LoadResource(CPaintManagerUI::GetResourceDll(), hResource);
+		if( hGlobal != NULL ) {
+			dwSize = ::SizeofResource(CPaintManagerUI::GetResourceDll(), hResource);
+			if( dwSize > 0 ) {
+				CPaintManagerUI::SetResourceZip((LPBYTE)::LockResource(hGlobal), dwSize);
+			}
+		}
+		::FreeResource(hResource);
+	}
+#endif
+
+
 
 	TCHAR usrDir[MAX_PATH];
 	::GetModuleFileName(NULL, usrDir, MAX_PATH);
@@ -204,6 +227,14 @@ wWinMain(_In_ HINSTANCE hInstance,
 					break;
 				case WM_MOUSEMOVE:
 				case WM_NCMOUSEMOVE:
+					if(scheduleMoveWnd) {
+						if((GetKeyState(VK_LBUTTON) & 0x8000) != 0)
+						{
+							::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+							break;
+						}
+						scheduleMoveWnd = 0;
+					}
 					if (XPP->_isFullScreen)
 						hookMouseMove(msg);
 					break;

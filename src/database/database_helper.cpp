@@ -7,6 +7,8 @@
 #include "database_helper.h"
 
 #include "shlwapi.h"
+#include "Utils\ProfileStd.h"
+
 
 WODBase::WODBase() 
 {
@@ -23,8 +25,20 @@ WODBase::~WODBase()
 bool WODBase::Init() 
 {
     const char *sql;
-
-    int res = sqlite3_open("D:\\wodbase.db", &db);
+    int res = -100;
+    auto path = GetProfString("base");
+    if (path && ::PathFileExistsA(path->c_str()))
+    {
+        res = sqlite3_open(path->c_str(), &db);
+    }
+    if (res != SQLITE_OK)
+    {
+        CHAR usrDir[MAX_PATH];
+        ::GetModuleFileNameA(NULL, usrDir, MAX_PATH);
+        ::PathRemoveFileSpecA(usrDir);
+        ::PathAppendA(usrDir, "wodbase.db");
+        res = sqlite3_open(usrDir, &db);
+    }
     if (res != SQLITE_OK) {
         LogIs(L"打开失败!\n ERR: %s\n", sqlite3_errmsg(db));
         // todo throw???
