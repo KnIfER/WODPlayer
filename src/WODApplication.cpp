@@ -72,6 +72,7 @@ void seekchange(SeekBar* bar, int pos) {
 	XPP->_mainPlayer._mMediaPlayer->SetPosition(pos);
 }
 
+extern std::vector<std::wstring> _args;
 
 void WODApplication::InitWindow()
 {
@@ -102,6 +103,10 @@ void WODApplication::InitWindow()
 	QkString path = file?file->c_str():"";
 	if(!path.IsEmpty())
 		_mainPlayer.PlayVideoFile(STR(path));
+	if (_args.size()>0)
+	{
+		_mainPlayer.PlayVideoFile(STR(QkString(_args[0].c_str())));
+	}
 	//MarkPlaying(true);
 
 	//tg

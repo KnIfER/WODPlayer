@@ -143,12 +143,25 @@ void hookMButtonClick(MSG & msg)
 		SetFocus(XPP->GetHWND());
 		return;
 	}
-}
+}	
 
 bool running=true;
 
 TCHAR usrDir[MAX_PATH];
 const TCHAR* configFileName = L"wod.ini";
+
+std::vector<std::wstring> _args;
+
+void parseCommandLine(const TCHAR* commandLine, std::vector<std::wstring>& arguments)
+{
+	int argc;
+	LPWSTR* argv = CommandLineToArgvW(commandLine, &argc);
+	for (int i = 0; i < argc; i++)
+	{
+		arguments.push_back(argv[i]);
+	}
+	LocalFree(argv);
+}
 
 int APIENTRY 
 wWinMain(_In_ HINSTANCE hInstance,
@@ -159,6 +172,8 @@ wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
+	parseCommandLine(lpCmdLine, _args);
+	 
 	// 初始化公共空间
 	//INITCOMMONCONTROLSEX icc;
 	//icc.dwSize = sizeof(INITCOMMONCONTROLSEX);

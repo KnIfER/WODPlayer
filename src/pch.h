@@ -17,6 +17,8 @@
 #pragma once
 #include <Windows.h>
 #include <Windowsx.h>
+#include <sstream>
+
 #include "VideoPlayerInerface.h"
 
 #define SKIP_SKIA_RENDERER
