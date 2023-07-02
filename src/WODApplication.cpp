@@ -634,6 +634,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			else
 				_mainPlayer.PlayVideoFile(_mainPlayer._currentPath);
 		}
+
+		//if(0)
 		if ((wParam == 1)
 			&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
 		{
@@ -821,8 +823,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			ResetWndOpacity();
 			break;
 		case IDM_PLUGIN:
-			//trackWodMenus((CControlUI*)lParam, wParam);
+			trackWodMenus((CControlUI*)lParam, wParam);
 			// 切换vlc+xunlei
+			if(0)
 			{
 				string* player = GetProfString("player");
 				PutProfString("player", player && *player=="VLCExternalPlayer.dll"?"XunLeiExternalPlayer\\XunLeiExternalPlayer.dll":"VLCExternalPlayer.dll");
@@ -851,6 +854,10 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			return 1;
 		case IDM_PLUGIN_XL:
 			PutProfString("player", "XunLeiExternalPlayer\\XunLeiExternalPlayer.dll");
+			Replay();
+			return 1;
+		case IDM_PLUGIN_MPV:
+			PutProfString("player", "MPVExternalPlayer.dll");
 			Replay();
 			return 1;
 

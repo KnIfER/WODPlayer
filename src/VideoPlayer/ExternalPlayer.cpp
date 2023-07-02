@@ -54,6 +54,8 @@ HMODULE ExternalPlayer::vwInit(int & error_code, const TCHAR* dllPath, bool blam
 		const DWORD dwFlags = GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")), "AddDllDirectory") != NULL ? LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS : 0;
 		::SetDllDirectory(dllDir);
 		//_unloaddll((intptr_t)_hPlayerMod);
+		//auto x=::LoadLibraryEx(L"D:/Code/FigureOut/Textrument/plugins/DirectUILib/WODPlayer/bin/plugins/libmpv-2.dll", NULL, dwFlags);
+		//auto x=::LoadLibrary(L"D:/Code/FigureOut/Textrument/plugins/DirectUILib/WODPlayer/bin/plugins/libmpv-2.dll");
 		auto hPlayer = ::LoadLibraryEx(dllPath, NULL, dwFlags);
 		//_hPlayerMod = hPlayer;
 		if(hPlayer) 
@@ -88,13 +90,16 @@ HMODULE ExternalPlayer::vwInit(int & error_code, const TCHAR* dllPath, bool blam
 					::MessageBox(NULL, PRINTBUFF, TEXT("External Video Player Widget"), MB_OK);
 				}
 			}
+			//LogIs(2, "%ld %ld loaded", hPlayer, vwCreatePlayer);
 			return vwCreatePlayer!=0?hPlayer:0;
 		}
-		else error_code = 3;
+		else error_code = 13;
 	}
-	else error_code = 2;
+	else error_code = 12;
 	return 0;
 }
+
+#include <stdexcept>
 
 ExternalPlayer::ExternalPlayer(int & error_code, HINSTANCE hInstance, HWND hParent, const TCHAR* dllPath, const TCHAR* dllDir)
 {
@@ -112,6 +117,34 @@ ExternalPlayer::ExternalPlayer(int & error_code, HINSTANCE hInstance, HWND hPare
 		if(error_code==0)
 			_hWnd = vwGetHWND(_player);
 	} 
+	catch (int i)
+	{
+		TCHAR str[50] = TEXT("God Damned Exception : ");
+		TCHAR code[10];
+		wsprintf(code, TEXT("%d"), i);
+		wcscat_s(str, code);
+		LogIs(str);
+		error_code = 6;
+	}
+	catch (std::runtime_error & ex)
+	{
+		LogIs("General Runtime Exception %s", ex.what());
+		error_code = 5;
+	}
+	//catch (const Win32Exception & ex)
+	//{
+	//	TCHAR message[1024];	//TODO: sane number
+	//	wsprintf(message, TEXT("An exception occured. Notepad++ cannot recover and must be shut down.\r\nThe exception details are as follows:\r\n")
+	//		TEXT("Code:\t0x%08X\r\nType:\t%S\r\nException address: 0x%p"), ex.code(), ex.what(), ex.where());
+	//	::MessageBox(Notepad_plus_Window::gNppHWND, message, TEXT("Win32Exception"), MB_OK | MB_ICONERROR);
+	//	mdump.writeDump(ex.info());
+	//	doException(notepad_plus_plus);
+	//}
+	catch (std::exception & ex)
+	{
+		LogIs("General Exception %s", ex.what());
+		error_code = 4;
+	}
 	catch(...) 
 	{
 		error_code = 3;

@@ -21,6 +21,7 @@ WODPlayer::WODPlayer() {
 	_volumebar.SetTag((LONG_PTR)this);
 	_volumebar.SetProgressAndMax(100, 100);
 	_volumebar._callback = (SeekBarTrackCallback)volume_seekbar_change;
+
 }
 
 void WODPlayer::newVideoView()
@@ -323,7 +324,10 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 	__super::SetPos(rc, bNeedInvalidate);
 	if(_hPlayer) {
 		//::MoveWindow(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
-		//::SetWindowPos(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate);
+		//::SetWindowPos(_hPlayer, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, bNeedInvalidate
+		//lxxx('SetPos dd dd', _srcWidth, _srcHeight);
+		auto hplayer = _mMediaPlayer->getHWND();
+		//hplayer = GetHWND();
 		if(_srcWidth && _srcHeight) 
 		{
 			float width = rc.right - rc.left;
@@ -368,14 +372,16 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 
 			_exRect.right = _exRect.left+w;
 			_exRect.bottom = _exRect.top+h;
-			::SetWindowPos(_mMediaPlayer->getHWND(), HWND_TOP, 
+			::SetWindowPos(hplayer, HWND_TOP, 
 				_exRect.left,  _exRect.top, 
 				w,  h, 
 				SWP_SHOWWINDOW);
+
+			//lxxx(SetWindowPos dd dd dd dd ff, _exRect.left, _exRect.top, w, h, _scale)
 		} 
 		else 
 		{
-			::SetWindowPos(_mMediaPlayer->getHWND(), HWND_TOP, 
+			::SetWindowPos(hplayer, HWND_TOP, 
 				rc.left, 
 				rc.top, 
 				//1*(rect.right - rect.left), 
@@ -440,11 +446,17 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 	{
 		case MM_PREPARED:
 		{
-			//LogIs(2, "MPM_PREPARED max=%d\n", wParam);
+			//LogIs(2, "MPM_PREPARED max=%d %ld\n", wParam, _hPlayer);
+			if(!_hPlayer) {
+				_hPlayer = ::GetFirstChild(_hWnd);
+				_mMediaPlayer->setHWND(_hPlayer);
+			}
+			//LogIs(2, "MPM_PREPARED max=%d %ld\n", wParam, _hPlayer);
 			_seekbar.SetMax(wParam);
 			MarkPlaying(true);
 			if(_mMediaPlayer)
 				_mMediaPlayer->syncResolution(_srcWidth, _srcHeight);
+			//LogIs(2, "syncResolution max=%d %d\n", _srcWidth, _srcHeight);
 			//if(_app->_WndOp==1)
 			{
 				SetPos(GetPos());
@@ -569,6 +581,7 @@ void WODPlayer::DoEvent(TEventUI& event)
 		if(_app->_isFullScreen || ::GetKeyState(VK_CONTROL) < 0)
 		{
 			float delta = 0.25;
+			//if(_scale==0)_scale = 1;
 			float scale = _scale;
 			int zDelta = (int) (short) HIWORD(event.wParam);
 			//LogIs(2, "%d %d", event.wParam, LOWORD(event.wParam));
@@ -591,6 +604,7 @@ void WODPlayer::DoEvent(TEventUI& event)
 					_bFit = false;
 				}
 			}
+			//lxxx(scale ff dd, _scale, zDelta);
 			//NeedUpdate();
 			//::LockWindowUpdate(_hPlayer);
 			//::SendMessage(GetHWND(), WM_SETREDRAW , FALSE, 0);

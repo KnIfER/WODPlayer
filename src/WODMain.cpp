@@ -106,6 +106,16 @@ void hookMouseWheel(MSG & msg)
 	{
 		NavTimemark(-zDelta);
 	}
+	//else if (XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd))
+	//{
+	//	TEventUI event = { 0 };
+	//	event.Type = UIEVENT_SCROLLWHEEL;
+	//	event.pSender = &XPP->_mainPlayer;
+	//	//event.wParam = MAKEWPARAM(zDelta < 0 ? SB_LINEDOWN : SB_LINEUP, zDelta);
+	//	event.wParam = msg.wParam;
+	//	event.lParam = msg.lParam;
+	//	XPP->_mainPlayer.DoEvent(event);
+	//}
 
 }
 

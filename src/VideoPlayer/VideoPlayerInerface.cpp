@@ -33,7 +33,8 @@ VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName)
 	if (0)
 	{
 		ret = new ExternalPlayer(error_code, CPaintManagerUI::GetInstance(), xpp->GetHWND()
-			, L"D:/Code/FigureOut/XunLeiExternalPlayer/bin/XunLeiExternalPlayer.dll");
+			//, L"D:/Code/FigureOut/XunLeiExternalPlayer/bin/XunLeiExternalPlayer.dll");
+			, L"D:/Code/FigureOut/Textrument/plugins/DirectUILib/WODPlayer/bin/plugins/MPVExternalPlayer.dll");
 		if (SUCCEED)
 		{
 			return ret;

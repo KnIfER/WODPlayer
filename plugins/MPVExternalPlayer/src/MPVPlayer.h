@@ -1,4 +1,4 @@
-/** Copyright 2021 WODPLayer author
+/** Copyright 2023 WODPLayer author
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -15,17 +15,19 @@
 * Foundation.
 */
 #pragma once
-#include <Windows.h>
-#include <Windowsx.h>
 
-class WindowBase 
+//#include "WindowBase.h"
+//#include <VideoPlayerInerface.h>
+
+
+class MPVPlayer //: public VideoPlayer
 {
 public:
 	HWND getHWND() {
 		return _hWnd;
 	};
 	void setHWND(HWND var) {
-		_hWnd = var;
+		_hWnd =  var;
 	};
 	HWND getHParent() {
 		return _hParent;
@@ -52,7 +54,24 @@ protected:
 	HWND _hWnd;
 	HWND _hParent;
 	WNDPROC _SysWndProc=NULL;
+
+public:
+	MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND hParent);
+	void			Stop() ;
+	void			Release() ;
+	void			Play() ;
+	void			Pause() ;
+	bool			IsPlaying() ;
+	bool			IsPaused() ;
+	long			GetPosition() ;
+	void			SetPosition(long pos) ;
+	long			GetDuration() ;
+	bool			PlayVideoFile(const TCHAR* path) ;
+	void			SetFullScreen(bool val) ;
+	void			takeSnapShot(const char *psz_filepath);
+	void			SyncSize(unsigned int * x, unsigned int * y) ;
+	float  			SetRate(float rate);
+	float		    SetVolume(int rate);
+private:
+	LONG_PTR mMediaPlayer;
 };
-
-
-

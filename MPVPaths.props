@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <MPV_PATH>C:\Program Files (x86)\MPV\mpv-dev-x86_64-v3-20230702-git-f76c441\</MPV_PATH>
+    <MPV_INC>$(MPV_PATH)include</MPV_INC>
+    <MPV_LIBS>mpv.lib</MPV_LIBS>
+    <MPV_LIPA_64>$(MPV_PATH)x64</MPV_LIPA_64>
+    <MPV_LIPA>$(MPV_PATH)</MPV_LIPA>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MPV_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(MPV_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="MPV_PATH">
+      <Value>$(MPV_PATH)</Value>
+    </BuildMacro>
+    <BuildMacro Include="MPV_INC">
+      <Value>$(MPV_INC)</Value>
+    </BuildMacro>
+    <BuildMacro Include="MPV_LIBS">
+      <Value>$(MPV_LIBS)</Value>
+    </BuildMacro>
+    <BuildMacro Include="MPV_LIPA_64">
+      <Value>$(MPV_LIPA_64)</Value>
+    </BuildMacro>
+    <BuildMacro Include="MPV_LIPA">
+      <Value>$(MPV_LIPA)</Value>
+    </BuildMacro>
+    <BuildMacro Include="MF_LIBS">
+      <Value>$(MF_LIBS)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>
