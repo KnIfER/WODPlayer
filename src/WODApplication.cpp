@@ -659,9 +659,10 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			int W = _mainPlayer._srcWidth, H=_mainPlayer._srcHeight;
 			_mainPlayer._mMediaPlayer->syncResolution(_mainPlayer._srcWidth, _mainPlayer._srcHeight);
-			//if(_mainPlayer._srcWidth!=W || _mainPlayer._srcHeight!=H) {
-			//	_mainPlayer._mMediaPlayer->Pause();
-			//}
+			if(_mainPlayer._srcWidth!=W || _mainPlayer._srcHeight!=H) {
+				//_mainPlayer._mMediaPlayer->Pause();
+				_mainPlayer.SetPos(_mainPlayer.GetPos());
+			}
 
 			//LogIs(3, "setPosition:: %d %d max=%d curr=%d\n", _mainPlayer._mMediaPlayer->m_nPosition, _mainPlayer._mMediaPlayer->m_nDuration, _mainPlayer._seekbar.GetMax(), _mainPlayer._seekbar.GetPosition());
 		}

@@ -149,8 +149,10 @@ static void handleEvents(mpv_event *event, MPVPlayer *player)
     ////case MPV_EVENT_END_FILE:
     //    PostMessage(player->getHParent(), MM_STOPPED, 0, 0);
     //    break;
-    case MPV_EVENT_START_FILE:
     //case MPV_EVENT_VIDEO_RECONFIG:
+    //    LogIs("handleEvents::MPV_EVENT_VIDEO_RECONFIG %s\n");
+    //    break;
+    case MPV_EVENT_START_FILE:
         LogIs("handleEvents::MPV_EVENT_START_FILE %s\n");
         if(!player->getHWND()) {
             player->setHWND(::GetFirstChild(player->getHParent()));
@@ -206,11 +208,12 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
     //mpv_set_option_string(mpv, "seekbarkeyframes", "false");
     mpv_set_option_string(mpv, "loop", "inf");
 
-    mpv_set_option_string(mpv, "autofit", "no");
     mpv_set_option_string(mpv, "force-window", "yes");
     mpv_set_option_string(mpv, "auto-window-resize", "no");
-    mpv_set_option_string(mpv, "keepaspect", "no");
-    mpv_set_option_string(mpv, "keepaspect-window", "no");
+
+    //mpv_set_option_string(mpv, "autofit", "no");
+    //mpv_set_option_string(mpv, "keepaspect", "no");
+    //mpv_set_option_string(mpv, "keepaspect-window", "no");
 
     //mpv_set_option(m_mpvInstance, "ctx", mpv_format::MPV_FORMAT_INT64, this);
 
@@ -311,7 +314,7 @@ void MPVPlayer::SyncSize(unsigned int * x, unsigned int * y) {
     mpv_get_property(mpv, "dwidth", MPV_FORMAT_INT64, &w);
     mpv_get_property(mpv, "dheight", MPV_FORMAT_INT64, &h);
     *x=w; *y=h;
-    //LogIs(2, "syncResolution max=%d %d\n", x, y);
+    LogIs("syncResolution x=%d y=%d\n", *x, *y);
     // 处理 MPV 事件
     while (mpv) {
         //LogIs("wakeup::\n");
