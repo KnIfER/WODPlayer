@@ -113,6 +113,15 @@ void WODApplication::InitWindow()
 
 	BOOL bHandled;
 	//HandleCustomMessage(WM_KEYDOWN, VK_P, 0, bHandled);
+
+
+	//string* player = GetProfString("player");
+	//auto brand = player && *player=="VLCExternalPlayer.dll"?"VLC":"XUN";
+	//CControlUI* menuBtn = (CControlUI*)m;
+	//menuBtn->GetText().Empty();
+	//menuBtn->GetText().Append(L"插件 ");
+	//menuBtn->GetText() += brand;
+	//menuBtn->SetNeedAutoCalcSize();
 }
 
 LRESULT WODApplication::OnClose(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
@@ -646,8 +655,11 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				_mainPlayer._seekbar.SetProgressAndMax(pos, _mainPlayer._mMediaPlayer->GetDuration());
 			}
 
+			int W = _mainPlayer._srcWidth, H=_mainPlayer._srcHeight;
 			_mainPlayer._mMediaPlayer->syncResolution(_mainPlayer._srcWidth, _mainPlayer._srcHeight);
-
+			//if(_mainPlayer._srcWidth!=W || _mainPlayer._srcHeight!=H) {
+			//	_mainPlayer._mMediaPlayer->Pause();
+			//}
 
 			//LogIs(3, "setPosition:: %d %d max=%d curr=%d\n", _mainPlayer._mMediaPlayer->m_nPosition, _mainPlayer._mMediaPlayer->m_nDuration, _mainPlayer._seekbar.GetMax(), _mainPlayer._seekbar.GetPosition());
 		}
@@ -797,10 +809,36 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_PLAY_NXT: NavPlayList(1); return 1;
 
 		case IDM_FILE:
-		case IDM_BKMK:
-		case IDM_SKIN:
-		case IDM_PLUGIN:
 			trackWodMenus((CControlUI*)lParam, wParam);
+			break;
+		case IDM_BKMK:
+			trackWodMenus((CControlUI*)lParam, wParam);
+			break;
+		case IDM_SKIN:
+			//trackWodMenus((CControlUI*)lParam, wParam);
+			// 切换hollow
+			PutProfInt("WndOp", GetProfInt("WndOp", -1)!=1?1:0);
+			ResetWndOpacity();
+			break;
+		case IDM_PLUGIN:
+			//trackWodMenus((CControlUI*)lParam, wParam);
+			// 切换vlc+xunlei
+			{
+				string* player = GetProfString("player");
+				PutProfString("player", player && *player=="VLCExternalPlayer.dll"?"XunLeiExternalPlayer\\XunLeiExternalPlayer.dll":"VLCExternalPlayer.dll");
+				
+				Replay();
+
+				auto brand = player && *player=="VLCExternalPlayer.dll"?"VLC":"XUN";
+				CControlUI* menuBtn = (CControlUI*)lParam;
+				menuBtn->GetText().Empty();
+				menuBtn->GetText().Append(L"插件 ");
+				menuBtn->GetText() += brand;
+				menuBtn->SetNeedAutoCalcSize();
+				menuBtn->NeedParentUpdate();
+				menuBtn->NeedUpdate();
+				menuBtn->Invalidate();
+			}
 			break;
 
 		case IDM_PLUGIN_MF:

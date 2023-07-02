@@ -79,8 +79,7 @@ int WODBase::AddBookmark(const char* folder, const char* filename, char* markNam
     sqlite3_stmt *stmt1 = NULL;
     sqlite3_stmt *stmt2 = NULL;
     sqlite3_stmt *stmt = NULL;
-    //if(folderId==-1) {
-    if(1) {
+    if(folderId==-1) {
         const char *sql = "INSERT INTO timemarks(vid, fname, fpath, pos, duration, folder, creation_time) VALUES(?, ?, ?, ? ,?, ?, ?)";
         int succ = sqlite3_prepare_v2(db, sql, -1, &stmt1, NULL);
         if (succ != SQLITE_OK) {

@@ -125,8 +125,11 @@ libvlc_event_manager_t *eventManager;
 
 static void handleEvents(const libvlc_event_t *event, void *userData)
 {
+    LogIs("handleEvents::%d\n", event->type);
     VLCPlayer *player = (VLCPlayer *)userData;
     switch (event->type) {
+    case libvlc_MediaPlayerVout:
+        break;
     case libvlc_MediaPlayerPositionChanged:
         break;
     case libvlc_MediaPlayerTimeChanged:
@@ -161,14 +164,47 @@ VLCPlayer::VLCPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
     if (m_vlcInstance==NULL)
     {
         const char** args = new const char*[] {
-            "-I", "dummy", "--ignore-config",
-                // "--plugin-path=C:\\Program Files (x86)\\VideoLAN\\vlc-3.0.18\\plugins",
-                "--vout-filter=deinterlace"
+            "-I", "dummy", "--ignore-config"
+                 //"--plugin-path","C:\\Program Files (x86)\\VideoLAN\\vlc-3.0.18\\plugins"
+                , "--vout-filter=deinterlace"
                 , "--deinterlace-mode=blend"
                 , "--input-repeat=2"
-        };
+                //"vvv"
+                //, "-vvv"
+                //, "--vout","opengl"
+                //, "--file-caching=0"
+                //, "--clock-jitter=0"
+                //, "--network-caching=0"
+                //, "--sub-track=0"
+                //, "--drop-late-frames"
+                //, "--skip-frames"
+                //, "--sout-rtp-proto=rtp"
+                //, "--no-autoscale"
 
-        m_vlcInstance = libvlc_new(6, args);
+
+                    //, "--quiet"
+                    //, "--no-sub-autodetect-file"
+                    //, "--no-video"
+
+                    //"--ignore-config", 
+                    //"--no-osd",
+                    //"--disable-screensaver",
+                    //"--ffmpeg-hw",
+                    //"--live-caching=100 ",
+                    //"--rtsp-caching=100",
+                    //"--realrtsp-caching=100",
+                    //"--network-caching=0",
+
+                    //"--skip-frames",
+                    //"--drop-late-frames"
+
+                , 0
+
+        };
+        //LogIs(2, "%d", sizeof(args));
+        int cc=0;
+        while(args[cc]) cc++;
+        m_vlcInstance = libvlc_new(cc, args);
     }
 
     if (!m_vlcInstance)
@@ -201,6 +237,87 @@ VLCPlayer::VLCPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
                 libvlc_MediaMetaChanged ,
                 libvlc_MediaPlayerLengthChanged
             };
+            //libvlc_event_e events[] {
+            //    libvlc_MediaMetaChanged,
+            //    libvlc_MediaSubItemAdded,
+            //    libvlc_MediaDurationChanged,
+            //    libvlc_MediaParsedChanged,
+            //    libvlc_MediaFreed,
+            //    libvlc_MediaStateChanged,
+            //    libvlc_MediaSubItemTreeAdded,
+
+            //    libvlc_MediaPlayerMediaChanged,
+            //    libvlc_MediaPlayerNothingSpecial,
+            //    libvlc_MediaPlayerOpening,
+            //    libvlc_MediaPlayerBuffering,
+            //    libvlc_MediaPlayerPlaying,
+            //    libvlc_MediaPlayerPaused,
+            //    libvlc_MediaPlayerStopped,
+            //    libvlc_MediaPlayerForward,
+            //    libvlc_MediaPlayerBackward,
+            //    libvlc_MediaPlayerEndReached,
+            //    libvlc_MediaPlayerEncounteredError,
+            //    libvlc_MediaPlayerTimeChanged,
+            //    libvlc_MediaPlayerPositionChanged,
+            //    libvlc_MediaPlayerSeekableChanged,
+            //    libvlc_MediaPlayerPausableChanged,
+            //    libvlc_MediaPlayerTitleChanged,
+            //    libvlc_MediaPlayerSnapshotTaken,
+            //    libvlc_MediaPlayerLengthChanged,
+            //    libvlc_MediaPlayerVout,
+            //    libvlc_MediaPlayerScrambledChanged,
+            //    libvlc_MediaPlayerESAdded,
+            //    libvlc_MediaPlayerESDeleted,
+            //    libvlc_MediaPlayerESSelected,
+            //    libvlc_MediaPlayerCorked,
+            //    libvlc_MediaPlayerUncorked,
+            //    libvlc_MediaPlayerMuted,
+            //    libvlc_MediaPlayerUnmuted,
+            //    libvlc_MediaPlayerAudioVolume,
+            //    libvlc_MediaPlayerAudioDevice,
+            //    libvlc_MediaPlayerChapterChanged,
+
+            //    libvlc_MediaListItemAdded,
+            //    libvlc_MediaListWillAddItem,
+            //    libvlc_MediaListItemDeleted,
+            //    libvlc_MediaListWillDeleteItem,
+            //    libvlc_MediaListEndReached,
+
+            //    libvlc_MediaListViewItemAdded,
+            //    libvlc_MediaListViewWillAddItem,
+            //    libvlc_MediaListViewItemDeleted,
+            //    libvlc_MediaListViewWillDeleteItem,
+
+            //    libvlc_MediaListPlayerPlayed,
+            //    libvlc_MediaListPlayerNextItemSet,
+            //    libvlc_MediaListPlayerStopped,
+
+            //    /**
+            //    * \deprecated Useless event, it will be triggered only when calling
+            //    * libvlc_media_discoverer_start()
+            //    */
+            //    libvlc_MediaDiscovererStarted,
+            //    /**
+            //    * \deprecated Useless event, it will be triggered only when calling
+            //    * libvlc_media_discoverer_stop()
+            //    */
+            //    libvlc_MediaDiscovererEnded,
+
+            //    libvlc_RendererDiscovererItemAdded,
+            //    libvlc_RendererDiscovererItemDeleted,
+
+            //    libvlc_VlmMediaAdded,
+            //    libvlc_VlmMediaRemoved,
+            //    libvlc_VlmMediaChanged,
+            //    libvlc_VlmMediaInstanceStarted,
+            //    libvlc_VlmMediaInstanceStopped,
+            //    libvlc_VlmMediaInstanceStatusInit,
+            //    libvlc_VlmMediaInstanceStatusOpening,
+            //    libvlc_VlmMediaInstanceStatusPlaying,
+            //    libvlc_VlmMediaInstanceStatusPause,
+            //    libvlc_VlmMediaInstanceStatusEnd,
+            //    libvlc_VlmMediaInstanceStatusError
+            //};
 
             // 订阅事件
             for (const libvlc_event_e &e : events) {

@@ -66,6 +66,8 @@ void initWodMenus(WODApplication * xpp)
             menu->SetRichEvent(true);
             menuBar->Add(menu);
             menu->SetAttribute(L"style", L"btn_wnd");
+            menu->SetFixedWidth(-2);
+            menu->SetMinWidth(50);
         }
     }
 }
@@ -187,7 +189,7 @@ class WODMenuAdapter : public MenuPopupAdapter
             return ret;
         }
 
-        void OnBindItemView(CControlUI* view, size_t index)
+        void OnBindItemView(CControlUI* view, size_t index, size_t type, bool pseudoBind)
         {
             CControlUI* btn = dynamic_cast<CControlUI*>(view);
             if (btn)

@@ -154,4 +154,15 @@
       <Filter>Source Files</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="skin\WODPlayer.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="skin\menu_item.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="skin\menu_row.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+  </ItemGroup>
 </Project>

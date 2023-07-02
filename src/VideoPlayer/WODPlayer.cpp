@@ -217,6 +217,8 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 			{
 				pathBuffer.RecalcSize();
 				size_t basePathLen = pathBuffer.GetLength();
+				//lxx(,STR(pathBuffer)+basePathLen+1)
+				//LogIs(2, pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1));
 				_timeMarked = _app->_db->GetBookMarks(pathBuffer.GetData(threadBuffer1)
 					, pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1), _bookmarks);
 			}
@@ -454,12 +456,15 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 		} return 1;
 		case WM_LBUTTONDOWN:
 		{
-			_moving = true;
-			POINT pt;
-			::GetCursorPos(&pt);
-			_moveLastX = pt.x;
-			_moveLastY = pt.y;
-			::SetCapture(GetHWND());
+			if(_app->_isFullScreen || ::GetKeyState(VK_CONTROL) < 0)
+			{
+				_moving = true;
+				POINT pt;
+				::GetCursorPos(&pt);
+				_moveLastX = pt.x;
+				_moveLastY = pt.y;
+				::SetCapture(GetHWND());
+			}
 		} return 1;
 		case WM_LBUTTONUP:
 		{

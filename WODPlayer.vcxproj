@@ -64,6 +64,11 @@
   <ItemGroup>
     <ResourceCompile Include="src\WOD.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="skin\menu_item.xml" />
+    <Xml Include="skin\menu_row.xml" />
+    <Xml Include="skin\WODPlayer.xml" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

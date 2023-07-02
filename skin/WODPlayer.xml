@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Window caption="0,0,0,30" sizebox="4,4,6,6" inset="0,0,0,0" 
 
-inset="10,10,10,10" sizebox="8,8,8,8" showdirty="false" 
+inset="0,0,0,0" sizebox="18,18,18,18" showdirty="false" 
 layered="false"
 showshadow="true"
 >
@@ -41,7 +41,7 @@ showshadow="true"
 	clipchild="false" 
 	vscrollbar="true"
 	name="root"
-	inset="2,2,2,2"
+	inset="5,5,5,5"
 	>
 	<HBox  bkcolor="#FF0078d7" height="35" name="topBar">
 		<Button static="true" style="btn_wnd" width="34" bkimage="file='ic_launcher.png' size='24,24' align='center' " tooltip="无限播放器 WODPlayer"/>
