@@ -38,6 +38,9 @@
 
 #define IDM_PLAY_PRV          IDM_PLAY+19
 #define IDM_PLAY_NXT		  IDM_PLAY+20
+#define IDM_PLAY_MID		  IDM_PLAY+21
+#define IDM_PLAY_START		  IDM_PLAY+22
+#define IDM_PLAY_END		  IDM_PLAY+23
 
 
 // 书签

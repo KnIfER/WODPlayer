@@ -519,6 +519,21 @@ void NavTimemark(int delta)
 	}
 }
 
+void NavTime(int t)
+{
+	auto & wod = XPP->_mainPlayer;
+	if(!wod._mMediaPlayer) return;
+	auto & player = wod._mMediaPlayer;
+	LONG pos = t==-1?0
+		:t==-2?wod._mMediaPlayer->GetDuration()/2
+		:wod._mMediaPlayer->GetDuration();
+	player->SetPosition(pos);
+	if (!wod._isPlaying)
+	{
+		wod._seekbar.SetProgress(pos);
+	}
+}
+
 void NavPlayList(int delta)
 {
 	auto & wod = XPP->_mainPlayer;
@@ -536,6 +551,7 @@ void NavPlayList(int delta)
 	}
 }
 
+// OnDrop
 LRESULT WODApplication::HandleDropFiles(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	HDROP hDropInfo = (HDROP)wParam;
@@ -584,6 +600,8 @@ LRESULT WODApplication::HandleDropFiles(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	::DragFinish(hDropInfo);
 	return true;
 }
+
+extern bool keyPressed;
 
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
@@ -640,6 +658,11 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
 		{
 			long pos = _mainPlayer._mMediaPlayer->GetPosition();
+
+			if(!_mainPlayer._hPlayer) {
+				_mainPlayer._hPlayer = ::GetFirstChild(_mainPlayer.GetHWND());
+				_mainPlayer._mMediaPlayer->setHWND(_mainPlayer._hPlayer);
+			}
 
 			//TCHAR szPosition[64];
 			//TCHAR szDuration[64];
@@ -715,7 +738,10 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			PickFile();
 			break;
 		case IDM_DELETE:
-		case IDM_DELETE_FOREVER: {
+		case IDM_DELETE_FOREVER: 
+		if(!keyPressed) {
+			keyPressed = true;
+			//lxxx(DELETE dd dd, wParam, lParam)
 			_mainPlayer.Stop();
 			MarkPlaying(false);
 			BOOL bDelOK = 0;
@@ -728,8 +754,17 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			}
 			else
 			{
-				extern int MoveToTrash(PCZZWSTR path);
-				bDelOK = !MoveToTrash(_mainPlayer._currentPath);
+				extern int MoveToTrash(PCZZSTR path);
+				QkString toDel = _mainPlayer._currentPath;
+				//toDel.Prepend(L"\\\\?\\");
+				toDel.Append(L"\0");
+				toDel.Append(L"\0");
+				std::string ppp  ;
+				toDel.GetData(ppp, 0);
+				int ret = MoveToTrash(ppp.data());
+				//lxx(%ld , GetLastError() )
+				//lxx(dd MoveToTrash, ret)
+				bDelOK = !ret;
 			}
 			if (bDelOK)
 			{
@@ -810,6 +845,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 		case IDM_PLAY_PRV: NavPlayList(-1); return 1;
 		case IDM_PLAY_NXT: NavPlayList(1); return 1;
+		case IDM_PLAY_START: NavTime(-1); return 1;
+		case IDM_PLAY_MID: NavTime(-2); return 1;
+		case IDM_PLAY_END: NavTime(-3); return 1;
 
 		case IDM_FILE:
 			trackWodMenus((CControlUI*)lParam, wParam);

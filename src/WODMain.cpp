@@ -102,6 +102,7 @@ void hookMouseWheel(MSG & msg)
 {
 	//fwKeys = GET_KEYSTATE_WPARAM(wParam);
 	auto zDelta = GET_WHEEL_DELTA_WPARAM(msg.wParam);
+	if(false)
 	if (msg.hwnd==XPP->_mainPlayer._seekbar.GetHWND() || IsKeyDown(VK_MENU))
 	{
 		NavTimemark(-zDelta);
@@ -161,6 +162,8 @@ TCHAR usrDir[MAX_PATH];
 const TCHAR* configFileName = L"wod.ini";
 
 std::vector<std::wstring> _args;
+
+bool keyPressed = 0;
 
 void parseCommandLine(const TCHAR* commandLine, std::vector<std::wstring>& arguments)
 {
@@ -256,6 +259,16 @@ wWinMain(_In_ HINSTANCE hInstance,
 				case WM_MOUSEWHEEL:
 					hookMouseWheel(msg);
 					break;
+				case WM_KEYDOWN:
+					if(msg.wParam==VK_CONTROL || msg.wParam==VK_SHIFT || msg.wParam==VK_MENU)
+						{}
+					else
+						keyPressed = HIWORD(msg.lParam) & KF_REPEAT;
+					break;
+				//case WM_KEYUP:
+				//	lxxx(WM_KEYUP dd dd, msg.wParam, msg.lParam)
+
+				//	break;
 				case WM_MOUSEMOVE:
 				case WM_NCMOUSEMOVE:
 					if(scheduleMoveWnd) {

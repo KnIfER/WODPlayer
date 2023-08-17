@@ -420,6 +420,8 @@ void WODPlayer::Toggle()
 			_mMediaPlayer->Play();
 		}
 		MarkPlaying(!_isPlaying);
+		if(!_hPlayer)
+		lxx(%ld = %ld != %ld, _hPlayer, _mMediaPlayer->getHWND(), GetHWND())
 	}
 }
 
@@ -604,7 +606,7 @@ void WODPlayer::DoEvent(TEventUI& event)
 					_bFit = false;
 				}
 			}
-			//lxxx(scale ff dd, _scale, zDelta);
+			lxxx(scale ff dd, _scale, zDelta);
 			//NeedUpdate();
 			//::LockWindowUpdate(_hPlayer);
 			//::SendMessage(GetHWND(), WM_SETREDRAW , FALSE, 0);

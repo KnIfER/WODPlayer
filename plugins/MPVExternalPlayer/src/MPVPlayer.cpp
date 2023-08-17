@@ -205,11 +205,22 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
     }
 
     mpv_set_option(mpv, "wid", mpv_format::MPV_FORMAT_INT64, &hParent);
-    //mpv_set_option_string(mpv, "seekbarkeyframes", "false");
+    mpv_set_option_string(mpv, "seekbarkeyframes", "yes");
     mpv_set_option_string(mpv, "loop", "inf");
 
     mpv_set_option_string(mpv, "force-window", "yes");
     mpv_set_option_string(mpv, "auto-window-resize", "no");
+    //mpv_set_property_string(mpv, "af", "volume=10");
+    mpv_set_property_string(mpv, "af", "lavfi=[pan=stereo|FL < 0.5*FC + 0.3*FLC + 0.3*FL + 0.3*BL + 0.3*SL + 0.5*LFE | FR < 0.5*FC + 0.3*FRC + 0.3*FR + 0.3*BR + 0.3*SR + 0.5*LFE],lavfi=[acompressor=10]");
+    //mpv_set_property_string(mpv, "af", "dynaudnorm=f=200:g=7");
+    //mpv_set_property_string(mpv, "af", "lavfi=[dynaudnorm=f=100:g=3]");
+
+    mpv_set_property_string(mpv, "window-dragging", "no");
+    mpv_set_property_string(mpv, "no-window-dragging", "yes");
+
+    mpv_set_property_string(mpv, "af", "stats");
+
+
 
     //mpv_set_option_string(mpv, "autofit", "no");
     //mpv_set_option_string(mpv, "keepaspect", "no");

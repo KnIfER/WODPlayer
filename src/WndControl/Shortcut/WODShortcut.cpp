@@ -30,6 +30,9 @@ void WODApplication::buildAccelerator()
 
 	_accelerators.push_back({FVIRTKEY, VK_PRIOR, IDM_PLAY_PRV});
 	_accelerators.push_back({FVIRTKEY, VK_NEXT, IDM_PLAY_NXT});
+	_accelerators.push_back({FVIRTKEY, VK_DIVIDE, IDM_PLAY_MID});
+	_accelerators.push_back({FVIRTKEY, VK_HOME, IDM_PLAY_START});
+	_accelerators.push_back({FVIRTKEY, VK_END, IDM_PLAY_END});
 
 	// bookmark
 	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_PRIOR, IDM_BKMK_PRV});

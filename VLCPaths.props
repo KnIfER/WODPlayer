@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <VLC_PATH>C:\Program Files (x86)\VideoLAN\vlc-2.2.8\</VLC_PATH>
+    <VLC_PATH>C:\Program Files (x86)\VideoLAN\vlc-3.0.18\</VLC_PATH>
     <VLC_INC>$(VLC_PATH)sdk\include</VLC_INC>
     <VLC_LIBS>libvlc.lib;libvlccore.lib;</VLC_LIBS>
     <VLC_LIPA_64>$(VLC_PATH)sdk\lib</VLC_LIPA_64>
