@@ -202,7 +202,7 @@ __int64 WODBase::GetBookMarks(const char* folder, const char* filename, std::vec
     localBuffer += folder;
     localBuffer += "\"";
     localBuffer += " limit 1";
-    LogIs("\nsql=%s", localBuffer.c_str());
+    //LogIs("\nsql=%s", localBuffer.c_str());
     __int64 folderVid = -1;
     char *errmsg = 0;
     int succ =  sqlite3_exec(db, localBuffer.c_str(), exec_callback1, &folderVid, &errmsg);

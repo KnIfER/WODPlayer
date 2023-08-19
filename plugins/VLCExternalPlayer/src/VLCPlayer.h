@@ -63,7 +63,7 @@ public:
 	long			GetPosition() ;
 	void			SetPosition(long pos) ;
 	long			GetDuration() ;
-	bool			PlayVideoFile(const TCHAR* path) ;
+	bool			PlayVideoFile(const CHAR* path) ;
 	void			SetFullScreen(bool val) ;
 	void			takeSnapShot(const char *psz_filepath);
 	void			SyncSize(unsigned int * x, unsigned int * y) ;

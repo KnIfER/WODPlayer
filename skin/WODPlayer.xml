@@ -45,9 +45,23 @@ showshadow="true"
 	>
 	<HBox  bkcolor="#FF0078d7" height="35" name="topBar">
 		<Button static="true" style="btn_wnd" width="34" bkimage="file='ic_launcher.png' size='24,24' align='center' " tooltip="无限播放器 WODPlayer"/>
-		<HBox minWidth="45" name="menuBar">
-			<Button style="btn_wnd" id="110" text="文件"/>
-			<Button style="btn_wnd" id="110" text="书签" />
+		<HBox minWidth="45" >
+			<HBox minWidth="45" name="menuBar" width="-2">
+				<Button style="btn_wnd" id="110" text="文件"/>
+				<Button style="btn_wnd" id="110" text="书签" />
+			</HBox>
+			
+			<Pad weight="1"/>
+			
+			<Pad width="1" inset="0,5,0,5">
+				<Pad bkcolor="#999"/>
+			</Pad>
+			<Label style="btn_wnd" name="titleBar" inset="5,0,0,0" text="123" width="-2"/>
+			<Pad width="5"/>
+			<Label style="btn_wnd" textcolor="#FF99ff99" bkcolor="#888888ff" inset="5" name="drive" text="FTP" width="-2" />
+			<Pad width="3"/>
+			<Label style="btn_wnd" textcolor="#FF99ff99" bkcolor="#888888ff" inset="5" name="mime" text="MPEGTS" width="-2" />
+			<Pad weight="1"/>
 		</HBox>
 		<!--Control static="true"/-->
 		<Button style="btn_wnd" id="110" text="—" />

@@ -94,6 +94,13 @@ void hookLButtonDown(MSG & msg)
 			scheduleExitFsc=1;
 		return;
 	}
+	else if(msg.pt.y<=4 || XPP->_topBarFscWnd->GetHWND()==msg.hwnd) 
+	{
+		scheduleExitFsc = msg.pt.y;
+		if(scheduleExitFsc==0)
+			scheduleExitFsc=1;
+		return;
+	}
 }
 
 extern void NavTimemark(int delta);
@@ -161,8 +168,6 @@ bool running=true;
 TCHAR usrDir[MAX_PATH];
 const TCHAR* configFileName = L"wod.ini";
 
-std::vector<std::wstring> _args;
-
 bool keyPressed = 0;
 
 void parseCommandLine(const TCHAR* commandLine, std::vector<std::wstring>& arguments)
@@ -186,7 +191,44 @@ wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	parseCommandLine(lpCmdLine, _args);
-	 
+
+	QkString mLockStr;
+	if(_args.size()) mLockStr.Append(_args[0].data());
+	else mLockStr.Append(L"WODPlayer");
+
+	// 创建互斥体
+	HANDLE hMutex = CreateMutex(NULL, TRUE, mLockStr);
+
+	// 检查互斥体是否已存在
+	if (GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		if (!IsKeyDown(VK_CONTROL))
+		{
+			// 已有实例在运行，将参数传递给已有实例
+			COPYDATASTRUCT cds;
+			cds.dwData = WOD_COPYDATA;
+			cds.cbData = 0;
+			if (_args.size()){
+
+				//cds.cbData = _args[0].length() * sizeof(WCHAR);
+				//cds.lpData = (LPWSTR)_args[0].c_str();
+				cds.cbData = (lstrlen(lpCmdLine) + 1) * sizeof(WCHAR);
+				cds.lpData = lpCmdLine;
+				lpCmdLine[cds.cbData-1] = '\0';
+			}
+
+			HWND hWnd = FindWindow(L"WODPlayer", NULL);
+			if (hWnd != NULL)
+			{
+				SendMessage(hWnd, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
+			}
+
+			// 退出当前实例
+			return 0;
+		}
+		hMutex = 0;
+	}
+
 	// 初始化公共空间
 	//INITCOMMONCONTROLSEX icc;
 	//icc.dwSize = sizeof(INITCOMMONCONTROLSEX);
@@ -310,6 +352,13 @@ wWinMain(_In_ HINSTANCE hInstance,
 	//delete XPP;
 
 	saveProf(usrDir, configFileName);
+
+	if(hMutex) {
+		// 释放互斥体
+		ReleaseMutex(hMutex);
+		CloseHandle(hMutex);
+	}
+
 }
 
 

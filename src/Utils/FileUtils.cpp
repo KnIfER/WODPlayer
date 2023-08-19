@@ -1,14 +1,13 @@
 #include "WindowBase.h"
 
-int MoveToVacuum(PCZZWSTR path)
+int MoveToVacuum(PCZZSTR path)
 {
-    SHFILEOPSTRUCT pm{};
+    SHFILEOPSTRUCTA pm{};
     pm.wFunc = FO_DELETE;
     pm.pFrom = path;
     pm.pTo = NULL;
-    pm.fFlags = FOF_NOCONFIRMATION | FOF_FILESONLY;
-    //pm.fFlags = FOF_NOCONFIRMATION;
-    return SHFileOperation(&pm);
+    pm.fFlags = FOF_FILESONLY | FOF_CONFIRMMOUSE | FOF_WANTNUKEWARNING;
+    return SHFileOperationA(&pm);
 }
 
 int MoveToTrash(PCZZSTR path)
@@ -17,10 +16,9 @@ int MoveToTrash(PCZZSTR path)
     ZeroMemory(&fileOp, sizeof(SHFILEOPSTRUCT));
     fileOp.wFunc = FO_DELETE;
     fileOp.pFrom = path;
-    fileOp.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT | FOF_FILESONLY;
+    fileOp.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT | FOF_FILESONLY | FOF_WANTNUKEWARNING;
     // fAnyOperationsAborted
     return SHFileOperationA(&fileOp);
-
 
     //char Buffer[2048+4];
 

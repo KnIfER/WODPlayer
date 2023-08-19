@@ -42,7 +42,7 @@ typedef long (__cdecl* VW_GETPOSITION)(LONG_PTR);
 typedef long (__cdecl* VW_GETDURATION)(LONG_PTR);
 typedef void (__cdecl* VW_SETPOSITION)(LONG_PTR, long);
 typedef void (__cdecl* VW_SETFULLSCREEN)(LONG_PTR, bool);
-typedef bool (__cdecl* VW_PLAYVIDEOFILE)(LONG_PTR, const TCHAR*);
+typedef bool (__cdecl* VW_PLAYVIDEOFILE)(LONG_PTR, const TCHAR*, const CHAR*);
 typedef bool (__cdecl* VW_CLOSE)(LONG_PTR);
 typedef void (__cdecl* VW_SYNCSIZE)(LONG_PTR, unsigned int*, unsigned int*);
 typedef void (__cdecl* VW_INTERFACE)();
@@ -66,7 +66,7 @@ public:
 	long			GetPosition() override;
 	long			GetDuration() override;
 	void			SetPosition(long pos) override;
-	bool			PlayVideoFile(const TCHAR* path) override;
+	bool			PlayVideoFile(const TCHAR* path, const CHAR* path1) override;
 	void			Close() override;
 	void			Release() override;
 	void			syncResolution(unsigned int & _resX, unsigned int & _resY) override;

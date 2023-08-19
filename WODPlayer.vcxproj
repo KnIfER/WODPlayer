@@ -37,6 +37,7 @@
     <ClInclude Include="src\database\bookmark.h" />
     <ClInclude Include="src\database\database_helper.h" />
     <ClInclude Include="src\database\sqlite3.h" />
+    <ClInclude Include="src\parameters.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Utils\ProfileStd.h" />
     <ClInclude Include="src\Utils\WindowUtils.h" />

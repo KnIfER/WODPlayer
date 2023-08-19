@@ -378,16 +378,16 @@ long VLCPlayer::GetDuration()
     return libvlc_media_player_get_length(VPlayer);
 }
 
-bool VLCPlayer::PlayVideoFile(const TCHAR* path)
+bool VLCPlayer::PlayVideoFile(const CHAR* path)
 {
     if (!VPlayer)
     {
         return false;
     }
-    CHAR buffer[256]={0};
-    WideCharToMultiByte (CP_ACP, 0, path , -1, buffer, 256, 0, 0) ;
+    //CHAR buffer[256]={0};
+    //WideCharToMultiByte (CP_ACP, 0, path , -1, buffer, 256, 0, 0) ;
 
-    libvlc_media_t *vlcMedia = libvlc_media_new_path(m_vlcInstance , buffer);
+    libvlc_media_t *vlcMedia = libvlc_media_new_path(m_vlcInstance , path);
     libvlc_media_player_set_media(VPlayer, vlcMedia);
     Play();
     return true;

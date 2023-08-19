@@ -74,6 +74,9 @@ public:
 	int _barsHeight=10;
 
     WinFrame* _bottomBar;
+    CControlUI* _titleBar;
+    CControlUI* _driveTag;
+    CControlUI* _mimeTag;
 
     CControlUI* _topBarFscH;
     WinFrame* _topBarFscWnd;

@@ -76,9 +76,9 @@ extern "C" __declspec(dllexport) void vwSetFullScreen(MPVPlayer* player, bool va
 	player->SetFullScreen(val);
 }
 
-extern "C" __declspec(dllexport) bool vwPlayVideoFile(MPVPlayer* player, TCHAR* path) 
+extern "C" __declspec(dllexport) bool vwPlayVideoFile(MPVPlayer* player, TCHAR* path, CHAR* path1) 
 {
-	return player->PlayVideoFile(path);
+	return player->PlayVideoFile(path1);
 }
 
 extern "C" __declspec(dllexport) void vwClose(MPVPlayer* player) 

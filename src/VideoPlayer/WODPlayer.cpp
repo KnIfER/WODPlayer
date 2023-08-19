@@ -179,6 +179,8 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 	}
 }
 
+std::string buffer;
+
 bool WODPlayer::PlayVideoFile(const TCHAR* path)
 {
 	bool ret = false;
@@ -187,11 +189,43 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		newVideoView();
 	}
 	//ASSERT(_mMediaPlayer);
+	_currentPath = path;
+	//xpLogTo(_currentPath);
 	if (_mMediaPlayer)
 	{
-		ret = _mMediaPlayer->PlayVideoFile(path);
+		ret = _mMediaPlayer->PlayVideoFile(path, _currentPath.GetData(buffer));
 	}
-	_currentPath = path;
+	QkString title;
+	title.Empty();
+	int idx = _currentPath.ReverseFind('/');
+	if(idx==-1) idx = _currentPath.ReverseFind('\\');
+	title.Append(STR(_currentPath)+idx+1, _currentPath.GetLength()-idx-1);
+	_app->_titleBar->SetText(title);
+	_app->_titleBar->SetNeedAutoCalcSize();
+
+
+	idx = _currentPath.Find(L":\\");
+	if(idx<0) idx = _currentPath.Find(L"://");
+	if(idx<0) idx = _currentPath.GetLength()>0?1:0;
+	_app->_driveTag->SetText(_currentPath.Mid(0, idx));
+
+	idx = _currentPath.ReverseFind(L".", _currentPath.GetLength()-2);
+	if(idx>0) {
+		title = _currentPath.Mid(idx+1);
+		title.MakeUpper();
+		if (title==L"TS")
+		{
+			title = L"MPEGTS";
+		}
+		_app->_mimeTag->SetText(title);
+	}
+
+
+	_app->_titleBar->NeedParentUpdate();
+	::SetWindowText(_app->GetHWND(), STR(_app->_titleBar->GetText()));
+
+
+
 	if(!_seekbar._decorator)
 	{
 		_seekbar.SetTag((LONG_PTR)this);

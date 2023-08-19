@@ -2,6 +2,8 @@
 
 #define IDM 40000
 
+#define WOD_COPYDATA 1
+
 // 文件
 #define IDM_FILE IDM
 #define IDM_FILE_OPEN            IDM_FILE+1
@@ -10,6 +12,8 @@
 #define IDM_SHUTDOWN             IDM_FILE+4
 #define IDM_DELETE               IDM_FILE+5
 #define IDM_DELETE_FOREVER       IDM_FILE+6
+#define IDM_PASTE_PLAYLIST       IDM_FILE+7
+#define IDM_COPY_PLAYLIST        IDM_FILE+8
 
 
 // 播放

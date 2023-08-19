@@ -32,7 +32,7 @@ public:
 	virtual long GetPosition()=0;
 	virtual void SetPosition(long pos)=0;
 	virtual long GetDuration()=0;
-	virtual bool PlayVideoFile(const TCHAR* path)=0;
+	virtual bool PlayVideoFile(const TCHAR* path, const CHAR* path1)=0;
 	virtual void SetFullScreen(bool val){};
 	virtual void Release(){};
 	virtual void Close(){};

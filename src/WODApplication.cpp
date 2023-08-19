@@ -72,8 +72,6 @@ void seekchange(SeekBar* bar, int pos) {
 	XPP->_mainPlayer._mMediaPlayer->SetPosition(pos);
 }
 
-extern std::vector<std::wstring> _args;
-
 void WODApplication::InitWindow()
 {
 	ResetWndOpacity();
@@ -82,6 +80,9 @@ void WODApplication::InitWindow()
 	m_pm._bIsLayoutOnly = true;
 	_playBtn = m_pm.FindControl(_T("play"));
 	_bottomBar = static_cast<WinFrame*>(m_pm.FindControl(_T("ch1")));
+	_titleBar = static_cast<WinFrame*>(m_pm.FindControl(_T("titleBar")));
+	_driveTag = static_cast<WinFrame*>(m_pm.FindControl(_T("drive")));
+	_mimeTag = static_cast<WinFrame*>(m_pm.FindControl(_T("mime")));
 
 	_topBar = static_cast<WinFrame*>(m_pm.FindControl(_T("topBar")));
 	_topBarFscWnd = static_cast<WinFrame*>(m_pm.FindControl(_T("topW")));
@@ -126,6 +127,7 @@ void WODApplication::InitWindow()
 
 LRESULT WODApplication::OnClose(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
 {
+	isClosing = true;
 	//LogIs("OnClose");
 	::DestroyWindow(GetHWND());
 	bHandled = TRUE;
@@ -605,6 +607,7 @@ extern bool keyPressed;
 
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
+	//if(isClosing) return 0;
 	switch (uMsg)
 	{
 	//case WM_DROPFILES:
@@ -626,8 +629,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 	case WM_CONTEXTMENU:
 	{
-		return 0;
-	}
+		
+	} return 0;
 	//case WM_PAINT: case WM_CLOSE: case WM_DESTROY:
 	//case WM_SIZE: // old layout code see ::  https://github.com/KnIfER/WODPlayer/blob/9a19f3e5f0893ba82c1a8a3566e5b55f7a3e6290/src/WndControl/WODWindow.cpp#L425
 
@@ -703,7 +706,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				_mainPlayer._mMediaPlayer->SetPosition(wParam);
 			}
 		}
-	}
+	} 
 	break;
 
 	case WM_QUIT:
@@ -720,9 +723,25 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		//	//int pos = _mainPlayer._mMediaPlayer->GetPosition();
 		//}
 		//break;
-		default:
-			break;
 		}
+		break;
+	case WM_COPYDATA:{
+		//lxx(WM_COPYDATA dd dd , wParam, lParam)
+		COPYDATASTRUCT *pCopyData = reinterpret_cast<COPYDATASTRUCT *>(lParam);
+		if(pCopyData->dwData==WOD_COPYDATA) {
+			//::SetActiveWindow(GetHWND());
+			::SetForegroundWindow(GetHWND());
+			//::SetFocus(GetHWND());
+			wchar_t *fileNamesW = static_cast<wchar_t *>(pCopyData->lpData);
+			//lxx(ss, fileNamesW);
+			std::vector<std::wstring> args;
+			parseCommandLine(fileNamesW, args);
+			if (args.size())
+			{
+				_mainPlayer.PlayVideoFile(args[0].c_str());
+			}
+		}
+	} break;
 	case WM_COMMAND:
 	{
 		bHandled = true;
@@ -747,9 +766,15 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			BOOL bDelOK = 0;
 			if(LOWORD(wParam)==IDM_DELETE_FOREVER)
 			{
-				//extern int MoveToVacuum(PCZZWSTR path);
-				//bDelOK = !MoveToVacuum(_mainPlayer._currentPath);
-				bDelOK = ::DeleteFile(_mainPlayer._currentPath);
+				extern int MoveToVacuum(PCZZSTR path);
+				QkString toDel = _mainPlayer._currentPath;
+				//toDel.Prepend(L"\\\\?\\");
+				toDel.Append(L"\0");
+				toDel.Append(L"\0");
+				std::string ppp  ;
+				toDel.GetData(ppp, 0);
+				bDelOK = !MoveToVacuum(ppp.data());
+				//bDelOK = ::DeleteFile(_mainPlayer._currentPath);
 				//LogIs(2, L"del~~~ %d %s", bDelOK, _mainPlayer._currentPath);
 			}
 			else
@@ -785,6 +810,81 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				}
 			}
 		} break;
+		case IDM_PASTE_PLAYLIST: 
+		if(!keyPressed) {
+			keyPressed = true;
+			QkString data;
+			if (OpenClipboard(GetHWND())) {
+				HANDLE hData = GetClipboardData(CF_UNICODETEXT);
+				if (hData) {
+					LPWSTR pData = (LPWSTR)GlobalLock(hData);
+					if (pData)
+					{
+						data = pData;
+						GlobalUnlock(hData);
+					}
+				}
+				CloseClipboard();
+			}
+			std::vector<QkString> paths;
+			data.Split(L"\n", paths);
+			bool detect = true;
+			int idx = 0;
+			for (size_t i = 0; i < paths.size(); i++)
+			{
+				QkString & path = paths[i];
+				path.Trim();
+				if (path.GetLength()>0)
+				{
+					if(detect) {
+						//detect = false;
+						if(path.Find(L"://")>0 || path.Find(L":\\")>0) {
+							detect = false;
+						}
+						if(!detect) {
+							if(true) _playList.clear();
+							idx = _playList.size();
+						}
+					}
+
+					if(!detect) {
+						_playList.push_back(path);
+					}
+				}
+			}
+			NavPlayList(idx - _playIdx);
+		} break;
+		case IDM_COPY_PLAYLIST: 
+		if(!keyPressed) {
+			keyPressed = true;
+			int ct = _playList.size();
+			std::wstring allPaths;
+			for (size_t i = 0; i < ct; i++)
+			{
+				allPaths += _playList[i];
+				if (i != ct - 1) // not the last item
+				{
+					allPaths += L"\r\n"; // use semicolon as separator
+				}
+			}
+
+			// convert allPaths to char * 
+			//  std::string narrowStr(allPaths.begin(), allPaths.end());
+			//std::string narrowStr = WStringToString(allPaths);
+			//const char* cstr = narrowStr.c_str();
+			const TCHAR* szText = allPaths.c_str();
+			if (OpenClipboard(NULL)) {
+				EmptyClipboard();
+				HANDLE hData = GlobalAlloc(GHND|GMEM_SHARE, (allPaths.size()+1)*sizeof(wchar_t));
+				LPWSTR pData = (LPWSTR)GlobalLock(hData);
+				CopyMemory(pData, szText, allPaths.size()*sizeof(wchar_t));
+				pData[allPaths.size()] = L'\0';
+
+				GlobalUnlock(hData);
+				SetClipboardData(CF_UNICODETEXT, hData);
+				CloseClipboard();
+			}
+		} break;
 		case IDM_MIN:
 			SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0); 
 			break;
@@ -803,6 +903,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			else
 				SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0); 
 			break;
+		case IDM_SHUTDOWN:
+			Close();
+			break;
 		case IDM_CLOSE:
 			Close();
 			break;
@@ -818,9 +921,6 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			_mainPlayer.SelectBookMark(_mainPlayer._selectedBookmark);
 			return 1;
 
-		case IDM_SHUTDOWN:
-			Close();
-			break;
 		case IDI_PLAY:
 		case IDM_PAUSE:
 			_mainPlayer.Toggle();

@@ -300,11 +300,10 @@ long MPVPlayer::GetDuration()
     return duration*1000;
 }
 
-bool MPVPlayer::PlayVideoFile(const TCHAR* path)
+bool MPVPlayer::PlayVideoFile(const CHAR* path)
 {
-    WideCharToMultiByte (CP_ACP, 0, path , -1, buffer, 256, 0, 0) ;
     const char** args = new const char*[] {
-        "loadfile", buffer, NULL
+        "loadfile", path, NULL
     };
     mpv_command(mpv, args);
     return true;
@@ -325,7 +324,7 @@ void MPVPlayer::SyncSize(unsigned int * x, unsigned int * y) {
     mpv_get_property(mpv, "dwidth", MPV_FORMAT_INT64, &w);
     mpv_get_property(mpv, "dheight", MPV_FORMAT_INT64, &h);
     *x=w; *y=h;
-    LogIs("syncResolution x=%d y=%d\n", *x, *y);
+    //LogIs("syncResolution x=%d y=%d\n", *x, *y);
     // 处理 MPV 事件
     while (mpv) {
         //LogIs("wakeup::\n");

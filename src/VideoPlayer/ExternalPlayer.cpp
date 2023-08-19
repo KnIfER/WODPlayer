@@ -200,7 +200,7 @@ int ExternalPlayer::SetVolume(int volume)
 	return volume;
 }
 
-bool ExternalPlayer::PlayVideoFile(const TCHAR* path)
+bool ExternalPlayer::PlayVideoFile(const TCHAR* path, const CHAR* path1)
 {
 	LogIs(L"PlayVideoFile host :: path=%s, m_pAPlayer=%ld", path, _player);
 
@@ -210,7 +210,7 @@ bool ExternalPlayer::PlayVideoFile(const TCHAR* path)
 	}
 
 	
-	return vwPlayVideoFile(_player, path);
+	return vwPlayVideoFile(_player, path, path1);
 }
 
 void ExternalPlayer::Play()
