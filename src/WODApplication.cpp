@@ -196,7 +196,7 @@ void WODApplication::Notify( TNotifyUI &msg )
 {
 	//if (msg.sType==DUI_MSGTYPE_BUTTONDOWN)
 	//{
-	//	LogIs(2, "12");
+		//LogIs(2, "12");
 	//	if(msg.pSender->m_bStatic)
 	//	{
 	//		ReleaseCapture();
@@ -208,6 +208,7 @@ void WODApplication::Notify( TNotifyUI &msg )
 	//}
 	if (msg.sType==L"click")
 	{
+		//LogIs(2, "click");
 		if (msg.sType==L"click")
 		{
 			//m_pm.SetDPI(125);
@@ -1140,16 +1141,16 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			ResetWndOpacity();
 			break;
 		case IDM_PLUGIN:
-			trackWodMenus((CControlUI*)lParam, wParam);
-			// 切换vlc+xunlei
-			if(0)
+			//trackWodMenus((CControlUI*)lParam, wParam);
+			// 切换mpv+xunlei
+			if(1)
 			{
 				string* player = GetProfString("player");
-				PutProfString("player", player && *player=="VLCExternalPlayer.dll"?"XunLeiExternalPlayer\\XunLeiExternalPlayer.dll":"VLCExternalPlayer.dll");
+				PutProfString("player", player && *player=="MPVExternalPlayer.dll"?"XunLeiExternalPlayer\\XunLeiExternalPlayer.dll":"MPVExternalPlayer.dll");
 				
 				Replay();
 
-				auto brand = player && *player=="VLCExternalPlayer.dll"?"VLC":"XUN";
+				auto brand = player && *player=="MPVExternalPlayer.dll"?"MVP":"XUN";
 				CControlUI* menuBtn = (CControlUI*)lParam;
 				menuBtn->GetText().Empty();
 				menuBtn->GetText().Append(L"插件 ");
