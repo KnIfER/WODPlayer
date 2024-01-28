@@ -74,10 +74,6 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 	return 0;
 }
 
-void seekchange(SeekBar* bar, int pos) {
-	XPP->_mainPlayer._mMediaPlayer->SetPosition(pos);
-}
-
 DWORD initTimer;
 DWORD initTimerID = 3;
 DWORD initTimerInterval = 500;
@@ -128,10 +124,6 @@ void WODApplication::InitWindow()
 	m_pm.GetShadow()->SetSharpness(9);
 	m_pm.GetShadow()->SetPosition(1,1);
 	m_pm.GetShadow()->SetColor(0x55888888);
-
-	seekbar = static_cast<SeekBar*>(m_pm.FindControl(_T("seekbar")));
-	if(seekbar)
-		seekbar->_callback = (SeekBarTrackCallback)seekchange;
 
 	_db->Init();
 

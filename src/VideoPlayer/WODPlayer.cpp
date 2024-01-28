@@ -314,6 +314,23 @@ void TimeMarksFloatDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdipl
 
 std::string buffer;
 
+void seekchange(SeekBar* bar, int pos) {
+	WODPlayer* player = (WODPlayer*)bar->GetTag();
+	player->_mMediaPlayer->SetPosition(pos);
+}
+
+void seekchangefloat(SeekBar* bar, int posf) {
+	WODPlayer* player = (WODPlayer*)bar->GetTag();
+	auto & seekbar = player->_seekbar;
+	long pos = seekbar._progress;
+	long duration = seekbar._max;
+	long sub_duration = 5*60*1000;
+	long sub_pos = pos % (sub_duration);
+	int lunhui = pos / sub_duration;
+
+	player->_mMediaPlayer->SetPosition(lunhui*sub_duration + posf);
+}
+
 bool WODPlayer::PlayVideoFile(const TCHAR* path)
 {
 	bool ret = false;
@@ -374,11 +391,10 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	{
 		_seekbar.SetTag((LONG_PTR)this);
 		_seekbar._decorator = (SeekBarTrackDecorator)TimeMarksDecorator;
-	}
-	if(!_seekfloat._decorator)
-	{
+		_seekbar._callback = (SeekBarTrackCallback)seekchange;
 		_seekfloat.SetTag((LONG_PTR)this);
 		_seekfloat._decorator = (SeekBarTrackDecorator)TimeMarksFloatDecorator;
+		_seekfloat._callback = (SeekBarTrackCallback)seekchangefloat;
 	}
 	//if (ret)
 	{
