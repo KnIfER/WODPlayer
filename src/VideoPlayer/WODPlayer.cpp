@@ -160,6 +160,11 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 
 	int splitter_idx = 0;
 
+	//BOOL zoomedIn = true;
+	//int zoomedInBy = 15*60*1000/2;
+	//LONG zoomedInAt = pControl->_progress;
+	//int zoomInWeight = 80;
+
 	for (size_t i = 0; i < player->_bookmarks.size(); i++)
 	{
 		auto & bkmk = player->_bookmarks.at(i);
@@ -198,6 +203,112 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 				, width
 				, height_1);
 		}
+	}
+}
+
+void TimeMarksFloatDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::SolidBrush & brush, RECT & rc)
+{
+	WODPlayer* player = (WODPlayer*)pControl->GetTag();
+	auto & seekbar = player->_seekbar;
+	long pos = seekbar._progress;
+	long duration = seekbar._max;
+	long sub_duration = 5*60*1000;
+	long sub_pos = pos % (sub_duration);
+	int lunhui = pos / sub_duration;
+
+	long timeRangeMin = lunhui*sub_duration;
+	long timeRangeMax = lunhui*sub_duration + sub_duration;
+
+	//graph.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);// SmoothingMode
+
+	//graph.FillRectangle(&brush, pControl->GetWidth()/2, 0
+	//	, 8
+	//	, pControl->GetHeight());
+
+	int w = 1;
+	int width = 3;
+	int H = pControl->GetHeight(), W = rc.right-rc.left, max = pControl->_max;
+	int height = H*2/3;
+	int top = (H-height)/2;
+
+	int height_1 = H*1/3;
+	int top_1 = (H-height_1)/2;
+
+	int left = pControl->GetFixedXY().cx;
+
+	brush.SetColor(0xff958700);
+	//brush.SetColor(0xff000000);
+	// 画原始进度
+	//graph.FillEllipse(&brush, seekbar.GetPos().left+(int)(pos*1.f/duration*seekbar.GetWidth()-w), 0
+	//	, width*2
+	//	, H);
+
+	int thumbSz = seekbar._thumbSize;
+	int radius = thumbSz/2;
+	int ttop = pControl->GetHeight()/2 - radius;
+
+	auto mode = graph.GetSmoothingMode();
+	graph.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);// SmoothingMode
+	graph.FillPie(&brush, (INT)seekbar.GetPos().left+(int)(pos*1.f/duration*seekbar.GetWidth()), ttop, thumbSz, thumbSz, 0, 360);
+	graph.SetSmoothingMode(mode);
+
+	brush.SetColor(0xffffffff);
+	//graph.FillEllipse(&brush, left + pControl->GetWidth()/2 - w, top
+	//		, width
+	//		, height);
+
+	Gdiplus::Pen pen(pControl->_trackColor);
+
+
+	int splitter_idx = 0;
+
+	//BOOL zoomedIn = true;
+	//int zoomedInBy = 15*60*1000/2;
+	//LONG zoomedInAt = pControl->_progress;
+	//int zoomInWeight = 80;
+
+	for (size_t i = 0; i < player->_bookmarks.size(); i++)
+	{
+		auto & bkmk = player->_bookmarks.at(i);
+		auto when = bkmk.pos;
+		if(when>=timeRangeMin && when<=timeRangeMax) {
+			when = (when-timeRangeMin);
+			int left = rc.left+when*1.0/max*W - w;
+			if(bkmk.layer==0)
+			{
+				graph.FillRectangle(&brush, left, top
+					, width
+					, height);
+				if (((splitter_idx++)%2)==0)
+				{
+					graph.FillRectangle(&brush, left+w, top
+						, width+w
+						, 2);
+					graph.FillRectangle(&brush, left+w, top+height-w-w
+						, width+w
+						, 2);
+					//graph.DrawLine(&pen, left+w, top, left+width+w+w+100, top);
+				}
+				else
+				{
+					graph.FillRectangle(&brush, left-width, top
+						, width+w
+						, 2);
+					graph.FillRectangle(&brush, left-width, top+height-w-w
+						, width+w
+						, 2);
+					//graph.DrawLine(&pen, left+w, top, left+width+w+w+100, top);
+				}
+			}
+			else
+			{
+				graph.FillRectangle(&brush, left, top_1
+					, width
+					, height_1);
+			}
+		}
+		else if(bkmk.layer==0)
+			splitter_idx++;
 	}
 }
 
@@ -263,6 +374,11 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	{
 		_seekbar.SetTag((LONG_PTR)this);
 		_seekbar._decorator = (SeekBarTrackDecorator)TimeMarksDecorator;
+	}
+	if(!_seekfloat._decorator)
+	{
+		_seekfloat.SetTag((LONG_PTR)this);
+		_seekfloat._decorator = (SeekBarTrackDecorator)TimeMarksFloatDecorator;
 	}
 	//if (ret)
 	{

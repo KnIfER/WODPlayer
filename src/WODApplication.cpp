@@ -57,10 +57,12 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 	}
 	if(*pstrClass=='_') {
 		pstrClass++;
-		if(*pstrClass=='s') {
+		if(*pstrClass=='s') { // "_s"
 			//LogIs(L"CreateControl::%s %d", pstrClass, *pstrClass=='_');
 			if(_mainPlayer._seekbar.GetParent()==NULL)
 				return &_mainPlayer._seekbar;
+			if(_mainPlayer._seekfloat.GetParent()==NULL)
+				return &_mainPlayer._seekfloat;
 			return &_mainPlayer._volumebar;
 		}
 		if(*pstrClass=='v') {
@@ -118,8 +120,8 @@ void WODApplication::InitWindow()
 	_topBarFscWnd = static_cast<WinFrame*>(m_pm.FindControl(_T("topW")));
 	_topBarFscH = static_cast<WinFrame*>(m_pm.FindControl(_T("topH")));
 
-	_timeLabel = static_cast<WinFrame*>(m_pm.FindControl(_T("time")));
-	_durationLabel = static_cast<WinFrame*>(m_pm.FindControl(_T("duration")));
+	_timeLabel = static_cast<CControlUI*>(m_pm.FindControl(_T("time")));
+	_durationLabel = static_cast<CControlUI*>(m_pm.FindControl(_T("duration")));
 
 	m_pm.GetShadow()->ShowShadow(true);
 	m_pm.GetShadow()->SetSize(5);
@@ -766,6 +768,20 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			{
 				_mainPlayer._seekbar.SetProgressAndMax(pos, duration);
 			}
+
+			long sub_duration = 5*60*1000;
+			long sub_pos = pos % (sub_duration);
+			int lunhui = pos / sub_duration;
+			_mainPlayer._seekfloat.SetProgressAndMax(sub_pos, sub_duration);
+
+			int range = _mainPlayer._seekfloat.GetWidth();
+			int maxRange  = _mainPlayer._seekbar.GetWidth();
+			//_seekfloat->GetFloatPercent().left = (lunhui * sub_duration)/duration;
+			//_seekfloat->NeedParentUpdate();
+
+			int x = (int)roundf((lunhui * sub_duration)*1.f/duration*maxRange);
+			if(x+range>maxRange) x = maxRange-range;
+			_mainPlayer._seekfloat.SetFixedXY({x,0});
 
 			int W = _mainPlayer._srcWidth, H=_mainPlayer._srcHeight;
 			_mainPlayer._mMediaPlayer->syncResolution(_mainPlayer._srcWidth, _mainPlayer._srcHeight);

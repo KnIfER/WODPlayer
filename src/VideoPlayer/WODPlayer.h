@@ -53,6 +53,7 @@ public:
     void DoEvent(TEventUI& event) override;
 
     SeekBar _seekbar;
+    SeekBar _seekfloat;
     SeekBar _volumebar;
     VideoPlayer* _mMediaPlayer;
     QkString _currentPath;

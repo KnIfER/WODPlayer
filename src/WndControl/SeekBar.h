@@ -76,6 +76,11 @@ public:
 
 	LONG _max;
 	LONG _progress;
+
+	BOOL _zoomedIn;
+	int _zoomedInBy;
+	LONG _zoomedInAt;
+	int zoomInWeight = 80;
 private:
 	int dragDownPos;
 	int dragDownLeft;

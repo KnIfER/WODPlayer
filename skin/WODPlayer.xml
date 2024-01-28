@@ -84,8 +84,18 @@ showshadow="true"
 			<HBox height="35">
         <Label style="btn_wnd" name="time" text="00:00:08" inset="5,0,0,0" width="-2"/>
 
-        <_s inset="0,10,0,10" minwidth="100" width="0" name="seekbar" barInset="10"/>
-        
+
+        <Box width="0"  >
+          <_s inset="0,10,0,10" minwidth="100" width="0" name="seekbar" barInset="10"/>
+          <_s name="seekfloat" inset="0,10,0,10" width="250" 
+              barInset="10" 
+              bkcolor="cf333333"
+              bordercolor="#bfffffff"
+							bordersize="1"
+              float="true"
+              />
+        </Box>
+
         <Label style="btn_wnd" name="duration" text="00:00:08" inset="5,0,0,0" width="-2"/>
         
 				<_s inset="0,10,0,10" width="100"  barInset="10"/>
