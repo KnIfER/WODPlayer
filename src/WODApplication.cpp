@@ -214,6 +214,11 @@ void WODApplication::Notify( TNotifyUI &msg )
 
 		}
 
+		if (msg.pSender==_timeLabel)
+		{
+			_mainPlayer._seekfloat.SetVisible(!_mainPlayer._seekfloat.IsVisible());
+		}
+
 		if( msg.sType == _T("itemclick") ) 
 		{
 		}

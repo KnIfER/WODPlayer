@@ -82,7 +82,7 @@ showshadow="true"
 			height="-2"
 			>
 			<HBox height="35">
-        <Label style="btn_wnd" name="time" text="00:00:08" inset="5,0,0,0" width="-2"/>
+        <Button style="btn_wnd" name="time" text="00:00:08" inset="5,0,0,0" width="-2"/>
 
 
         <Box width="0"  >
@@ -93,10 +93,11 @@ showshadow="true"
               bordercolor="#bfffffff"
 							bordersize="1"
               float="true"
+              visible="false"
               />
         </Box>
 
-        <Label style="btn_wnd" name="duration" text="00:00:08" inset="5,0,0,0" width="-2"/>
+        <Button style="btn_wnd" name="duration" text="00:00:08" inset="5,0,0,0" width="-2"/>
         
 				<_s inset="0,10,0,10" width="100"  barInset="10"/>
 			</HBox>
