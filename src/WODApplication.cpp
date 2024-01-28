@@ -769,6 +769,10 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			}
 
 			long sub_duration = 5*60*1000;
+			if(duration<=sub_duration*6) {
+				sub_duration /= 2;
+			}
+			_mainPlayer.seekfloat_duration = sub_duration;
 			long sub_pos = pos % (sub_duration);
 			int lunhui = pos / sub_duration;
 			_mainPlayer._seekfloat.SetProgressAndMax(sub_pos, sub_duration);

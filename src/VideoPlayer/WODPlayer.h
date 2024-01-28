@@ -84,4 +84,7 @@ public:
     int _moveLastX = 0;
     int _moveLastY = 0;
     int _rotation = 0;
+
+    int seekfloat_duration = 5*60*1000;
 };
+

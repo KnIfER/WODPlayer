@@ -212,7 +212,7 @@ void TimeMarksFloatDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdipl
 	auto & seekbar = player->_seekbar;
 	long pos = seekbar._progress;
 	long duration = seekbar._max;
-	long sub_duration = 5*60*1000;
+	long sub_duration = player->seekfloat_duration;
 	long sub_pos = pos % (sub_duration);
 	int lunhui = pos / sub_duration;
 
@@ -324,7 +324,7 @@ void seekchangefloat(SeekBar* bar, int posf) {
 	auto & seekbar = player->_seekbar;
 	long pos = seekbar._progress;
 	long duration = seekbar._max;
-	long sub_duration = 5*60*1000;
+	long sub_duration = player->seekfloat_duration;
 	long sub_pos = pos % (sub_duration);
 	int lunhui = pos / sub_duration;
 
