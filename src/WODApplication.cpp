@@ -99,6 +99,9 @@ void deleteFileProc(HWND hwnd, UINT, UINT_PTR, DWORD)
 	XPP->DeleteCurrentFile(delPermanent);
 }
 
+CControlUI* _timeLabel;
+CControlUI* _durationLabel;
+
 void WODApplication::InitWindow()
 {
 	ResetWndOpacity();
@@ -114,6 +117,9 @@ void WODApplication::InitWindow()
 	_topBar = static_cast<WinFrame*>(m_pm.FindControl(_T("topBar")));
 	_topBarFscWnd = static_cast<WinFrame*>(m_pm.FindControl(_T("topW")));
 	_topBarFscH = static_cast<WinFrame*>(m_pm.FindControl(_T("topH")));
+
+	_timeLabel = static_cast<WinFrame*>(m_pm.FindControl(_T("time")));
+	_durationLabel = static_cast<WinFrame*>(m_pm.FindControl(_T("duration")));
 
 	m_pm.GetShadow()->ShowShadow(true);
 	m_pm.GetShadow()->SetSize(5);
@@ -708,6 +714,32 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
 		{
 			long pos = _mainPlayer._mMediaPlayer->GetPosition();
+			long duration = _mainPlayer._mMediaPlayer->GetDuration();
+
+			//_timeLabel
+
+			int sec = pos/1000;
+			int minutes = sec/60;
+			int hour = minutes/60;
+			minutes %= 60;
+			sec %= 60;
+			_timeLabel->GetText().Empty();
+			_timeLabel->GetText().Format(L"%02d:%02d:%02d", hour, minutes, sec);
+			_timeLabel->Invalidate();
+			//_timeLabel->GetText() += hour;
+			//_timeLabel->GetText() += L":";
+			//_timeLabel->GetText() += minutes;
+			//_timeLabel->GetText() += L":";
+			//_timeLabel->GetText() += sec;
+
+			sec = duration/1000;
+			minutes = sec/60;
+			hour = minutes/60;
+			minutes %= 60;
+			sec %= 60;
+			_durationLabel->GetText().Empty();
+			_durationLabel->GetText().Format(L"%02d:%02d:%02d", hour, minutes, sec);
+			_durationLabel->Invalidate();
 
 			if(!_mainPlayer._hPlayer) {
 				_mainPlayer._hPlayer = ::GetFirstChild(_mainPlayer.GetHWND());
@@ -721,7 +753,6 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			//lstrcat(szPosition, _T("/"));
 			//lstrcat(szPosition, szDuration);
-			long duration = _mainPlayer._mMediaPlayer->GetDuration();
 			if(_mainPlayer._currentPath.EndWith("flv"))
 			if (_mainPlayer._durationCache != duration)
 			{
