@@ -114,3 +114,18 @@ extern "C" __declspec(dllexport) int vwSetVolume(MFPlayer2* player, int value)
 	//LogIs("MFVOL=%d", ret);
 	return ret*100;
 }
+
+
+
+//extern "C" __declspec(dllexport) void vwSetRotation(MFPlayer2* player, int64_t rate) 
+//{
+//	player->SetRotation();
+//}
+//
+//
+//extern "C" __declspec(dllexport) int64_t vwGetRotation(MFPlayer2* player) 
+//{
+//	return player->GetRotation();
+//}
+
+

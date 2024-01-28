@@ -60,6 +60,8 @@ public:
 
     void ResetWndOpacity();
 
+    void DeleteCurrentFile(BOOL permanent);
+
     void buildAccelerator();
 
     void ToggleFullScreen();

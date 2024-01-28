@@ -39,6 +39,8 @@ public:
 	virtual void syncResolution(unsigned int & _resX, unsigned int & _resY){};
 	virtual float SetRate(float rate)=0;
 	virtual int SetVolume(int volume)=0;
+	virtual void	SetRotation(int value) {}
+	virtual int	GetRotation() { return 0; }
 	//POINT _resolution; 
 	//unsigned int _resX; 
 	//unsigned int _resY; 

@@ -174,7 +174,7 @@ int exec_callback1(void *para, int columenCount, char **columnValue, char **colu
 // todo atoi 精确度
 int exec_callback2(void *para, int columenCount, char **columnValue, char **columnName)
 {
-    ((std::vector<BookMark>*)para)->push_back(BookMark{atoi(columnValue[0]), atoi(columnValue[1])});
+    ((std::vector<BookMark>*)para)->push_back(BookMark{atoi(columnValue[0]), atoi(columnValue[1]), atoi(columnValue[2])});
     return 0;
 }
 
@@ -211,7 +211,7 @@ __int64 WODBase::GetBookMarks(const char* folder, const char* filename, std::vec
 
     if(folderVid>=0)
     {
-        localBuffer = "select pos,id from timemarks where vid=";
+        localBuffer = "select pos,id,layer from timemarks where vid=";
         localBuffer += std::to_string(folderVid);
         localBuffer += " and folder!=1";
         localBuffer += " order by pos asc, creation_time asc, id asc";

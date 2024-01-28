@@ -137,7 +137,7 @@ int testVlc(HWND hwnd, CHAR* filePath)
 
 static void handleEvents(mpv_event *event, MPVPlayer *player)
 {
-    //LogIs("handleEvents::%d\n", event->event_id);
+    LogIs("handleEvents::%d\n", event->event_id);
     switch (event->event_id) {
     case MPV_EVENT_PROPERTY_CHANGE:
         break;
@@ -233,6 +233,11 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
 
     mpv_initialize(mpv);
 
+
+    //tg
+    //SetRotation(125);
+
+
     error_code = 0;
 }
 
@@ -262,14 +267,17 @@ void MPVPlayer::Pause()
 
 bool MPVPlayer::IsPlaying()
 {
-    return !IsPaused();
+    int playback_state;
+    if (mpv_get_property(mpv, "pause", MPV_FORMAT_FLAG, &playback_state) < 0)
+        return false;
+    return !playback_state && GetDuration()>0;
 }
 
 bool MPVPlayer::IsPaused()
 {
     int playback_state;
     mpv_get_property(mpv, "pause", MPV_FORMAT_FLAG, &playback_state);
-    return playback_state;
+    return playback_state && GetDuration()>0;
 }
 
 long MPVPlayer::GetPosition()
@@ -323,7 +331,16 @@ void MPVPlayer::SyncSize(unsigned int * x, unsigned int * y) {
     int64_t w=*x, h=*y;
     mpv_get_property(mpv, "dwidth", MPV_FORMAT_INT64, &w);
     mpv_get_property(mpv, "dheight", MPV_FORMAT_INT64, &h);
-    *x=w; *y=h;
+
+    if (mRotation && ((mRotation%180>=45 || mRotation%180<=135)))
+    {
+        *x=h; *y=w;
+    }
+    else
+    {
+        *x=w; *y=h;
+    }
+
     //LogIs("syncResolution x=%d y=%d\n", *x, *y);
     // 处理 MPV 事件
     while (mpv) {
@@ -346,4 +363,21 @@ float MPVPlayer::SetVolume(int value)
     _itoa(value, buffer, 10);
     if(mpv) mpv_set_property_string(mpv, "volume", buffer);
     return 1;
+}
+
+void MPVPlayer::SetRotation(int value)
+{
+    if (mRotation!=value)
+    {
+        //mpv_set_property_string(mpv, "video-rotate", "45");
+        mRotation = value;
+        mpv_set_property(mpv, "video-rotate", MPV_FORMAT_INT64, &mRotation);
+    }
+}
+
+int MPVPlayer::GetRotation()
+{
+    //mpv_get_property_string(mpv, "video-rotate", "45");
+    mpv_get_property(mpv, "video-rotate", MPV_FORMAT_INT64, &mRotation);
+    return mRotation;
 }

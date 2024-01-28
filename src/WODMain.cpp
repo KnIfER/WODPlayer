@@ -181,6 +181,39 @@ void parseCommandLine(const TCHAR* commandLine, std::vector<std::wstring>& argum
 	LocalFree(argv);
 }
 
+BOOL prvInstance(_In_ LPWSTR lpCmdLine, BOOL add)
+{
+	if (!IsKeyDown(VK_CONTROL))
+	{
+		// 已有实例在运行，将参数传递给已有实例
+		COPYDATASTRUCT cds;
+		cds.dwData = WOD_COPYDATA;
+		cds.cbData = 0;
+		QkString tmp;
+		if (_args.size()) {
+			if(add) {
+				tmp = lpCmdLine;
+				tmp.Append(L" -add  ");
+				cds.cbData = (tmp.GetLength()) * sizeof(WCHAR);
+				cds.lpData = (LPWSTR)STR(tmp);
+				lpCmdLine[cds.cbData-1] = '\0';
+			} else {
+				cds.cbData = (lstrlen(lpCmdLine) + 1) * sizeof(WCHAR);
+				cds.lpData = lpCmdLine;
+				lpCmdLine[cds.cbData-1] = '\0';
+			}
+		}
+		HWND hWnd = FindWindow(L"WODPlayer", NULL);
+		if (hWnd != NULL)
+		{
+			SendMessage(hWnd, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
+		}
+		// 退出当前实例
+		return TRUE;
+	}
+	return FALSE;
+}
+
 int APIENTRY 
 wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -192,40 +225,21 @@ wWinMain(_In_ HINSTANCE hInstance,
 
 	parseCommandLine(lpCmdLine, _args);
 
-	QkString mLockStr;
 	if(_args.size()) mLockStr.Append(_args[0].data());
 	else mLockStr.Append(L"WODPlayer");
 
 	// 创建互斥体
-	HANDLE hMutex = CreateMutex(NULL, TRUE, mLockStr);
-
-	// 检查互斥体是否已存在
-	if (GetLastError() == ERROR_ALREADY_EXISTS)
+	hMutexTemp = CreateMutex(NULL, TRUE, L"WODPLTMP");
+	if (GetLastError() == ERROR_ALREADY_EXISTS) // 检查互斥体是否已存在
 	{
-		if (!IsKeyDown(VK_CONTROL))
-		{
-			// 已有实例在运行，将参数传递给已有实例
-			COPYDATASTRUCT cds;
-			cds.dwData = WOD_COPYDATA;
-			cds.cbData = 0;
-			if (_args.size()){
+		if(prvInstance(lpCmdLine, TRUE)) return 0;
+		hMutexTemp = 0;
+	}
 
-				//cds.cbData = _args[0].length() * sizeof(WCHAR);
-				//cds.lpData = (LPWSTR)_args[0].c_str();
-				cds.cbData = (lstrlen(lpCmdLine) + 1) * sizeof(WCHAR);
-				cds.lpData = lpCmdLine;
-				lpCmdLine[cds.cbData-1] = '\0';
-			}
-
-			HWND hWnd = FindWindow(L"WODPlayer", NULL);
-			if (hWnd != NULL)
-			{
-				SendMessage(hWnd, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
-			}
-
-			// 退出当前实例
-			return 0;
-		}
+	HANDLE hMutex = CreateMutex(NULL, TRUE, STR(mLockStr));
+	if (GetLastError() == ERROR_ALREADY_EXISTS) // 检查互斥体是否已存在
+	{
+		if(prvInstance(lpCmdLine, FALSE)) return 0;
 		hMutex = 0;
 	}
 
@@ -268,6 +282,12 @@ wWinMain(_In_ HINSTANCE hInstance,
 	loadProf(usrDir, configFileName);
 
 	XPP = new WODApplication();
+
+	if (_args.size()>0)
+	{
+		XPP->_playList.push_back(_args[0].c_str()); // path0
+	}
+
 	//WODApplication app{};
 	//XPP = new WODApplication();
 	//XPP = &app;
@@ -301,7 +321,9 @@ wWinMain(_In_ HINSTANCE hInstance,
 				case WM_MOUSEWHEEL:
 					hookMouseWheel(msg);
 					break;
+				case WM_SYSKEYDOWN :
 				case WM_KEYDOWN:
+					lxxx(WM_KEYDOWN dd, msg.wParam)
 					if(msg.wParam==VK_CONTROL || msg.wParam==VK_SHIFT || msg.wParam==VK_MENU)
 						{}
 					else
@@ -353,10 +375,14 @@ wWinMain(_In_ HINSTANCE hInstance,
 
 	saveProf(usrDir, configFileName);
 
-	if(hMutex) {
-		// 释放互斥体
+	if(hMutex) { // 释放互斥体
 		ReleaseMutex(hMutex);
 		CloseHandle(hMutex);
+	}
+	
+	if(hMutexTemp) { // 释放互斥体
+		ReleaseMutex(hMutexTemp);
+		CloseHandle(hMutexTemp);
 	}
 
 }

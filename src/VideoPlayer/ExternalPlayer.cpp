@@ -81,6 +81,8 @@ HMODULE ExternalPlayer::vwInit(int & error_code, const TCHAR* dllPath, bool blam
 			DEF_FUNC(hPlayer, vwInterface, VW_INTERFACE, "vwInterface");
 			DEF_FUNC(hPlayer, vwSetRate, VW_SETRATE, "vwSetRate");
 			DEF_FUNC(hPlayer, vwSetVolume, VW_SETVOLUME, "vwSetVolume");
+			DEF_FUNC(hPlayer, vwSetRotation, VW_SETROTATION, "vwSetRotation");
+			DEF_FUNC(hPlayer, vwGetRotation, VW_GETROTATION, "vwGetRotation");
 			if(PRINTLEN!=PRINTLEN_0)
 			{
 				PRINTBUFF[PRINTLEN]='\0';
@@ -200,6 +202,26 @@ int ExternalPlayer::SetVolume(int volume)
 	return volume;
 }
 
+
+
+void ExternalPlayer::SetRotation(int value)
+{
+	if(_player && vwSetRotation) 
+	{
+		return vwSetRotation(_player, value);
+	}
+}
+
+int ExternalPlayer::GetRotation()
+{
+	if(_player && vwSetVolume) 
+	{
+		return vwGetRotation(_player);
+	}
+	return 0;
+}
+
+
 bool ExternalPlayer::PlayVideoFile(const TCHAR* path, const CHAR* path1)
 {
 	LogIs(L"PlayVideoFile host :: path=%s, m_pAPlayer=%ld", path, _player);
@@ -257,6 +279,7 @@ long ExternalPlayer::GetPosition()
 long ExternalPlayer::GetDuration()
 {
 	return _player?vwGetDuration(_player):0;
+	//return 1000*60*60;
 }
 
 void ExternalPlayer::SetPosition(long pos)

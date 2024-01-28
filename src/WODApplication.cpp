@@ -20,6 +20,10 @@
 #include "WODMenus.h"
 
 
+#include <thread>
+#include <chrono>
+
+
 struct DemoData
 {
 	const TCHAR* title;
@@ -72,6 +76,29 @@ void seekchange(SeekBar* bar, int pos) {
 	XPP->_mainPlayer._mMediaPlayer->SetPosition(pos);
 }
 
+DWORD initTimer;
+DWORD initTimerID = 3;
+DWORD initTimerInterval = 500;
+
+void initTimerProc(HWND hwnd, UINT, UINT_PTR, DWORD)
+{
+	::KillTimer(hwnd, initTimerID);
+	if (hMutexTemp)
+	{
+		ReleaseMutex(hMutexTemp);
+		CloseHandle(hMutexTemp);
+		hMutexTemp = 0;
+	}
+}
+
+DWORD delTimerID = 4;
+BOOL delPermanent = 4;
+void deleteFileProc(HWND hwnd, UINT, UINT_PTR, DWORD)
+{
+	::KillTimer(hwnd, delTimerID);
+	XPP->DeleteCurrentFile(delPermanent);
+}
+
 void WODApplication::InitWindow()
 {
 	ResetWndOpacity();
@@ -104,9 +131,9 @@ void WODApplication::InitWindow()
 	QkString path = file?file->c_str():"";
 	if(!path.IsEmpty())
 		_mainPlayer.PlayVideoFile(STR(path));
-	if (_args.size()>0)
+	if (_playList.size()>0)
 	{
-		_mainPlayer.PlayVideoFile(STR(QkString(_args[0].c_str())));
+		_mainPlayer.PlayVideoFile(_playList[0]);
 	}
 	//MarkPlaying(true);
 
@@ -123,6 +150,11 @@ void WODApplication::InitWindow()
 	//menuBtn->GetText().Append(L"插件 ");
 	//menuBtn->GetText() += brand;
 	//menuBtn->SetNeedAutoCalcSize();
+
+	ImmAssociateContext(GetHWND(), NULL);
+
+	//m_pm.SetTimer(m_pm.GetRoot(), 0, 350, true);
+	initTimer = ::SetTimer(GetHWND(), initTimerID, initTimerInterval, (TIMERPROC)initTimerProc);
 }
 
 LRESULT WODApplication::OnClose(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
@@ -336,8 +368,8 @@ void WODApplication::MarkPlaying(bool playing)
 
 		if(playing)
 			::SetTimer(m_hWnd, 1, 100, NULL);
-		else
-			::KillTimer(m_hWnd, 1);
+		//else
+		//	::KillTimer(m_hWnd, 1);
 	}
 }
 
@@ -486,23 +518,33 @@ void NavTimemark(int delta)
 	if(!wod._mMediaPlayer) return;
 	auto & player = wod._mMediaPlayer;
 	auto & bkmks = wod._bookmarks;
-	int pos = player->GetPosition();
+	int pos = player->IsPlaying()?wod._seekbar._progress:player->GetPosition(); // todo
 	if(bkmks.size())
 	{
 		bool set = false;
-		for (size_t i = 0; i < bkmks.size(); i++)
+		for (size_t i = 0, size=bkmks.size(); i < size; i++)
 		{
-			if (delta<0 && bkmks[i].pos >= pos)
+			int mark = bkmks[i].pos;
+			if (delta<0)
 			{
-				if (i>0)
+				if (mark >= pos)
 				{
-					wod.SelectBookMark(i-1);
-					set = 1;
+					if (i>0)
+					{
+						while(bkmks[i].layer!=0 && i>0 && bkmks[i-1].pos==mark) {
+							i--;
+						}
+						wod.SelectBookMark(i-1);
+						set = 1;
+					}
+					break;
 				}
-				break;
 			}
-			if (delta>0 && bkmks[i].pos > pos)
+			else if (mark > pos)
 			{
+				while(bkmks[i].layer!=0 && i+1 < size && bkmks[i+1].pos==mark) {
+					i++;
+				}
 				wod.SelectBookMark(i);
 				set = 1;
 				break;
@@ -517,6 +559,10 @@ void NavTimemark(int delta)
 				set = 1;
 			}
 		}
+		//lxx(dd dd dd, bkmks[wod._selectedBookmark].layer
+		//	, bkmks[wod._selectedBookmark].pos
+		//	, wod._selectedBookmark+1<bkmks.size()?bkmks[wod._selectedBookmark+1].pos:-1
+		//)
 		wod._seekbar.Invalidate();
 	}
 }
@@ -528,7 +574,7 @@ void NavTime(int t)
 	auto & player = wod._mMediaPlayer;
 	LONG pos = t==-1?0
 		:t==-2?wod._mMediaPlayer->GetDuration()/2
-		:wod._mMediaPlayer->GetDuration();
+		:wod._mMediaPlayer->GetDuration()-1;
 	player->SetPosition(pos);
 	if (!wod._isPlaying)
 	{
@@ -536,19 +582,20 @@ void NavTime(int t)
 	}
 }
 
-void NavPlayList(int delta)
+void NavPlayList(int newIdx)
 {
 	auto & wod = XPP->_mainPlayer;
 	auto & player = wod._mMediaPlayer;
 	auto & lst = XPP->_playList;
 	if(lst.size())
 	{
-		XPP->_playIdx += delta;
-		XPP->_playIdx %= lst.size();
-		if(XPP->_playIdx<0) XPP->_playIdx=0;
-		if(lst[XPP->_playIdx]!=wod._currentPath)
+		if(newIdx<0) newIdx=0;
+		if(newIdx>=lst.size()) newIdx=lst.size()-1;
+		//newIdx %= lst.size();
+		XPP->_playIdx = newIdx;
+		if(lst[newIdx]!=wod._currentPath)
 		{
-			wod.PlayVideoFile(lst[XPP->_playIdx]);
+			wod.PlayVideoFile(lst[newIdx]);
 		}
 	}
 }
@@ -657,7 +704,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		}
 
 		//if(0)
-		if ((wParam == 1)
+		if ((wParam == 1 && _mainPlayer._mMediaPlayer)
 			&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
 		{
 			long pos = _mainPlayer._mMediaPlayer->GetPosition();
@@ -674,13 +721,19 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			//lstrcat(szPosition, _T("/"));
 			//lstrcat(szPosition, szDuration);
-
-			int nPos =  int (pos / (double)_mainPlayer._mMediaPlayer->GetDuration() * 1000);
+			long duration = _mainPlayer._mMediaPlayer->GetDuration();
+			if(_mainPlayer._currentPath.EndWith("flv"))
+			if (_mainPlayer._durationCache != duration)
+			{
+				if(duration>_mainPlayer._durationCache) _mainPlayer._durationCache = duration;
+				else duration = _mainPlayer.	_durationCache;
+			}
+			int nPos =  int (pos / (double)duration * 1000);
 			//SendMessage(GetDlgItem(hwnd, IDC_SLIDER1), TBM_SETPOS, (WPARAM)TRUE, (LPARAM)nPos);
 
 			if (!_mainPlayer._seekbar._isSeeking)
 			{
-				_mainPlayer._seekbar.SetProgressAndMax(pos, _mainPlayer._mMediaPlayer->GetDuration());
+				_mainPlayer._seekbar.SetProgressAndMax(pos, duration);
 			}
 
 			int W = _mainPlayer._srcWidth, H=_mainPlayer._srcHeight;
@@ -738,10 +791,37 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			parseCommandLine(fileNamesW, args);
 			if (args.size())
 			{
-				_mainPlayer.PlayVideoFile(args[0].c_str());
+				auto iter = std::find(args.begin(), args.end(), L"-add");
+				if (iter != args.end())
+				{
+					KillTimer(GetHWND(), initTimerID);
+					_playList.push_back(args[0].c_str());
+					if (hMutexTemp)
+					{
+						initTimer = ::SetTimer(GetHWND(), initTimerID, initTimerInterval, (TIMERPROC)initTimerProc);
+					}
+				} else {
+					_mainPlayer.PlayVideoFile(args[0].c_str());
+				}
 			}
 		}
 	} break;
+	//case WM_CHAR:
+	//	// 过滤非英文字符
+	//	if ((wParam < 'A' || wParam > 'Z') && (wParam < 'a' || wParam > 'z')) {
+	//		return 0;
+	//	}
+	//	break;
+
+	//case WM_ACTIVATE:
+	//	if (LOWORD(wParam) != WA_INACTIVE) {
+	//		// 切换输入法为英语
+	//		//HKL englishLayout = LoadKeyboardLayout(L"00000409", KLF_ACTIVATE);
+	//		//ActivateKeyboardLayout(englishLayout, KLF_SETFORPROCESS);
+	//		//SendMessageW(WM_INPUTLANGCHANGEREQUEST, 0, (LPARAM)LoadKeyboardLayout(L"00000409", KLF_ACTIVATE));
+
+	//	}
+	//	break;
 	case WM_COMMAND:
 	{
 		bHandled = true;
@@ -763,57 +843,17 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//lxxx(DELETE dd dd, wParam, lParam)
 			_mainPlayer.Stop();
 			MarkPlaying(false);
-			BOOL bDelOK = 0;
-			if(LOWORD(wParam)==IDM_DELETE_FOREVER)
-			{
-				extern int MoveToVacuum(PCZZSTR path);
-				QkString toDel = _mainPlayer._currentPath;
-				//toDel.Prepend(L"\\\\?\\");
-				toDel.Append(L"\0");
-				toDel.Append(L"\0");
-				std::string ppp  ;
-				toDel.GetData(ppp, 0);
-				bDelOK = !MoveToVacuum(ppp.data());
-				//bDelOK = ::DeleteFile(_mainPlayer._currentPath);
-				//LogIs(2, L"del~~~ %d %s", bDelOK, _mainPlayer._currentPath);
-			}
-			else
-			{
-				extern int MoveToTrash(PCZZSTR path);
-				QkString toDel = _mainPlayer._currentPath;
-				//toDel.Prepend(L"\\\\?\\");
-				toDel.Append(L"\0");
-				toDel.Append(L"\0");
-				std::string ppp  ;
-				toDel.GetData(ppp, 0);
-				int ret = MoveToTrash(ppp.data());
-				//lxx(%ld , GetLastError() )
-				//lxx(dd MoveToTrash, ret)
-				bDelOK = !ret;
-			}
-			if (bDelOK)
-			{
-				auto & wod = XPP->_mainPlayer;
-				auto & player = wod._mMediaPlayer;
-				auto & lst = XPP->_playList;
-
-				if(lst.size() && XPP->_playIdx<lst.size())
-				{
-					lst.erase(lst.begin()+XPP->_playIdx);
-					if(XPP->_playIdx==lst.size()) 
-						XPP->_playIdx --;
-					if(XPP->_playIdx<0) XPP->_playIdx=0;
-					if(lst.size())
-					{
-						wod.PlayVideoFile(lst[XPP->_playIdx]);
-					}
-				}
-			}
+			//delPermanent = LOWORD(wParam)==IDM_DELETE_FOREVER;
+			//::KillTimer(GetHWND(), delTimerID);
+			//::SetTimer(GetHWND(), delTimerID, 150, (TIMERPROC)deleteFileProc);
+			DeleteCurrentFile(LOWORD(wParam)==IDM_DELETE_FOREVER);
 		} break;
 		case IDM_PASTE_PLAYLIST: 
+		case IDM_APPEND_PLAYLIST: 
 		if(!keyPressed) {
 			keyPressed = true;
 			QkString data;
+			bool purgeLst = LOWORD(wParam)==IDM_PASTE_PLAYLIST;
 			if (OpenClipboard(GetHWND())) {
 				HANDLE hData = GetClipboardData(CF_UNICODETEXT);
 				if (hData) {
@@ -834,6 +874,20 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			{
 				QkString & path = paths[i];
 				path.Trim();
+				if(path.StartWith('"') && path.EndWith('"')) {
+					path.MidFast(1, path.GetLength()-2);
+					path.Trim();
+				}
+				else if(path.StartWith(L"file")) {
+					if(path.StartWith(L"file '")) {
+						path.MidFast(6, path.GetLength()-7);
+						path.Replace(L"'\''", L"'");
+					}
+					if(path.StartWith(L"file:///")) {
+						path.MidFast(8, path.GetLength()-8);
+					}
+					path.Trim();
+				}
 				if (path.GetLength()>0)
 				{
 					if(detect) {
@@ -842,7 +896,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 							detect = false;
 						}
 						if(!detect) {
-							if(true) _playList.clear();
+							if(purgeLst) _playList.clear();
 							idx = _playList.size();
 						}
 					}
@@ -852,7 +906,39 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 					}
 				}
 			}
-			NavPlayList(idx - _playIdx);
+			if(purgeLst || _mainPlayer._currentPath.IsEmpty()
+				|| (!_mainPlayer._mMediaPlayer || (!_mainPlayer._mMediaPlayer->IsPaused() && !_mainPlayer._mMediaPlayer->IsPlaying()) )
+					)
+				NavPlayList(idx);
+		} break;
+		case IDM_VIEW_PROPERTY: 
+		if(!keyPressed) {
+			keyPressed = true;
+			SHELLEXECUTEINFO info = {0};
+			info.cbSize = sizeof info;
+			info.lpFile = STR(_mainPlayer._currentPath);
+			info.nShow = SW_SHOW;
+			info.fMask = SEE_MASK_INVOKEIDLIST;
+			info.fMask = SEE_MASK_INVOKEIDLIST;
+			info.lpVerb = L"properties";
+			ShellExecuteEx(&info);
+		} break;
+		case IDM_COPY_PLAYING: 
+		if(!keyPressed) {
+			keyPressed = true;
+			const TCHAR* szText = _mainPlayer._currentPath;
+			int length = _mainPlayer._currentPath.GetLength();
+			if (OpenClipboard(NULL)) {
+				EmptyClipboard();
+				HANDLE hData = GlobalAlloc(GHND|GMEM_SHARE, (length+1)*sizeof(wchar_t));
+				LPWSTR pData = (LPWSTR)GlobalLock(hData);
+				CopyMemory(pData, szText, length*sizeof(wchar_t));
+				pData[length] = L'\0';
+
+				GlobalUnlock(hData);
+				SetClipboardData(CF_UNICODETEXT, hData);
+				CloseClipboard();
+			}
 		} break;
 		case IDM_COPY_PLAYLIST: 
 		if(!keyPressed) {
@@ -866,6 +952,10 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				{
 					allPaths += L"\r\n"; // use semicolon as separator
 				}
+			}
+			if (allPaths.empty())
+			{
+				allPaths += _mainPlayer._currentPath;
 			}
 
 			// convert allPaths to char * 
@@ -889,6 +979,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0); 
 			break;
 		case IDM_MAXMISE:
+			if(keyPressed) break;
 			if(_isFullScreen) 
 			{
 				ToggleFullScreen();
@@ -896,12 +987,19 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				break;
 			}
 		case IDM_MAX:
+			if(keyPressed) break;
+			keyPressed = 1;
 			if(_isFullScreen) 
 				ToggleFullScreen();
 			else if(::IsMaximized(GetHWND()))
 				SendMessage(WM_SYSCOMMAND, SC_RESTORE, 0); 
 			else
 				SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0); 
+			break;
+		case IDM_FULLSCREEN:
+			if(keyPressed) break;
+			keyPressed = 1;
+			ToggleFullScreen();
 			break;
 		case IDM_SHUTDOWN:
 			Close();
@@ -932,6 +1030,15 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_SEEK_BACK_FAST: SeekDelta(-1, 1); break;
 		case IDM_SEEK_BACK_FASTER: SeekDelta(-1, 2); break;
 
+
+		case IDM_ROTATE_RIGHT: 
+		case IDM_ROTATE_LEFT: 
+			if(!keyPressed) {
+				//keyPressed = true;  // 怪哉
+				_mainPlayer.SetRotate(LOWORD(wParam)==IDM_ROTATE_RIGHT?90:-90); 
+			}
+			break;
+
 		case IDM_SPEED_UP:  _mainPlayer.SpeedDelta(0.1f); break;
 		case IDM_SPEED_DOWN:  _mainPlayer.SpeedDelta(-0.1f); break;
 		case IDM_SPEED_UP_FAST:  _mainPlayer.SpeedDelta(0.5f); break;
@@ -943,8 +1050,34 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_BKMK_PRV: NavTimemark(-1); return 1;
 		case IDM_BKMK_NXT: NavTimemark(1); return 1;
 
-		case IDM_PLAY_PRV: NavPlayList(-1); return 1;
-		case IDM_PLAY_NXT: NavPlayList(1); return 1;
+		case IDM_PLAY_PRV:
+		case IDM_PLAY_NXT:
+			if(!keyPressed) {
+				keyPressed = true;
+				int newIdx = XPP->_playIdx + (LOWORD(wParam)==IDM_PLAY_PRV?-1:1);
+				if(newIdx<0) newIdx=0;
+				if(newIdx>=_playList.size()) newIdx=_playList.size()-1;
+				NavPlayList(newIdx);
+				if (_mainPlayer._mMediaPlayer->IsPaused())
+				{
+					_mainPlayer._mMediaPlayer->Play();
+				}
+				MarkPlaying(true);
+			}
+			return 1;
+		case IDM_PLAY_A:
+		case IDM_PLAY_Z:
+			if(!keyPressed) {
+				keyPressed = true;
+				int newIdx = (LOWORD(wParam)==IDM_PLAY_A?0:(_playList.size()-1));
+				NavPlayList(newIdx);
+				if (_mainPlayer._mMediaPlayer->IsPaused())
+				{
+					_mainPlayer._mMediaPlayer->Play();
+				}
+				MarkPlaying(true);
+			}
+			return 1;
 		case IDM_PLAY_START: NavTime(-1); return 1;
 		case IDM_PLAY_MID: NavTime(-2); return 1;
 		case IDM_PLAY_END: NavTime(-3); return 1;
@@ -1065,6 +1198,58 @@ void WODApplication::ResetWndOpacity()
 		else
 		{
 			SetLayeredWindowAttributes(m_hWnd, TransparentKey, ceil(alpha/100.f*255), LWA_ALPHA);
+		}
+	}
+}
+
+
+void WODApplication::DeleteCurrentFile(BOOL permanent)
+{
+	BOOL bDelOK = 0;
+	if(permanent)
+	{
+		extern int MoveToVacuum(PCZZSTR path);
+		QkString toDel = _mainPlayer._currentPath;
+		//toDel.Prepend(L"\\\\?\\");
+		toDel.Append(L"\0");
+		toDel.Append(L"\0");
+		std::string ppp  ;
+		toDel.GetData(ppp, 0);
+		bDelOK = !MoveToVacuum(ppp.data());
+		//bDelOK = ::DeleteFile(_mainPlayer._currentPath);
+		//LogIs(2, L"del~~~ %d %s", bDelOK, _mainPlayer._currentPath);
+	}
+	else
+	{
+		//std::this_thread::sleep_for(std::chrono::microseconds(1200));
+		extern int MoveToTrash(PCZZSTR path, BOOL bNoUI);
+		QkString toDel = _mainPlayer._currentPath;
+		//toDel.Prepend(L"\\\\?\\");
+		toDel.Append(L"\0");
+		toDel.Append(L"\0");
+		std::string ppp  ;
+		toDel.GetData(ppp, 0);
+		int ret = MoveToTrash(ppp.data(), TRUE);
+		//lxx(%ld , GetLastError() )
+		//lxx(dd MoveToTrash, ret)
+		bDelOK = !ret;
+	}
+	if (bDelOK)
+	{
+		auto & wod = XPP->_mainPlayer;
+		auto & player = wod._mMediaPlayer;
+		auto & lst = XPP->_playList;
+
+		if(lst.size() && XPP->_playIdx<lst.size())
+		{
+			lst.erase(lst.begin()+XPP->_playIdx);
+			if(XPP->_playIdx==lst.size()) 
+				XPP->_playIdx --;
+			if(XPP->_playIdx<0) XPP->_playIdx=0;
+			if(lst.size())
+			{
+				wod.PlayVideoFile(lst[XPP->_playIdx]);
+			}
 		}
 	}
 }

@@ -43,6 +43,7 @@ public:
 
     float SpeedDelta(float delta);
     int SetVolume(int volume);
+    void SetRotate(int delta);
 
 
     void SetPos(RECT rc, bool bNeedInvalidate = true) override;
@@ -55,6 +56,7 @@ public:
     SeekBar _volumebar;
     VideoPlayer* _mMediaPlayer;
     QkString _currentPath;
+    long _durationCache=0;
 //private:
     bool _isPlaying;
     HWND _hPlayer;
@@ -80,4 +82,5 @@ public:
     bool _moving = false;
     int _moveLastX = 0;
     int _moveLastY = 0;
+    int _rotation = 0;
 };

@@ -111,6 +111,13 @@ int WODPlayer::SetVolume(int volume)
 	return _mMediaPlayer->SetVolume(volume);
 }
 
+void WODPlayer::SetRotate(int delta)
+{
+	_mMediaPlayer->SetRotation((_rotation + delta + (delta<0?360:0)) % 360);
+	_rotation = _mMediaPlayer->GetRotation();
+	SetPos(GetPos());
+}
+
 //class DummyPlayer : public VideoPlayer
 //{
 //public:
@@ -140,6 +147,9 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 	int height = H*2/3;
 	int top = (H-height)/2;
 
+	int height_1 = H*1/3;
+	int top_1 = (H-height_1)/2;
+
 	//graph.FillEllipse(&brush, pControl->GetWidth()/2 - w, top
 	//		, width
 	//		, height);
@@ -148,33 +158,45 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 
 	WODPlayer* player = (WODPlayer*)pControl->GetTag();
 
+	int splitter_idx = 0;
+
 	for (size_t i = 0; i < player->_bookmarks.size(); i++)
 	{
-		auto when = player->_bookmarks.at(i).pos;
+		auto & bkmk = player->_bookmarks.at(i);
+		auto when = bkmk.pos;
 		int left = rc.left+when*1.0/max*W - w;
-		graph.FillRectangle(&brush, left, top
-			, width
-			, height);
 
-		if((i%2)==0)
+		if(bkmk.layer==0)
 		{
-			graph.FillRectangle(&brush, left+w, top
-				, width+w
-				, 2);
-			graph.FillRectangle(&brush, left+w, top+height-w-w
-				, width+w
-				, 2);
-			//graph.DrawLine(&pen, left+w, top, left+width+w+w+100, top);
+			graph.FillRectangle(&brush, left, top
+				, width
+				, height);
+			if (((splitter_idx++)%2)==0)
+			{
+				graph.FillRectangle(&brush, left+w, top
+					, width+w
+					, 2);
+				graph.FillRectangle(&brush, left+w, top+height-w-w
+					, width+w
+					, 2);
+				//graph.DrawLine(&pen, left+w, top, left+width+w+w+100, top);
+			}
+			else
+			{
+				graph.FillRectangle(&brush, left-width, top
+					, width+w
+					, 2);
+				graph.FillRectangle(&brush, left-width, top+height-w-w
+					, width+w
+					, 2);
+				//graph.DrawLine(&pen, left+w, top, left+width+w+w+100, top);
+			}
 		}
 		else
 		{
-			graph.FillRectangle(&brush, left-width, top
-				, width+w
-				, 2);
-			graph.FillRectangle(&brush, left-width, top+height-w-w
-				, width+w
-				, 2);
-			//graph.DrawLine(&pen, left+w, top, left+width+w+w+100, top);
+			graph.FillRectangle(&brush, left, top_1
+				, width
+				, height_1);
 		}
 	}
 }
@@ -189,7 +211,11 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		newVideoView();
 	}
 	//ASSERT(_mMediaPlayer);
-	_currentPath = path;
+	if (_currentPath!=path)
+	{
+		_durationCache = 0;
+		_currentPath = path;
+	}
 	//xpLogTo(_currentPath);
 	if (_mMediaPlayer)
 	{
@@ -197,9 +223,14 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	}
 	QkString title;
 	title.Empty();
-	int idx = _currentPath.ReverseFind('/');
+	int idx = _currentPath.ReverseFind('/'), ed = _currentPath.GetLength()-1, wenhao=-1;
 	if(idx==-1) idx = _currentPath.ReverseFind('\\');
-	title.Append(STR(_currentPath)+idx+1, _currentPath.GetLength()-idx-1);
+	if (_currentPath.StartWith(L"http"))
+	{
+		wenhao = _currentPath.ReverseFind('?');
+		if(wenhao>idx+1) ed = wenhao-1;
+	}
+	title.Append(STR(_currentPath)+idx+1, ed-idx);
 	_app->_titleBar->SetText(title);
 	_app->_titleBar->SetNeedAutoCalcSize();
 
@@ -211,7 +242,9 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 
 	idx = _currentPath.ReverseFind(L".", _currentPath.GetLength()-2);
 	if(idx>0) {
-		title = _currentPath.Mid(idx+1);
+		if(wenhao>idx+1) ed = wenhao-1;
+		else ed = _currentPath.GetLength()-1;
+		title = _currentPath.Mid(idx+1, ed-idx);
 		title.MakeUpper();
 		if (title==L"TS")
 		{
@@ -260,6 +293,10 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		}
 
 		MarkPlaying();
+		if (_mMediaPlayer->IsPaused())
+		{
+			_mMediaPlayer->Play();
+		}
 		return true;
 	}
 	return false;
@@ -362,17 +399,28 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 		//lxxx('SetPos dd dd', _srcWidth, _srcHeight);
 		auto hplayer = _mMediaPlayer->getHWND();
 		//hplayer = GetHWND();
-		if(_srcWidth && _srcHeight) 
+		int W, H;
+		//if (_rotation && (_mMediaPlayer) && ((_rotation%180>=45 || _rotation%180<=135)))
+		//{
+		//	W = _srcHeight;
+		//	H = _srcWidth;
+		//}
+		//else
+		{
+			W = _srcWidth;
+			H = _srcHeight;
+		}
+		if(W && H) 
 		{
 			float width = rc.right - rc.left;
 			float height = rc.bottom-rc.top;
 
-			_minScale = min(width/_srcWidth, height/_srcHeight);
+			_minScale = min(width/W, height/H);
 
 			float ratio = _minScale*_scale;
 
-			int w = _srcWidth*ratio;
-			int h = _srcHeight*ratio;
+			int w = W*ratio;
+			int h = H*ratio;
 
 			_exRect.left = (width-w)/2;
 			//_exRect.top = max(0, (height-h)/2);
@@ -482,7 +530,8 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 	{
 		case MM_PREPARED:
 		{
-			//LogIs(2, "MPM_PREPARED max=%d %ld\n", wParam, _hPlayer);
+			//lxx("MPM_PREPARED max=%d %ld\n", wParam, _hPlayer);
+			//lxx(MPM_PREPARED dd, _mMediaPlayer->GetDuration())
 			if(!_hPlayer) {
 				_hPlayer = ::GetFirstChild(_hWnd);
 				_mMediaPlayer->setHWND(_hPlayer);

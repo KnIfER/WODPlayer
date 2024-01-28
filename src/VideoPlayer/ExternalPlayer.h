@@ -48,6 +48,8 @@ typedef void (__cdecl* VW_SYNCSIZE)(LONG_PTR, unsigned int*, unsigned int*);
 typedef void (__cdecl* VW_INTERFACE)();
 typedef float (__cdecl* VW_SETRATE)(LONG_PTR, float);
 typedef int (__cdecl* VW_SETVOLUME)(LONG_PTR, int);
+typedef void (__cdecl* VW_SETROTATION)(LONG_PTR, int);
+typedef int (__cdecl* VW_GETROTATION)(LONG_PTR);
 
 // D:\Code\FigureOut\XunLeiExternalPlayer\bin\XunLeiExternalPlayer.dll
 
@@ -71,7 +73,9 @@ public:
 	void			Release() override;
 	void			syncResolution(unsigned int & _resX, unsigned int & _resY) override;
 	float			SetRate(float rate) override;
-	int			 SetVolume(int volume) override;
+	int				SetVolume(int volume) override;
+	void		    SetRotation(int value) override;
+	int			GetRotation() override;
 	HMODULE vwInit(int & error_code, const TCHAR* dllPath, bool blame=false, const TCHAR* dllDir=0);
 protected:
 	LONG_PTR _player;
@@ -101,4 +105,7 @@ private:
 	VW_INTERFACE vwInterface = nullptr;
 	VW_SETRATE vwSetRate = nullptr;
 	VW_SETVOLUME vwSetVolume = nullptr;
+	VW_SETROTATION vwSetRotation = nullptr;
+	VW_GETROTATION vwGetRotation = nullptr;
+
 };

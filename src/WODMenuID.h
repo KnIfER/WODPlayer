@@ -14,6 +14,9 @@
 #define IDM_DELETE_FOREVER       IDM_FILE+6
 #define IDM_PASTE_PLAYLIST       IDM_FILE+7
 #define IDM_COPY_PLAYLIST        IDM_FILE+8
+#define IDM_COPY_PLAYING         IDM_FILE+9
+#define IDM_VIEW_PROPERTY        IDM_FILE+10
+#define IDM_APPEND_PLAYLIST       IDM_FILE+11
 
 
 // 播放
@@ -45,6 +48,14 @@
 #define IDM_PLAY_MID		  IDM_PLAY+21
 #define IDM_PLAY_START		  IDM_PLAY+22
 #define IDM_PLAY_END		  IDM_PLAY+23
+#define IDM_PLAY_A			  IDM_PLAY+24
+#define IDM_PLAY_Z			  IDM_PLAY+25
+
+
+#define IDM_ROTATE IDM_PLAY+50
+#define IDM_ROTATE_RIGHT	  IDM_PLAY+51
+#define IDM_ROTATE_LEFT		  IDM_PLAY+52
+#define IDM_ROTATE_RESET	  IDM_PLAY+53
 
 
 // 书签

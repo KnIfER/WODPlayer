@@ -8,4 +8,8 @@
 __declspec(selectany) std::vector<std::wstring> _args;
 __declspec(selectany) bool isClosing = false;
 
+
+__declspec(selectany) QkString mLockStr;
+__declspec(selectany) HANDLE hMutexTemp;
+
 void parseCommandLine(const TCHAR* commandLine, std::vector<std::wstring>& arguments);

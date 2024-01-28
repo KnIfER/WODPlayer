@@ -107,3 +107,17 @@ extern "C" __declspec(dllexport) int vwSetVolume(MPVPlayer* player, int value)
 {
 	return player->SetVolume(value);
 }
+
+
+extern "C" __declspec(dllexport) void vwSetRotation(MPVPlayer* player, int value) 
+{
+	player->SetRotation(value);
+}
+
+
+extern "C" __declspec(dllexport) int64_t vwGetRotation(MPVPlayer* player) 
+{
+	return player->GetRotation();
+}
+
+
