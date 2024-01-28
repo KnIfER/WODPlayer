@@ -724,6 +724,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			sec %= 60;
 			_timeLabel->GetText().Empty();
 			_timeLabel->GetText().Format(L"%02d:%02d:%02d", hour, minutes, sec);
+			//_timeLabel->GetText().Format(L"%ld", duration);
 			_timeLabel->Invalidate();
 			//_timeLabel->GetText() += hour;
 			//_timeLabel->GetText() += L":";
@@ -756,7 +757,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			if (_mainPlayer._durationCache != duration)
 			{
 				if(duration>_mainPlayer._durationCache) _mainPlayer._durationCache = duration;
-				else duration = _mainPlayer.	_durationCache;
+				else duration = _mainPlayer._durationCache;
 			}
 			int nPos =  int (pos / (double)duration * 1000);
 			//SendMessage(GetDlgItem(hwnd, IDC_SLIDER1), TBM_SETPOS, (WPARAM)TRUE, (LPARAM)nPos);

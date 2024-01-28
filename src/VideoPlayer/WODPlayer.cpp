@@ -331,6 +331,9 @@ void seekchangefloat(SeekBar* bar, int posf) {
 	player->_mMediaPlayer->SetPosition(lunhui*sub_duration + posf);
 }
 
+extern CControlUI* _timeLabel;
+extern CControlUI* _durationLabel;
+
 bool WODPlayer::PlayVideoFile(const TCHAR* path)
 {
 	bool ret = false;
@@ -385,7 +388,9 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	_app->_titleBar->NeedParentUpdate();
 	::SetWindowText(_app->GetHWND(), STR(_app->_titleBar->GetText()));
 
-
+	_timeLabel->GetText() = L"--:--:--";
+	_durationLabel->GetText() = L"--:--:--";
+	_durationLabel->NeedParentUpdate();
 
 	if(!_seekbar._decorator)
 	{
