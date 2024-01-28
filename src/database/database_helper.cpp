@@ -198,9 +198,10 @@ __int64 WODBase::GetBookMarks(const char* folder, const char* filename, std::vec
     // 首先查询得 folder vid
     localBuffer = "select id from timemarks where folder=1 and fname=\"";
     localBuffer += filename;
-    localBuffer += "\" and fpath=\"";
-    localBuffer += folder;
     localBuffer += "\"";
+    //localBuffer += " and fpath=\"";
+    //localBuffer += folder;
+    //localBuffer += "\"";
     localBuffer += " limit 1";
     //LogIs("\nsql=%s", localBuffer.c_str());
     __int64 folderVid = -1;
