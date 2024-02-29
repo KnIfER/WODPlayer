@@ -811,7 +811,7 @@ void WODPlayer::Toggle(int play)
 			_mMediaPlayer->Pause();
 		}
 		MarkPlaying(toPlay);
-		if(!_hPlayer)
+		if(!_hPlayer) // fixme
 		lxx(%ld = %ld != %ld, _hPlayer, _mMediaPlayer->getHWND(), GetHWND())
 	}
 }

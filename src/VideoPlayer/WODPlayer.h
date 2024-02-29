@@ -25,7 +25,7 @@ class WODPlayer : public WinFrame
 public:
     WODPlayer();     
 
-    void Toggle();
+    void Toggle(int play=-1);
     HWND GetMediaPlayerHWND();
     bool IsMediaPlayerWindow(HWND hwnd);
     void MarkPlaying(bool playing=true);

@@ -18,7 +18,7 @@
 
 #define IDM_FOLDER                      106
 #define IDI_NXT                         107
-#define IDM_PAUSE                       107
+#define IDM_TOGGLE_PLAY                       107
 #define IDI_PREV                        108
 #define IDI_STOP                        109
 #define IDI_FOLDER                      IDM_OPEN

@@ -1161,9 +1161,22 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			return 1;
 
 		case IDI_PLAY:
-		case IDM_PAUSE:
+		case IDM_TOGGLE_PLAY:
 			_mainPlayer.Toggle();
 			break;
+		case IDM_PLAY_PAUSE:
+			_mainPlayer.Toggle(0);
+			break;
+		case IDM_PLAY_PLAY:
+			_mainPlayer.Toggle(1);
+			break;
+
+		case IDM_PLAY_TIME:
+			return _mainPlayer._mMediaPlayer->GetPosition();
+		case IDM_PLAY_SEEK:
+			_mainPlayer._mMediaPlayer->SetPosition(lParam, HIWORD(wParam)==0);
+			return 1;
+
 		case IDM_SEEK_FORE: SeekDelta(1, 0); break;
 		case IDM_SEEK_FORE_FAST: SeekDelta(1, 1); break;
 		case IDM_SEEK_FORE_FASTER: SeekDelta(1, 2); break;
@@ -1199,7 +1212,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				if(newIdx<0) newIdx=0;
 				if(newIdx>=_playList.size()) newIdx=_playList.size()-1;
 				NavPlayList(newIdx);
-				if (_mainPlayer._mMediaPlayer->IsPaused())
+				//if (_mainPlayer._mMediaPlayer->IsPaused())
 				{
 					_mainPlayer._mMediaPlayer->Play();
 				}
@@ -1319,7 +1332,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			ResetWndOpacity();
 			return 1;
 		}
-
+		case IDM_SKIN_SEEKBAR_MAGNIFIER:
+			_mainPlayer._seekfloat.SetVisible(!_mainPlayer._seekfloat.IsVisible());
+			return 1;
 	}
 	break;
 	case WM_NOTIFY:
