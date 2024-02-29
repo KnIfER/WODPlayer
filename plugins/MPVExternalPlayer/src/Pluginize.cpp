@@ -66,9 +66,21 @@ extern "C" __declspec(dllexport) long vwGetDuration(MPVPlayer* player)
 	return player->GetDuration();
 }
 
-extern "C" __declspec(dllexport) void vwSetPosition(MPVPlayer* player, long pos) 
+extern "C" __declspec(dllexport) void vwSetPosition(MPVPlayer* player, long pos, bool fastSeek) 
 {
-	return player->SetPosition(pos);
+	return player->SetPosition(pos, fastSeek);
+}
+
+
+extern "C" __declspec(dllexport) void vwSetLoop(MPVPlayer* player, bool val) 
+{
+	return player->SetLoop(val);
+}
+
+
+extern "C" __declspec(dllexport) void vwSetInitialPosition(MPVPlayer* player, long pos) 
+{
+	return player->SetInitialPosition(pos);
 }
 
 extern "C" __declspec(dllexport) void vwSetFullScreen(MPVPlayer* player, bool val) 

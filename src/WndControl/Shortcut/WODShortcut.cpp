@@ -45,6 +45,13 @@ void WODApplication::buildAccelerator()
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_NEXT, IDM_PLAY_Z});
 	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_PRIOR, IDM_PLAY_A});
 	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_NEXT, IDM_PLAY_Z});
+	_accelerators.push_back({FVIRTKEY, VK_OEM_COMMA, IDM_PLAY_FASTBACKWARD});
+	_accelerators.push_back({FVIRTKEY, VK_OEM_PERIOD, IDM_PLAY_FASTFOREWARD});
+	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_OEM_COMMA, IDM_PLAY_FASTFASTBACKWARD});
+	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_OEM_PERIOD, IDM_PLAY_FASTFASTFOREWARD});
+	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_OEM_COMMA, IDM_PLAY_FASTFASTERBACKWARD});
+	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_OEM_PERIOD, IDM_PLAY_FASTFASTERFOREWARD});
+	_accelerators.push_back({FVIRTKEY, VK_OEM_2, IDM_PLAY_FASTFOREWARDOFF});
 
 	//rotate
 	_accelerators.push_back({FVIRTKEY|FALT, VK_RETURN, IDM_ROTATE_RIGHT});

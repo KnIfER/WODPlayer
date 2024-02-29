@@ -86,39 +86,40 @@ BOOL unregWndClass(LPCTSTR lpcsClassName)
 
 int testVlc(HWND hwnd, CHAR* filePath)
 {
-    if (mpv==NULL)
-    {
-        mpv = mpv_create();
+    //if (mpv==NULL)
+    //{
+    //    mpv = mpv_create();
 
-    }
+    //}
 
-    if (!mpv)
-    {
-        LogIs(2, "init err!");
-        return -1;
-    }
+    //if (!mpv)
+    //{
+    //    LogIs(2, "init err!");
+    //    return -1;
+    //}
 
-    // 设置 MPV 事件回调函数
-    //mpv_set_wakeup_callback(m_mpvInstance, handleMpvEvent, nullptr);
+    //// 设置 MPV 事件回调函数
+    ////mpv_set_wakeup_callback(m_mpvInstance, handleMpvEvent, nullptr);
 
-    // 打开媒体文件
-    const char *file = "C:\\Users\\TEST\\Music\\20180620_175310.mp4";
-    const char** args = new const char*[] {
-        "loadfile", file, NULL
-    };
+    //// 打开媒体文件
+    //const char *file = "C:\\Users\\TEST\\Music\\20180620_175310.mp4";
+    //const char** args = new const char*[] {
+    //    "loadfile", file, NULL
+    //};
 
-    mpv_set_option(mpv, "wid", mpv_format::MPV_FORMAT_INT64, &hwnd);
-    mpv_set_option_string(mpv, "loop", "inf");
+    //mpv_set_option(mpv, "wid", mpv_format::MPV_FORMAT_INT64, &hwnd);
+    //mpv_set_option_string(mpv, "loop", "inf");
 
-    mpv_initialize(mpv);
 
-    mpv_command(mpv, args);
+    //mpv_initialize(mpv);
 
-    //// 创建 MPV 渲染上下文
-    //mpv_render_context *mpvRenderContext;
-    //mpv_render_context_create(&mpvRenderContext, mpv, NULL);
-    //// 设置父窗口
-    //mpv_render_context_set_hwnd(mpvRenderContext, parentWindow);
+    //mpv_command(mpv, args);
+
+    ////// 创建 MPV 渲染上下文
+    ////mpv_render_context *mpvRenderContext;
+    ////mpv_render_context_create(&mpvRenderContext, mpv, NULL);
+    ////// 设置父窗口
+    ////mpv_render_context_set_hwnd(mpvRenderContext, parentWindow);
 
     return 0;
 }
@@ -207,6 +208,7 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
     mpv_set_option(mpv, "wid", mpv_format::MPV_FORMAT_INT64, &hParent);
     mpv_set_option_string(mpv, "seekbarkeyframes", "yes");
     mpv_set_option_string(mpv, "loop", "inf");
+    mpv_set_option_string(mpv, "keep-open", "yes");
 
     mpv_set_option_string(mpv, "force-window", "yes");
     mpv_set_option_string(mpv, "auto-window-resize", "no");
@@ -220,7 +222,7 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
 
     mpv_set_property_string(mpv, "af", "stats");
 
-
+    //mpv_set_property_string(mpv, "hr-seek", "no");
 
     //mpv_set_option_string(mpv, "autofit", "no");
     //mpv_set_option_string(mpv, "keepaspect", "no");
@@ -291,14 +293,46 @@ long MPVPlayer::GetPosition()
 
 CHAR buffer[256]={0};
 
-void MPVPlayer::SetPosition(long pos)
+void MPVPlayer::SetPosition(long pos, bool fastSeek)
 {
-    sprintf(buffer, "%.3f", pos/1000.0);
-    //const char** args = new const char*[] {
-    //    "seek", buffer, NULL
-    //};
-    //mpv_command(mpv, args);
-    mpv_set_property_string(mpv, "time-pos", (const char *)buffer);
+    if(fastSeek) 
+    {
+        sprintf(buffer, "%.3f", pos/1000.0);
+        const char** args = new const char*[] {
+            "seek", buffer
+                // , "exact", "synchronous"
+                , "absolute"
+                , NULL
+        };
+        mpv_command(mpv, args);
+    }
+    else
+    {
+        double v = pos/1000.0;
+        mpv_set_property(mpv, "time-pos", MPV_FORMAT_DOUBLE, &v);
+    }
+
+//    sprintf(buffer, "%.3f", pos/1000.0);
+//    const char** args = new const char*[] {
+//        "seek", buffer
+//            // , "exact", "synchronous"
+//            , "absolute+exact"
+//            , NULL
+//    };
+//    mpv_command(mpv, args);
+
+    //sprintf(buffer, "%.3f", pos/1000.0);
+    //mpv_set_property_string(mpv, "time-pos", (const char *)buffer);
+}
+
+void MPVPlayer::SetLoop(bool val)
+{
+    mpv_set_option_string(mpv, "loop", val?"inf":"no");
+}
+
+void MPVPlayer::SetInitialPosition(long pos)
+{
+    //mpv_set_option_string(mpv, "start", "00:04");
 }
 
 long MPVPlayer::GetDuration()
@@ -311,9 +345,15 @@ long MPVPlayer::GetDuration()
 bool MPVPlayer::PlayVideoFile(const CHAR* path)
 {
     const char** args = new const char*[] {
-        "loadfile", path, NULL
+        "loadfile"
+            , path
+            , NULL
     };
     mpv_command(mpv, args);
+
+    //mpv_set_property_string(mpv, "stream-record", "G:\\BaiduNetdiskDownload\\New_folder\\test.flv");
+    //, "--"
+    //, 
     return true;
 }
 
@@ -353,9 +393,14 @@ void MPVPlayer::SyncSize(unsigned int * x, unsigned int * y) {
     }
 }
 
-float MPVPlayer::SetRate(float rate)
+float MPVPlayer::SetRate(float value)
 {
-    return 1;
+    //_itoa(value, buffer, 10);
+    //if(mpv) mpv_set_property_string(mpv, "rate", buffer);
+    double v = value;
+    mpv_set_property(mpv, "speed", MPV_FORMAT_DOUBLE, &v);
+    mpv_get_property(mpv, "speed", MPV_FORMAT_DOUBLE, &v);
+    return v;
 }
 
 float MPVPlayer::SetVolume(int value)

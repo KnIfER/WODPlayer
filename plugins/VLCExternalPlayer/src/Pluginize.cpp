@@ -66,9 +66,9 @@ extern "C" __declspec(dllexport) long vwGetDuration(VLCPlayer* player)
 	return player->GetDuration();
 }
 
-extern "C" __declspec(dllexport) void vwSetPosition(VLCPlayer* player, long pos) 
+extern "C" __declspec(dllexport) void vwSetPosition(VLCPlayer* player, long pos, bool fastSeek) 
 {
-	return player->SetPosition(pos);
+	return player->SetPosition(pos, fastSeek);
 }
 
 extern "C" __declspec(dllexport) void vwSetFullScreen(VLCPlayer* player, bool val) 

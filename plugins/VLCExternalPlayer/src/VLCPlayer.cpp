@@ -368,7 +368,7 @@ long VLCPlayer::GetPosition()
     return libvlc_media_player_get_time(VPlayer);
 }
 
-void VLCPlayer::SetPosition(long pos)
+void VLCPlayer::SetPosition(long pos, bool fastSeek)
 {
     return libvlc_media_player_set_time(VPlayer, pos);
 }

@@ -89,6 +89,27 @@ void initTimerProc(HWND hwnd, UINT, UINT_PTR, DWORD)
 	}
 }
 
+float fastForwardRate = 0;
+BOOL fastForwardStill = False;
+DWORD ffTimer = 0;
+DWORD ffTimerID = 7;
+DWORD ffTimerInterval = 50;
+
+void ffTimerProc(HWND hwnd, UINT, UINT_PTR, DWORD)
+{
+	if (fastForwardRate!=0)
+	{
+		auto & player = *XPP->_mainPlayer._mMediaPlayer;
+		if(fastForwardStill || XPP->_mainPlayer._isPlaying) {
+			player.SetPosition(player.GetPosition() + fastForwardRate*1000, true);
+		}
+	}
+	else {
+		::KillTimer(hwnd, ffTimerID);
+		ffTimer = 0;
+	}
+}
+
 DWORD delTimerID = 4;
 BOOL delPermanent = 4;
 void deleteFileProc(HWND hwnd, UINT, UINT_PTR, DWORD)
@@ -155,6 +176,15 @@ void WODApplication::InitWindow()
 
 	//m_pm.SetTimer(m_pm.GetRoot(), 0, 350, true);
 	initTimer = ::SetTimer(GetHWND(), initTimerID, initTimerInterval, (TIMERPROC)initTimerProc);
+
+
+	// 启动置顶
+	auto hwnd = XPP->GetHWND();
+	//auto wndSty = GetWindowLong(hwnd, GWL_STYLE);
+	//SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_TOPMOST);
+	SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+	SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+
 }
 
 LRESULT WODApplication::OnClose(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
@@ -351,6 +381,7 @@ void WODApplication::ToggleFullScreen()
 		_topBarFscWnd->SetVisible(false);
 		m_pm.GetSizeBox().top = 4;
 	}
+	m_pm.GetRoot()->SetInset(_isFullScreen||_isMaximized==SC_MAXIMIZE?0:5);
 }
 
 bool WODApplication::IsFullScreen()
@@ -495,8 +526,9 @@ void SeekDelta(int delta, int level)
 	auto & player = XPP->_mainPlayer._mMediaPlayer;
 	if (player)
 	{
+		fastForwardRate = 0;
 		int max=player->GetDuration();
-		int factor = 1;
+		float factor = 1;
 		if(level==1) {
 			factor = 5;
 		}
@@ -510,7 +542,7 @@ void SeekDelta(int delta, int level)
 		else if(delta>max) delta=max;
 		else set=1;
 		if(set || player->GetPosition()!=delta) {
-			player->SetPosition(delta);
+			player->SetPosition(delta, true);
 		}
 		if(!XPP->_mainPlayer._isPlaying && !XPP->_mainPlayer._seekbar._isSeeking) {
 			XPP->_mainPlayer._seekbar.SetProgressAndMax(delta, player->GetDuration());
@@ -573,19 +605,27 @@ void NavTimemark(int delta)
 	}
 }
 
+//std::function<bool (void)> haha = [](){return 0;};
+
 void NavTime(int t)
 {
 	auto & wod = XPP->_mainPlayer;
 	if(!wod._mMediaPlayer) return;
 	auto & player = wod._mMediaPlayer;
-	LONG pos = t==-1?0
+	LONG pos = t==-1?wod.nSkipStart//0
 		:t==-2?wod._mMediaPlayer->GetDuration()/2
 		:wod._mMediaPlayer->GetDuration()-1;
-	player->SetPosition(pos);
-	if (!wod._isPlaying)
+	player->SetLoop(false);
+	player->SetPosition(pos, true);
+	bool playing = wod._isPlaying;
+	if (!playing)
 	{
 		wod._seekbar.SetProgress(pos);
 	}
+	wod.PostLambda([player](){
+		player->SetLoop(true);
+		return false;
+	}, 100);
 }
 
 void NavPlayList(int newIdx)
@@ -656,7 +696,21 @@ LRESULT WODApplication::HandleDropFiles(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return true;
 }
 
+
+//mpv_set_option_string(mpv, "start", "00:04");
+
 extern bool keyPressed;
+
+void toggleFastforward(float rate) {
+	if(fastForwardRate!=rate) {
+		fastForwardRate = rate;
+		//fastForwardStill = !XPP->_mainPlayer._isPlaying;
+		if(ffTimer==0)
+			ffTimer = ::SetTimer(XPP->GetHWND(), ffTimerID, ffTimerInterval, (TIMERPROC)ffTimerProc);
+	} else {
+		fastForwardRate = 0;
+	}
+}
 
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
@@ -716,6 +770,13 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			long pos = _mainPlayer._mMediaPlayer->GetPosition();
 			long duration = _mainPlayer._mMediaPlayer->GetDuration();
 
+			if(_mainPlayer._currentPath.EndWith("flv"))
+				if (_mainPlayer._durationCache != duration)
+				{
+					if(duration>_mainPlayer._durationCache) _mainPlayer._durationCache = duration;
+					else duration = _mainPlayer._durationCache;
+				}
+			int nPos =  int (pos / (double)duration * 1000);
 			//_timeLabel
 
 			int sec = pos/1000;
@@ -754,31 +815,41 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			//lstrcat(szPosition, _T("/"));
 			//lstrcat(szPosition, szDuration);
-			if(_mainPlayer._currentPath.EndWith("flv"))
-			if (_mainPlayer._durationCache != duration)
-			{
-				if(duration>_mainPlayer._durationCache) _mainPlayer._durationCache = duration;
-				else duration = _mainPlayer._durationCache;
-			}
-			int nPos =  int (pos / (double)duration * 1000);
+			// 
 			//SendMessage(GetDlgItem(hwnd, IDC_SLIDER1), TBM_SETPOS, (WPARAM)TRUE, (LPARAM)nPos);
 
 			if (!_mainPlayer._seekbar._isSeeking)
 			{
 				_mainPlayer._seekbar.SetProgressAndMax(pos, duration);
+				if(_mainPlayer.nSkipStart && pos<_mainPlayer.nSkipStart-250) {
+					_mainPlayer._mMediaPlayer->SetPosition(_mainPlayer.nSkipStart, true);
+				}
+				if(_mainPlayer.nSkipEnd && pos>=duration-_mainPlayer.nSkipEnd) {
+					_mainPlayer._mMediaPlayer->SetPosition(_mainPlayer.nSkipStart, true);
+				}
 			}
 
 			long sub_duration = 5*60*1000;
-			if(duration<=sub_duration*6) {
+			if(duration<=sub_duration/5) { // 1 分钟以下
+				sub_duration = 30*1000;
+			}
+			else if(duration<=sub_duration*2) { // 10 分钟以下
+				sub_duration /= 5;
+			}
+			else if(duration<=sub_duration*6) { // 30 分钟以下
 				sub_duration /= 2;
 			}
+			int range = _mainPlayer._seekfloat.GetWidth();
+			int maxRange  = _mainPlayer._seekbar.GetWidth();
+			sub_duration = min(sub_duration, range*1.f/2/maxRange*duration);
+			if(sub_duration==0)
+				sub_duration = 1000;
+
 			_mainPlayer.seekfloat_duration = sub_duration;
 			long sub_pos = pos % (sub_duration);
 			int lunhui = pos / sub_duration;
 			_mainPlayer._seekfloat.SetProgressAndMax(sub_pos, sub_duration);
 
-			int range = _mainPlayer._seekfloat.GetWidth();
-			int maxRange  = _mainPlayer._seekbar.GetWidth();
 			//_seekfloat->GetFloatPercent().left = (lunhui * sub_duration)/duration;
 			//_seekfloat->NeedParentUpdate();
 
@@ -806,7 +877,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			if (_mainPlayer._seekbar._isSeeking && _mainPlayer._mMediaPlayer
 				&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
 			{
-				_mainPlayer._mMediaPlayer->SetPosition(wParam);
+				_mainPlayer._mMediaPlayer->SetPosition(wParam, true);
 			}
 		}
 	} 
@@ -817,15 +888,24 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	case WM_KEYDOWN:
 		switch(wParam)
 		{
-		//case VK_C:
-		//{
-		//	//if(IsKeyDown(VK_CONTROL)) {
-		//	//	VLCPlayer* player = (VLCPlayer*)_mainPlayer._mMediaPlayer;
-		//	//	player->takeSnapShot("G:\\IMG\\tmp.png");
-		//	//}
-		//	//int pos = _mainPlayer._mMediaPlayer->GetPosition();
-		//}
-		//break;
+			//case VK_C:
+			//{
+			//	//if(IsKeyDown(VK_CONTROL)) {
+			//	//	VLCPlayer* player = (VLCPlayer*)_mainPlayer._mMediaPlayer;
+			//	//	player->takeSnapShot("G:\\IMG\\tmp.png");
+			//	//}
+			//	//int pos = _mainPlayer._mMediaPlayer->GetPosition();
+			//}
+			//break;
+			//case VK_OEM_COMMA:
+			//	toggleFastforward(-1);
+			//break;
+			//case VK_OEM_PERIOD:
+			//	toggleFastforward(1);
+			//break;
+			//case VK_OEM_2:
+			//	fastForwardRate = 0;
+			//break;
 		}
 		break;
 	case WM_COPYDATA:{
@@ -924,6 +1004,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			{
 				QkString & path = paths[i];
 				path.Trim();
+				if(path.GetLength()==0)
+					continue;
 				if(path.StartWith('"') && path.EndWith('"')) {
 					path.MidFast(1, path.GetLength()-2);
 					path.Trim();
@@ -937,6 +1019,14 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 						path.MidFast(8, path.GetLength()-8);
 					}
 					path.Trim();
+				}
+				if(_playList.size()>0 && path.Find(L"\\")<0 && path.Find(L"/")<0) {
+					if(_playList[_playList.size()-1].StartWith(L"http")) {
+						_playList[_playList.size()-1].Append(L"VODNAM");
+						_playList[_playList.size()-1].Append(path);
+						_playList[_playList.size()-1].Append(L"NAMVOD");
+					}
+					continue;
 				}
 				if (path.GetLength()>0)
 				{
@@ -1042,9 +1132,10 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			if(_isFullScreen) 
 				ToggleFullScreen();
 			else if(::IsMaximized(GetHWND()))
-				SendMessage(WM_SYSCOMMAND, SC_RESTORE, 0); 
+				SendMessage(WM_SYSCOMMAND, _isMaximized=SC_RESTORE, 0); 
 			else
-				SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0); 
+				SendMessage(WM_SYSCOMMAND, _isMaximized=SC_MAXIMIZE, 0);
+			m_pm.GetRoot()->SetInset(_isFullScreen||_isMaximized==SC_MAXIMIZE?0:5); 
 			break;
 		case IDM_FULLSCREEN:
 			if(keyPressed) break;
@@ -1131,6 +1222,29 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_PLAY_START: NavTime(-1); return 1;
 		case IDM_PLAY_MID: NavTime(-2); return 1;
 		case IDM_PLAY_END: NavTime(-3); return 1;
+
+		case IDM_PLAY_FASTBACKWARD:
+			toggleFastforward(-1);
+			break;
+		case IDM_PLAY_FASTFOREWARD:
+			toggleFastforward(1);
+			break;
+		case IDM_PLAY_FASTFASTBACKWARD:
+			toggleFastforward(-2);
+			break;
+		case IDM_PLAY_FASTFASTFOREWARD:
+			toggleFastforward(2);
+			break;
+		case IDM_PLAY_FASTFASTERBACKWARD:
+			toggleFastforward(-4);
+			break;
+		case IDM_PLAY_FASTFASTERFOREWARD:
+			toggleFastforward(4);
+			break;
+
+		case IDM_PLAY_FASTFOREWARDOFF:
+			fastForwardRate = 0;
+			break;
 
 		case IDM_FILE:
 			trackWodMenus((CControlUI*)lParam, wParam);

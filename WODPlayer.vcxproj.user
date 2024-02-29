@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommand>bin/$(TargetName)$(TargetExt)</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>"D:\ship\小染好困困too - _streamNo.[2024-01-28] - [162406365354].flv"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>"L:\done_奥斯不是狗 - 1口气背完法理学 - _streamNo.0_ConvertNo.0.mp4"</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommand>bin/$(TargetName)$(TargetExt)</LocalDebuggerCommand>

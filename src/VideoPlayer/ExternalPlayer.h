@@ -40,7 +40,9 @@ typedef bool (__cdecl* VW_ISPLAYING)(LONG_PTR);
 typedef bool (__cdecl* VW_ISPAUSED)(LONG_PTR);
 typedef long (__cdecl* VW_GETPOSITION)(LONG_PTR);
 typedef long (__cdecl* VW_GETDURATION)(LONG_PTR);
-typedef void (__cdecl* VW_SETPOSITION)(LONG_PTR, long);
+typedef void (__cdecl* VW_SETPOSITION)(LONG_PTR, long, bool);
+typedef void (__cdecl* VW_SETLOOP)(LONG_PTR, long);
+typedef void (__cdecl* VW_SETINITIALPOSITION)(LONG_PTR, long);
 typedef void (__cdecl* VW_SETFULLSCREEN)(LONG_PTR, bool);
 typedef bool (__cdecl* VW_PLAYVIDEOFILE)(LONG_PTR, const TCHAR*, const CHAR*);
 typedef bool (__cdecl* VW_CLOSE)(LONG_PTR);
@@ -53,6 +55,8 @@ typedef int (__cdecl* VW_GETROTATION)(LONG_PTR);
 
 // D:\Code\FigureOut\XunLeiExternalPlayer\bin\XunLeiExternalPlayer.dll
 
+#define EXP_MV_API override
+
 class ExternalPlayer : public VideoPlayer
 {
 public:
@@ -60,22 +64,24 @@ public:
 	~ExternalPlayer();
 
 public:
-	void			Stop() override;
-	void			Play() override;
-	void			Pause() override;
-	bool			IsPlaying() override;
-	bool			IsPaused() override;
-	long			GetPosition() override;
-	long			GetDuration() override;
-	void			SetPosition(long pos) override;
-	bool			PlayVideoFile(const TCHAR* path, const CHAR* path1) override;
-	void			Close() override;
-	void			Release() override;
-	void			syncResolution(unsigned int & _resX, unsigned int & _resY) override;
-	float			SetRate(float rate) override;
-	int				SetVolume(int volume) override;
-	void		    SetRotation(int value) override;
-	int			GetRotation() override;
+	void			Stop() EXP_MV_API;
+	void			Play() EXP_MV_API;
+	void			Pause() EXP_MV_API;
+	bool			IsPlaying() EXP_MV_API;
+	bool			IsPaused() EXP_MV_API;
+	long			GetPosition() EXP_MV_API;
+	long			GetDuration() EXP_MV_API;
+	void			SetPosition(long pos, bool fastSeek) EXP_MV_API;
+	void			SetLoop(bool loop) EXP_MV_API;
+	void			SetInitialPosition(long pos);
+	bool			PlayVideoFile(const TCHAR* path, const CHAR* path1) EXP_MV_API;
+	void			Close() EXP_MV_API;
+	void			Release() EXP_MV_API;
+	void			syncResolution(unsigned int & _resX, unsigned int & _resY) EXP_MV_API;
+	float			SetRate(float rate) EXP_MV_API;
+	int				SetVolume(int volume) EXP_MV_API;
+	void		    SetRotation(int value) EXP_MV_API;
+	int			GetRotation() EXP_MV_API;
 	HMODULE vwInit(int & error_code, const TCHAR* dllPath, bool blame=false, const TCHAR* dllDir=0);
 protected:
 	LONG_PTR _player;
@@ -98,6 +104,8 @@ private:
 	VW_GETPOSITION vwGetPosition = nullptr;
 	VW_GETDURATION vwGetDuration = nullptr;
 	VW_SETPOSITION vwSetPosition = nullptr;
+	VW_SETLOOP vwSetLoop = nullptr;
+	VW_SETINITIALPOSITION vwSetInitialPosition = nullptr;
 	VW_SETFULLSCREEN vwSetFullScreen = nullptr;
 	VW_PLAYVIDEOFILE vwPlayVideoFile = nullptr;
 	VW_CLOSE vwClose = nullptr;

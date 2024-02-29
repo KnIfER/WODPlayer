@@ -30,7 +30,8 @@ public:
 	virtual bool IsPlaying()=0;
 	virtual bool IsPaused()=0;
 	virtual long GetPosition()=0;
-	virtual void SetPosition(long pos)=0;
+	virtual void SetPosition(long pos, bool fastSeek)=0;
+	virtual void SetLoop(bool loop)=0;
 	virtual long GetDuration()=0;
 	virtual bool PlayVideoFile(const TCHAR* path, const CHAR* path1)=0;
 	virtual void SetFullScreen(bool val){};

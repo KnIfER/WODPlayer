@@ -64,7 +64,9 @@ public:
 	bool			IsPlaying() ;
 	bool			IsPaused() ;
 	long			GetPosition() ;
-	void			SetPosition(long pos) ;
+	void			SetPosition(long pos, bool fastSeek) ;
+	void			SetLoop(bool val) ;
+	void			SetInitialPosition(long pos) ;
 	long			GetDuration() ;
 	bool			PlayVideoFile(const CHAR* path) ;
 	void			SetFullScreen(bool val) ;

@@ -97,7 +97,7 @@ float WODPlayer::SpeedDelta(float delta)
 			speed = 12;
 		}
 		this->speed = _mMediaPlayer->SetRate(speed);
-		LogIs(1, "speed=%f", speed);
+		LogIs(1, "speed=%f", speed); // todo 回显
 	}
 	else
 	{
@@ -316,7 +316,7 @@ std::string buffer;
 
 void seekchange(SeekBar* bar, int pos) {
 	WODPlayer* player = (WODPlayer*)bar->GetTag();
-	player->_mMediaPlayer->SetPosition(pos);
+	player->_mMediaPlayer->SetPosition(pos, true);
 }
 
 void seekchangefloat(SeekBar* bar, int posf) {
@@ -328,11 +328,120 @@ void seekchangefloat(SeekBar* bar, int posf) {
 	long sub_pos = pos % (sub_duration);
 	int lunhui = pos / sub_duration;
 
-	player->_mMediaPlayer->SetPosition(lunhui*sub_duration + posf);
+	player->_mMediaPlayer->SetPosition(lunhui*sub_duration + posf, true);
 }
 
 extern CControlUI* _timeLabel;
 extern CControlUI* _durationLabel;
+
+#include <iostream>
+#include <string>
+
+int parsint(const TCHAR* s, int i, int end, int val) {
+	//lxx(digit dd dd dd, i, end, val)
+	//if (o == nullptr) return val;
+
+	//std::string s = std::to_string(*static_cast<int*>(o));
+	//int i = 0, len = s.length();
+	int len = end-i;
+	if (len <= 0) return val;
+
+	int result = 0;
+	bool negative = false;
+	int limit = -INT_MAX;
+	int multmin;
+	int digit;
+
+	if (s[i] == '-') {
+		negative = true;
+		limit = INT_MIN;
+		i++;
+	}
+
+	multmin = limit / 10;
+
+	while (i < end) {
+		digit = s[i++] - L'0';
+
+		if (digit < 0 || digit>9 || result < multmin || (result *= 10) < limit + digit) {
+			if (i > (negative ? 1 : 0)) break;
+			else return val;
+		}
+
+		result -= digit;
+	}
+
+	return negative ? result : -result;
+}
+
+
+// Function to check if a number is prime
+bool isPrime(int number) {
+	if (number <= 1) return false; // 0 and 1 are not prime numbers
+	if (number <= 3) return true; // 2 and 3 are prime numbers
+
+								  // Check from 2 to square root of the number
+	for (int i = 2; i * i <= number; i++) {
+		if (number % i == 0) return false;
+	}
+	return true;
+}
+
+QkString voals = L"aeiouAEIOU";
+
+bool isPunct(TCHAR ch) {
+	switch (ch) {
+	case L' ':
+	case L'-':
+	case L'.':
+	case L'[':
+	case L']':
+	case L'_':
+		return true;
+	}
+	return false;
+}
+static void decryptFileName(QkString & fileName) {
+	// 
+	int idx = -1;
+	if(fileName.EndWith(L".enc")) {
+		fileName.MidFast(0, fileName.GetLength()-4); // 去除后缀
+	}
+	if(fileName.Find(L'.', 0)>0) {
+		int i=0, cc=0;
+		for (size_t j = idx+1; j < fileName.GetLength(); j++)
+		{
+			TCHAR ch = fileName.GetAt(j);
+			if(isPunct(ch)) { // ch 是任意标点符号
+				cc=0;
+			}  
+			else 
+			{
+				if((cc%2)!=0 || cc>5&&isPrime(cc)) {
+					if(ch>=L'A'&& ch<=L'u') {
+						auto idx = voals.Find(ch);
+						if(idx>=0) ch = voals.GetAt((idx-1+voals.GetLength())%voals.GetLength());
+						//DbgPrint(L"GetFilePath 解密 0  \n");
+					}
+					else if(ch>=(L'一')&& ch<=(L'龥')) {
+						ch = ch-1;
+						if(ch<L'一') ch=L'龥';
+						//DbgPrint(L"GetFilePath 解密 1  \n");
+					}
+				}
+				cc++;
+			}
+			//QkString tmp = ch;
+			//DbgPrint(L"GetFilePath 解密 %s %d %d   \n",  tmp.GetData(), isPunct(ch), ch>=(L'一')&& ch<=(L'龥'));
+			fileName.SetAt(j, ch);
+			i++;
+		}
+		//QkString tmp = "x";
+		//tmp.SetAt(0, L'嘠'-1);
+		//DbgPrint(L"GetFilePath 解密文件名 = %s %d %d %s \n", fileName.GetData(), L'嘠'-L'一', L'龥'-L'嘠', tmp.GetData(), 0);
+	}
+}
+
 
 bool WODPlayer::PlayVideoFile(const TCHAR* path)
 {
@@ -347,43 +456,81 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		_durationCache = 0;
 		_currentPath = path;
 	}
+	nSkipStart = nSkipEnd = 0;
+	int seekStart = _currentPath.Find(L"[p");
+	if(seekStart>=0) {
+		int seekEnd = _currentPath.Find(L"]", seekStart+2), sep=0;
+		if(seekEnd>0) {
+			sep = _currentPath.Find(L"-", seekStart);
+			if(sep>=seekEnd)
+				sep = -1;
+			nSkipStart = parsint(_currentPath.GetData(), seekStart+2, sep>0?sep:seekEnd, 0);
+			if(sep>0) {
+				nSkipEnd = parsint(_currentPath.GetData(), sep+1, seekEnd, 0);
+			}
+		}
+		//std::string buffer;
+		//lxx(ss dd, _currentPath.Mid(seekStart+2, sep-seekStart-2).GetData(), (int)nSkipStart)
+		//lxxx('seekEndseekEnd dd dd ss ', (int)nSkipStart, (int)nSkipEnd, _currentPath.Mid(seekStart, seekEnd-seekStart).GetData(buffer));
+	}
+	int endIdx = -1, idx;
+	QkString title;
+	title.Empty();
+	bool save = false; 
+	if(_currentPath.EndWith(L"NAMVOD")) {
+		endIdx = _currentPath.Find(L"VODNAM");
+		if(endIdx>0) {
+			title = _currentPath.GetData()+endIdx+6;
+			title.MidFast(0, title.GetLength()-6);
+			save = true;
+		}
+	}
 	//xpLogTo(_currentPath);
 	if (_mMediaPlayer)
 	{
-		ret = _mMediaPlayer->PlayVideoFile(path, _currentPath.GetData(buffer));
+		//_mMediaPlayer->setIni
+		ret = _mMediaPlayer->PlayVideoFile(path, _currentPath.GetData(buffer, 0, endIdx));
 	}
-	QkString title;
-	title.Empty();
-	int idx = _currentPath.ReverseFind('/'), ed = _currentPath.GetLength()-1, wenhao=-1;
-	if(idx==-1) idx = _currentPath.ReverseFind('\\');
-	if (_currentPath.StartWith(L"http"))
-	{
-		wenhao = _currentPath.ReverseFind('?');
-		if(wenhao>idx+1) ed = wenhao-1;
+	int ed, wenhao, b1=title.IsEmpty();
+	if(b1) {
+		idx = _currentPath.ReverseFind('/');
+		ed = _currentPath.GetLength()-1;
+		wenhao=-1;
+		if(idx==-1) idx = _currentPath.ReverseFind('\\');
+		if (_currentPath.StartWith(L"http"))
+		{
+			wenhao = _currentPath.ReverseFind('?');
+			if(wenhao>idx+1) ed = wenhao-1;
+		}
+		title.Append(STR(_currentPath)+idx+1, ed-idx);
+		if(title.EndWith(".enc")) {
+			decryptFileName(title);
+		}
+
 	}
-	title.Append(STR(_currentPath)+idx+1, ed-idx);
 	_app->_titleBar->SetText(title);
 	_app->_titleBar->SetNeedAutoCalcSize();
 
 
-	idx = _currentPath.Find(L":\\");
-	if(idx<0) idx = _currentPath.Find(L"://");
-	if(idx<0) idx = _currentPath.GetLength()>0?1:0;
-	_app->_driveTag->SetText(_currentPath.Mid(0, idx));
+	if(b1) {
+		idx = _currentPath.Find(L":\\");
+		if(idx<0) idx = _currentPath.Find(L"://");
+		if(idx<0) idx = _currentPath.GetLength()>0?1:0;
+		_app->_driveTag->SetText(_currentPath.Mid(0, idx));
 
-	idx = _currentPath.ReverseFind(L".", _currentPath.GetLength()-2);
-	if(idx>0) {
-		if(wenhao>idx+1) ed = wenhao-1;
-		else ed = _currentPath.GetLength()-1;
-		title = _currentPath.Mid(idx+1, ed-idx);
-		title.MakeUpper();
-		if (title==L"TS")
-		{
-			title = L"MPEGTS";
+		idx = _currentPath.ReverseFind(L".", _currentPath.GetLength()-2);
+		if(idx>0) {
+			if(wenhao>idx+1) ed = wenhao-1;
+			else ed = _currentPath.GetLength()-1;
+			title = _currentPath.Mid(idx+1, ed-idx);
+			title.MakeUpper();
+			if (title==L"TS")
+			{
+				title = L"MPEGTS";
+			}
+			_app->_mimeTag->SetText(title);
 		}
-		_app->_mimeTag->SetText(title);
 	}
-
 
 	_app->_titleBar->NeedParentUpdate();
 	::SetWindowText(_app->GetHWND(), STR(_app->_titleBar->GetText()));
@@ -401,6 +548,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		_seekfloat._decorator = (SeekBarTrackDecorator)TimeMarksFloatDecorator;
 		_seekfloat._callback = (SeekBarTrackCallback)seekchangefloat;
 	}
+	// 获取书签
 	//if (ret)
 	{
 		QkString tmp;
@@ -417,15 +565,24 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 			if(pathBuffer.Find('\"')) {
 				pathBuffer.Replace(L"\"", L"\"\"");
 			}
+			auto idx = pathBuffer.Find('?');
+			if(idx>0) {
+				pathBuffer.MidFast(0, idx);
+			}
 			int fullPathLen = pathBuffer.GetLength();
 			if (DuiLib::PathRemoveFileSpecW((LPWSTR)pathBuffer.GetData()))
 			{
 				pathBuffer.RecalcSize();
 				size_t basePathLen = pathBuffer.GetLength();
+				QkString fileName = pathBuffer.GetData()+basePathLen+1;//pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1);
+				if(fileName.EndWith(".enc")) {
+					decryptFileName(fileName);
+				}
+				//lxx(,STR(fileName))
 				//lxx(,STR(pathBuffer)+basePathLen+1)
 				//LogIs(2, pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1));
 				_timeMarked = _app->_db->GetBookMarks(pathBuffer.GetData(threadBuffer1)
-					, pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1), _bookmarks);
+					, fileName.GetData(threadBuffer), _bookmarks);
 			}
 		}
 
@@ -460,6 +617,10 @@ bool WODPlayer::AddBookmark()
 			if(pathBuffer.Find('\"')) {
 				pathBuffer.Replace(L"\"", L"\"\"");
 			}
+			auto idx = pathBuffer.Find('?');
+			if(idx>0) {
+				pathBuffer.MidFast(0, idx);
+			}
 			int fullPathLen = pathBuffer.GetLength();
 			if (DuiLib::PathRemoveFileSpecW((LPWSTR)pathBuffer.GetData()))
 			{
@@ -472,8 +633,14 @@ bool WODPlayer::AddBookmark()
 				//	pathBuffer.SetAt(basePathLen, '\0');
 				//	pathBuffer.RecalcSize();
 				//}
+
+				QkString fileName = pathBuffer.GetData()+basePathLen+1;//pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1);
+				if(fileName.EndWith(".enc")) {
+					decryptFileName(fileName);
+				}
+
 				rowId = _app->_db->AddBookmark(pathBuffer.GetData(threadBuffer1)
-					, pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1), 0, _timeMarked, pos, duration, 0);
+					, fileName.GetData(threadBuffer), 0, _timeMarked, pos, duration, 0);
 			}
 		}
 
@@ -506,7 +673,7 @@ void WODPlayer::SelectBookMark(int index)
 {
 	if (index>=0 && index<_bookmarks.size())
 	{
-		_mMediaPlayer->SetPosition(_bookmarks[index].pos);
+		_mMediaPlayer->SetPosition(_bookmarks[index].pos, false);
 		_selectedBookmark = index;
 		if (!_isPlaying)
 		{
@@ -567,7 +734,7 @@ void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 			_exRect.left += _translationX;
 			_exRect.top += _translationY;
 
-			if (_scale > 1)
+			if (_scale > 1 && 0)
 			{
 				if (h > height)
 				{
@@ -626,19 +793,24 @@ HWND WODPlayer::GetMediaPlayerHWND()
 	return _hPlayer;
 }
 
-void WODPlayer::Toggle()
+void WODPlayer::Toggle(int play)
 {
 	if (_mMediaPlayer)
 	{
-		if (_isPlaying)
-		{
-			_mMediaPlayer->Pause();
-		}
+		bool toPlay;
+		if(play==-1)
+			toPlay = !_isPlaying;
 		else 
+			toPlay = play == 1;
+		if (toPlay)
 		{
 			_mMediaPlayer->Play();
 		}
-		MarkPlaying(!_isPlaying);
+		else 
+		{
+			_mMediaPlayer->Pause();
+		}
+		MarkPlaying(toPlay);
 		if(!_hPlayer)
 		lxx(%ld = %ld != %ld, _hPlayer, _mMediaPlayer->getHWND(), GetHWND())
 	}

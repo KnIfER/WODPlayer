@@ -296,7 +296,6 @@ wWinMain(_In_ HINSTANCE hInstance,
 	XPP->CenterWindow();
 	XPP->buildAccelerator();
 	//XPP->init(hInstance, NULL);
-
 	//XPP->ShowModal();
 	CControlUI* btn = new CControlUI();
 

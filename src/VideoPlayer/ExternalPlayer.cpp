@@ -45,6 +45,9 @@ static void PRINTMSG(TCHAR* buff, const CHAR* name, int & printed_len)
 	func = (type)GetProcAddress(hMod, name);\
 	if(!func) PRINTMSG(PRINTBUFF, name, PRINTLEN);
 
+#define DEF_FUNC_NOWARN(hMod, func, type, name)\
+	func = (type)GetProcAddress(hMod, name);
+
 static HMODULE _hPlayerMod;
 
 HMODULE ExternalPlayer::vwInit(int & error_code, const TCHAR* dllPath, bool blame, const TCHAR* dllDir)
@@ -74,6 +77,8 @@ HMODULE ExternalPlayer::vwInit(int & error_code, const TCHAR* dllPath, bool blam
 			DEF_FUNC(hPlayer, vwGetPosition, VW_GETPOSITION, "vwGetPosition");
 			DEF_FUNC(hPlayer, vwGetDuration, VW_GETDURATION, "vwGetDuration");
 			DEF_FUNC(hPlayer, vwSetPosition, VW_SETPOSITION, "vwSetPosition");
+			DEF_FUNC(hPlayer, vwSetLoop, VW_SETLOOP, "vwSetLoop");
+			DEF_FUNC_NOWARN(hPlayer, vwSetInitialPosition, VW_SETINITIALPOSITION, "vwSetInitialPosition");
 			DEF_FUNC(hPlayer, vwSetFullScreen, VW_SETFULLSCREEN, "vwSetFullScreen");
 			DEF_FUNC(hPlayer, vwPlayVideoFile, VW_PLAYVIDEOFILE, "vwPlayVideoFile");
 			DEF_FUNC(hPlayer, vwSyncSize, VW_SYNCSIZE, "vwSyncSize");
@@ -282,11 +287,27 @@ long ExternalPlayer::GetDuration()
 	//return 1000*60*60;
 }
 
-void ExternalPlayer::SetPosition(long pos)
+void ExternalPlayer::SetPosition(long pos, bool fastSeek)
 {
 	if (_player)
 	{
-		vwSetPosition(_player, pos);
+		vwSetPosition(_player, pos, fastSeek);
+	}
+}
+
+void ExternalPlayer::SetLoop(bool loop)
+{
+	if (_player)
+	{
+		vwSetLoop(_player, loop);
+	}
+}
+
+void ExternalPlayer::SetInitialPosition(long pos)
+{
+	if (_player)
+	{
+		vwSetInitialPosition(_player, pos);
 	}
 }
 

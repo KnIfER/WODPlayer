@@ -86,5 +86,8 @@ public:
     int _rotation = 0;
 
     int seekfloat_duration = 5*60*1000;
+
+    long nSkipStart = 0;
+    long nSkipEnd = 0;
 };
 

@@ -355,7 +355,7 @@ long MFPlayer2::GetPosition()
     return value;
 }
 
-void MFPlayer2::SetPosition(long pos)
+void MFPlayer2::SetPosition(long pos, bool fastSeek)
 {
     SetPosition((MFTIME)pos);
 }
