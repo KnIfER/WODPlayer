@@ -282,10 +282,33 @@ wWinMain(_In_ HINSTANCE hInstance,
 	loadProf(usrDir, configFileName);
 
 	XPP = new WODApplication();
-
+	//lxx(ss dd, lpCmdLine, _args.size())
 	if (_args.size()>0)
 	{
-		XPP->_playList.push_back(_args[0].c_str()); // path0
+		for (size_t i = 0; i < _args.size(); i++)
+		{
+			auto &  path = _args[i];
+			if(path.size()>0) {
+				if(path[0]==L'-') {
+					if(StrCmpN(_args[i].c_str(), L"-loadArgs", 9)==0) {
+						std::ifstream file(_args[i].c_str()+10);
+						if (file.is_open()) {
+							std::string line;
+							QkString ln;
+							while (std::getline(file, line)) {
+								ln = line.c_str();
+								//lxx(ss, ln.GetData())
+								_args.push_back(STR(ln));
+							}
+							file.close();
+						}
+					}
+				} 
+				else {
+					XPP->_playList.push_back(_args[i].c_str());
+				}
+			}
+		}
 	}
 
 	//WODApplication app{};

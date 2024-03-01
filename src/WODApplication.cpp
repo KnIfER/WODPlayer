@@ -77,11 +77,12 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 DWORD initTimer;
 DWORD initTimerID = 3;
 DWORD initTimerInterval = 500;
+BOOL _singleInstance= 1;
 
 void initTimerProc(HWND hwnd, UINT, UINT_PTR, DWORD)
 {
 	::KillTimer(hwnd, initTimerID);
-	if (hMutexTemp)
+	if (hMutexTemp && !_singleInstance)
 	{
 		ReleaseMutex(hMutexTemp);
 		CloseHandle(hMutexTemp);
@@ -381,7 +382,9 @@ void WODApplication::ToggleFullScreen()
 		_topBarFscWnd->SetVisible(false);
 		m_pm.GetSizeBox().top = 4;
 	}
-	m_pm.GetRoot()->SetInset(_isFullScreen||_isMaximized==SC_MAXIMIZE?0:5);
+	bool b1 = _isFullScreen||_isMaximized==SC_MAXIMIZE;
+	m_pm.GetRoot()->SetInset(b1?0:5);
+	m_pm._bStaticMovable = !b1; 
 }
 
 bool WODApplication::IsFullScreen()
@@ -909,30 +912,58 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		}
 		break;
 	case WM_COPYDATA:{
-		//lxx(WM_COPYDATA dd dd , wParam, lParam)
+		lxx(WM_COPYDATA dd dd , wParam, lParam)
 		COPYDATASTRUCT *pCopyData = reinterpret_cast<COPYDATASTRUCT *>(lParam);
 		if(pCopyData->dwData==WOD_COPYDATA) {
 			//::SetActiveWindow(GetHWND());
 			::SetForegroundWindow(GetHWND());
 			//::SetFocus(GetHWND());
 			wchar_t *fileNamesW = static_cast<wchar_t *>(pCopyData->lpData);
-			//lxx(ss, fileNamesW);
 			std::vector<std::wstring> args;
 			parseCommandLine(fileNamesW, args);
+			lxx(ss dd, fileNamesW, args.size());
 			if (args.size())
 			{
-				auto iter = std::find(args.begin(), args.end(), L"-add");
-				if (iter != args.end())
+				bool append = std::find(args.begin(), args.end(), L"-add")!= args.end();
+				KillTimer(GetHWND(), initTimerID);
+				if (hMutexTemp)
 				{
-					KillTimer(GetHWND(), initTimerID);
-					_playList.push_back(args[0].c_str());
-					if (hMutexTemp)
-					{
-						initTimer = ::SetTimer(GetHWND(), initTimerID, initTimerInterval, (TIMERPROC)initTimerProc);
-					}
-				} else {
-					_mainPlayer.PlayVideoFile(args[0].c_str());
+					initTimer = ::SetTimer(GetHWND(), initTimerID, initTimerInterval, (TIMERPROC)initTimerProc);
 				}
+				for (size_t i = 0; i < args.size(); i++)
+				{
+					auto &  path = args[i];
+
+					if(path.size()>0) {
+						if(path[0]==L'-') {
+							if(StrCmpN(args[i].c_str(), L"-loadArgs", 0)==0) {
+								std::wifstream file(args[i].c_str()+10);
+								if (file.is_open()) {
+									std::ifstream file(args[i].c_str()+10);
+									if (file.is_open()) {
+										std::string line;
+										QkString ln;
+										while (std::getline(file, line)) {
+											ln = line.c_str();
+											//lxx(ss, ln.GetData())
+											args.push_back(STR(ln));
+										}
+										file.close();
+									}
+								}
+							}
+						} 
+						else {
+							if (!append)
+							{
+								_mainPlayer.PlayVideoFile(path.c_str());
+								append = true;
+							}
+							_playList.push_back(path.c_str());
+						}
+					}
+				}
+				
 			}
 		}
 	} break;
@@ -1135,7 +1166,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				SendMessage(WM_SYSCOMMAND, _isMaximized=SC_RESTORE, 0); 
 			else
 				SendMessage(WM_SYSCOMMAND, _isMaximized=SC_MAXIMIZE, 0);
-			m_pm.GetRoot()->SetInset(_isFullScreen||_isMaximized==SC_MAXIMIZE?0:5); 
+			m_pm._bStaticMovable = !(_isFullScreen||_isMaximized==SC_MAXIMIZE); 
+			m_pm.GetRoot()->SetInset(m_pm._bStaticMovable?5:0);
 			break;
 		case IDM_FULLSCREEN:
 			if(keyPressed) break;
@@ -1310,6 +1342,10 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			Replay();
 			return 1;
 
+		case IDM_SKIN_SEEKBAR_MAGNIFIER:
+			_mainPlayer._seekfloat.SetVisible(!_mainPlayer._seekfloat.IsVisible());
+			return 1;
+
 		case IDM_SKIN_NORM:
 		case IDM_SKIN_HOLLOW:
 		case IDM_SKIN_ALPHA_1 :
@@ -1332,9 +1368,6 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			ResetWndOpacity();
 			return 1;
 		}
-		case IDM_SKIN_SEEKBAR_MAGNIFIER:
-			_mainPlayer._seekfloat.SetVisible(!_mainPlayer._seekfloat.IsVisible());
-			return 1;
 	}
 	break;
 	case WM_NOTIFY:
