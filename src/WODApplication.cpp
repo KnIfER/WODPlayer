@@ -77,7 +77,7 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 DWORD initTimer;
 DWORD initTimerID = 3;
 DWORD initTimerInterval = 500;
-BOOL _singleInstance= 1;
+BOOL _singleInstance = 0;
 
 void initTimerProc(HWND hwnd, UINT, UINT_PTR, DWORD)
 {
@@ -912,7 +912,19 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		}
 		break;
 	case WM_COPYDATA:{
-		lxx(WM_COPYDATA dd dd , wParam, lParam)
+		//lxx(WM_COPYDATA dd dd , wParam, lParam)
+		//_bottomBar->PostLambda([](){
+		//	static int findCC = 0;
+		//	findCC++;
+		//	PathFinder _pathFinder;
+		//	std::vector<QkString> fileArr;
+		//	set<QkString, strPtrCmp>  parents;
+		//	_pathFinder.SetParentRecorder(parents);
+		//	_pathFinder.GetPatterns().push_back(L"*");
+		//	_pathFinder.SearchFiles((findCC%2)?L"V:\\BaiduNetdiskDownload":L"F:\\Backup", &fileArr, 0, true);
+		//	lxxx(find :: dd, fileArr.size())
+		//	return true;
+		//}, 5000);
 		COPYDATASTRUCT *pCopyData = reinterpret_cast<COPYDATASTRUCT *>(lParam);
 		if(pCopyData->dwData==WOD_COPYDATA) {
 			//::SetActiveWindow(GetHWND());
@@ -921,7 +933,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			wchar_t *fileNamesW = static_cast<wchar_t *>(pCopyData->lpData);
 			std::vector<std::wstring> args;
 			parseCommandLine(fileNamesW, args);
-			lxx(ss dd, fileNamesW, args.size());
+			//lxx(ss dd, fileNamesW, args.size());
 			if (args.size())
 			{
 				bool append = std::find(args.begin(), args.end(), L"-add")!= args.end();

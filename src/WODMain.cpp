@@ -229,7 +229,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 	else mLockStr.Append(L"WODPlayer");
 
 	// 创建互斥体
-	hMutexTemp = CreateMutex(NULL, TRUE, L"WODPLTMP");
+	hMutexTemp = CreateMutex(NULL, TRUE, L"WODPLTMP1");
 	if (GetLastError() == ERROR_ALREADY_EXISTS) // 检查互斥体是否已存在
 	{
 		if(prvInstance(lpCmdLine, TRUE)) return 0;
