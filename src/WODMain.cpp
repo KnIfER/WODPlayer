@@ -193,14 +193,14 @@ BOOL prvInstance(_In_ LPWSTR lpCmdLine, BOOL add)
 		if (_args.size()) {
 			if(add) {
 				tmp = lpCmdLine;
-				tmp.Append(L" -add  ");
+				tmp.Append(L" -add   ");
 				cds.cbData = (tmp.GetLength()) * sizeof(WCHAR);
-				cds.lpData = (LPWSTR)STR(tmp);
-				lpCmdLine[cds.cbData-1] = '\0';
+				cds.lpData = lpCmdLine = (LPWSTR)STR(tmp);
+				lpCmdLine[tmp.GetLength()-1] = L'\0';
 			} else {
-				cds.cbData = (lstrlen(lpCmdLine) + 1) * sizeof(WCHAR);
+				cds.cbData = (lstrlen(lpCmdLine)) * sizeof(WCHAR);
 				cds.lpData = lpCmdLine;
-				lpCmdLine[cds.cbData-1] = '\0';
+				lpCmdLine[lstrlen(lpCmdLine)] = L'\0';
 			}
 		}
 		HWND hWnd = FindWindow(L"WODPlayer", NULL);
