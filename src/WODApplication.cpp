@@ -364,6 +364,13 @@ void WODApplication::ToggleFullScreen()
 		//		mi.rcMonitor.right - mi.rcMonitor.left,
 		//		mi.rcMonitor.bottom - mi.rcMonitor.top, 0);
 		//}
+		_bottomBar->PostLambda([_hFullScreenBtmbar, hWnd](){
+			SetWindowPos(_hFullScreenBtmbar, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
+			//::SetActiveWindow(hWnd);
+			::SetForegroundWindow(hWnd);
+			return false;
+		}
+		, 100);
 	}
 	else
 	{
@@ -931,6 +938,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			::SetForegroundWindow(GetHWND());
 			//::SetFocus(GetHWND());
 			wchar_t *fileNamesW = static_cast<wchar_t *>(pCopyData->lpData);
+			//fileNamesW[pCopyData->dwData] = 0;
 			std::vector<std::wstring> args;
 			parseCommandLine(fileNamesW, args);
 			//lxx(ss dd, fileNamesW, args.size());
