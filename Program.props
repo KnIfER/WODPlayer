@@ -5,7 +5,7 @@
     <DIS_WARN>4996</DIS_WARN>
     <GL>No</GL>
     <LG>/LTCG:OFF</LG>
-    <direct_path>$(ProjectDir)..</direct_path>
+    <direct_path>D:\Code\FigureOut\Textrument\plugins\DirectUILib</direct_path>
     <dir_output>$(direct_path)\build\$(Configuration)_$(Platform)\</dir_output>
     <dir_intermediate>$(Configuration)_$(Platform)\</dir_intermediate>
     <dir_bin>$(direct_path)\bin\$(TargetName)$(TargetExt)</dir_bin>
