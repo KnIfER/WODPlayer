@@ -312,6 +312,7 @@ void SetFloatHwnd(HWND hwnd)
 	);
 }
 
+bool _lastTopMost;
 
 void WODApplication::ToggleFullScreen()
 {
@@ -353,7 +354,8 @@ void WODApplication::ToggleFullScreen()
 
 		int w = ::GetSystemMetrics(SM_CXSCREEN);
 		int h = ::GetSystemMetrics(SM_CYSCREEN);
-		::SetWindowPos(hWnd, NULL, 0, 0, w, h, 0);
+		_lastTopMost = GetWindowLong(hWnd, GWL_EXSTYLE)&WS_EX_TOPMOST;
+		::SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, w, h, 0);
 
 		//HMONITOR hmon = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 		//MONITORINFO mi = { sizeof(mi) };
@@ -364,10 +366,22 @@ void WODApplication::ToggleFullScreen()
 		//		mi.rcMonitor.right - mi.rcMonitor.left,
 		//		mi.rcMonitor.bottom - mi.rcMonitor.top, 0);
 		//}
-		_bottomBar->PostLambda([_hFullScreenBtmbar, hWnd](){
+
+		//if(GetWindowLong(hWnd, GWL_EXSTYLE) & WS_EX_TOPMOST) {
+		//SetWindowLong(_hFullScreenBtmbar, GWL_EXSTYLE, GetWindowLong(_hFullScreenBtmbar, GWL_EXSTYLE)|WS_EX_TOPMOST);
+		//SetWindowLong(this->_topBarFscH->GetHWND(), GWL_EXSTYLE, GetWindowLong(this->_topBarFscH->GetHWND(), GWL_EXSTYLE)|WS_EX_TOPMOST);
+		//}
+
+		_bottomBar->PostLambda([_hFullScreenBtmbar, hWnd, this](){
+			if(!this->_isFullScreen) 
+				return false;
 			SetWindowPos(_hFullScreenBtmbar, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
 			//::SetActiveWindow(hWnd);
 			::SetForegroundWindow(hWnd);
+			if(_lastTopMost) {
+				SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE)&~WS_EX_TOPMOST);
+				::SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
+			}
 			return false;
 		}
 		, 100);
@@ -388,6 +402,10 @@ void WODApplication::ToggleFullScreen()
 		_bottomBar->SetVisible(true);
 		_topBarFscWnd->SetVisible(false);
 		m_pm.GetSizeBox().top = 4;
+		if(_lastTopMost) {
+			SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE)|WS_EX_TOPMOST);
+			::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
+		}
 	}
 	bool b1 = _isFullScreen||_isMaximized==SC_MAXIMIZE;
 	m_pm.GetRoot()->SetInset(b1?0:5);
@@ -679,14 +697,17 @@ LRESULT WODApplication::HandleDropFiles(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//WideCharToMultiByte (CP_ACP, 0, szFileName
 			//	, -1, buffer, 256, 0, 0) ;
 			//MarkPlaying();
-			//LogIs(2, szFileName);
-			if (!nxt_file[0])
-			{
-				_playList.clear();
-				_playIdx = 0;
-				lstrcpy(nxt_file, szFileName);
+			QkString path_ = szFileName;
+			if(!path_.EndWith(L".txt")) { // todo opt
+				//LogIs(2, STR(path_));
+				if (!nxt_file[0])
+				{
+					_playList.clear();
+					_playIdx = 0;
+					lstrcpy(nxt_file, szFileName);
+				}
+				_playList.push_back(szFileName);
 			}
-			_playList.push_back(szFileName);
 		}
 	}
 	if (nxt_file[0] && _mainPlayer._mMediaPlayer)
@@ -974,12 +995,15 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 							}
 						} 
 						else {
-							if (!append)
-							{
-								_mainPlayer.PlayVideoFile(path.c_str());
-								append = true;
+							QkString path_ = path.c_str();
+							if(!path_.EndWith(L".txt")) { // todo opt
+								if (!append)
+								{
+									_mainPlayer.PlayVideoFile(path_);
+									append = true;
+								}
+								_playList.push_back(path_);
 							}
-							_playList.push_back(path.c_str());
 						}
 					}
 				}
