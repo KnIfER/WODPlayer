@@ -254,11 +254,15 @@ wWinMain(_In_ HINSTANCE hInstance,
 	CPaintManagerUI::SetResourcePath(CPaintManagerUI::GetInstancePath() + _T("..//skin//"));
 #else
 	//CPaintManagerUI::SetResourceType(UILIB_ZIPRESOURCE);
-	CPaintManagerUI::SetResourceType(UILIB_FILE);
-	CPaintManagerUI::SetResourcePath(CPaintManagerUI::GetInstancePath() + _T("..//skin//"));
+	//CPaintManagerUI::SetResourceType(UILIB_FILE);
+	//CPaintManagerUI::SetResourcePath(CPaintManagerUI::GetInstancePath() + _T("..//skin//"));
 
 	//CPaintManagerUI::SetResourceZip(_T("skin.zip"));
 	//CPaintManagerUI::SetResourcePath(strResourcePath.GetData());
+
+	CPaintManagerUI::SetResourceType(UILIB_ZIPRESOURCE);
+	//CPaintManagerUI::SetResourcePath(_T("skin.zip"));
+	
 	HRSRC hResource = ::FindResource(CPaintManagerUI::GetResourceDll(), _T("IDR_ZIPRES"), _T("ZIPRES"));
 	if( hResource != NULL ) {
 		DWORD dwSize = 0;
@@ -269,7 +273,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 				CPaintManagerUI::SetResourceZip((LPBYTE)::LockResource(hGlobal), dwSize);
 			}
 		}
-		::FreeResource(hResource);
+		//::FreeResource(hResource);
 	}
 #endif
 
