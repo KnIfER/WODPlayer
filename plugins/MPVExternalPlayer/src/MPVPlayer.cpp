@@ -222,6 +222,9 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
 
     mpv_set_property_string(mpv, "af", "stats");
 
+    mpv_set_property_string(mpv, "sub-auto", "no");
+    mpv_set_property_string(mpv, "autoload-files", "no");
+
     //mpv_set_property_string(mpv, "hr-seek", "no");
 
     //mpv_set_option_string(mpv, "autofit", "no");
@@ -234,6 +237,8 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
     mpv_set_wakeup_callback(mpv, wakeup, this);
 
     mpv_initialize(mpv);
+
+    mpv_command_string(mpv,"version");
 
 
     //tg
