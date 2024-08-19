@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "virtual_keys.h"
 #include "WODMenuID.h"
 
 
@@ -28,6 +27,7 @@ void WODApplication::buildAccelerator()
 
 	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_DELETE, IDM_DELETE});
 	_accelerators.push_back({FVIRTKEY|FCONTROL|FSHIFT, VK_DELETE, IDM_DELETE_FOREVER});
+	_accelerators.push_back({FVIRTKEY|FCONTROL|FSHIFT|FALT, VK_DELETE, IDM_DELETE_ALL_FOREVER});
 
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_C, IDM_COPY_PLAYLIST});
 	_accelerators.push_back({FVIRTKEY|FCONTROL|FSHIFT, VK_C, IDM_COPY_PLAYING});

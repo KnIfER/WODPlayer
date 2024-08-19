@@ -10,6 +10,16 @@ int MoveToVacuum(PCZZSTR path)
     return SHFileOperationA(&pm);
 }
 
+int MoveToVacuumW(LPCWSTR path)
+{
+    SHFILEOPSTRUCT pm{};
+    pm.wFunc = FO_DELETE;
+    pm.pFrom = path;
+    pm.pTo = NULL;
+    pm.fFlags = FOF_FILESONLY | FOF_CONFIRMMOUSE | FOF_WANTNUKEWARNING;
+    return SHFileOperation(&pm);
+}
+
 int MoveToTrash(PCZZSTR path, BOOL bNoUI)
 {
     SHFILEOPSTRUCTA fileOp;

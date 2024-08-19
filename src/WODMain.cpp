@@ -180,6 +180,7 @@ void parseCommandLine(const TCHAR* commandLine, std::vector<std::wstring>& argum
 	}
 	LocalFree(argv);
 }
+#include <codecvt>
 
 BOOL prvInstance(_In_ LPWSTR lpCmdLine, BOOL add)
 {
@@ -203,15 +204,125 @@ BOOL prvInstance(_In_ LPWSTR lpCmdLine, BOOL add)
 				lpCmdLine[lstrlen(lpCmdLine)] = L'\0';
 			}
 		}
+		if(!add) 
+		{
+			HWND hWnd = FindWindow(L"WODPlayer", readyT);
+			if (hWnd != NULL)
+			{
+				SendMessage(hWnd, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
+				return TRUE; // 退出当前实例
+			}
+			return FALSE;
+		}
 		HWND hWnd = FindWindow(L"WODPlayer", NULL);
 		if (hWnd != NULL)
 		{
 			SendMessage(hWnd, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
 		}
-		// 退出当前实例
-		return TRUE;
+		return TRUE; // 退出当前实例
 	}
 	return FALSE;
+}
+
+TCHAR* ReadUTF16File(const TCHAR* filePath) {
+	HANDLE hFile = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE) {
+		// Handle file opening error
+		return NULL;
+	}
+
+	DWORD fileSize = GetFileSize(hFile, NULL);
+	TCHAR* buffer = new TCHAR[fileSize / sizeof(TCHAR) + 1];
+	DWORD bytesRead = 0;
+	ReadFile(hFile, buffer, fileSize, &bytesRead, NULL);
+	buffer[fileSize / sizeof(TCHAR)] = '\0';
+
+	CloseHandle(hFile);
+
+	return buffer;
+}
+
+
+void parseArgs(std::vector<std::wstring> & args) 
+{
+	bool append = std::find(args.begin(), args.end(), L"-add")!= args.end();
+	for (size_t i = 0; i < args.size(); i++)
+	{
+		auto &  path = args[i];
+		//lxx(ss, (path.data()))
+		if(path.size()>0) {
+			if(path[0]==L'-') {
+				if(StrCmpN(args[i].c_str(), L"-loadArgs", 9)==0) {
+					QkString ln;
+					if(StrCmpN(args[i].c_str(), L"-loadArgsW", 10)==0) {
+						TCHAR* all = ReadUTF16File(args[i].c_str()+11)+1;
+						TCHAR* current = all;
+						TCHAR* next = nullptr;
+						while ((next = _tcschr(current, _T('\n'))) != nullptr) {
+							// Process the line from current to next
+							ln.Empty();
+							ln.Append(current, next-current);
+							//*next = _T('\0');
+							//_tprintf(_T("%s\n"), current);
+							*next = _T('\n'); // Restore the newline character
+							current = next + 1; // Move to the character after the newline
+							ln.Trim();
+							args.push_back(ln.GetData());
+						}
+						if (*current != _T('\0')) {
+							//_tprintf(_T("%s\n"), current);
+							ln = current;
+							ln.Trim();
+							args.push_back(ln.GetData());
+						}
+
+
+						//	std::wifstream file(args[i].c_str()+11, std::ios::binary);
+						//	if (file.is_open()) {
+						//		// apply BOM-sensitive UTF-16 facet
+						//		std::locale loc("chs");	
+						//		std::wcout.imbue(loc);
+						//		std::codecvt_utf16<wchar_t, 0x10ffff, std::consume_header>* codecvtToUnicode = new std::codecvt_utf16 < wchar_t, 0x10ffff, std::consume_header > ;
+						//		file.imbue(std::locale(file.getloc(), codecvtToUnicode));
+						//		std::wstring wline;
+						//		while (std::getline(file, wline)) {
+						//			ln = wline.data();
+						//			ln.Trim();
+						//			////lxx(ss dd, ln.GetData(), ln==L"J:\\R\\-- Foliage --\\life\\睡不着的泡泡糖： -  #甜妹统治世界.mp4")
+
+						//			//if(ln.GetLength())
+						//			args.push_back(ln.GetData());
+						//			//args.push_back(wline);
+						//		}
+						//	}
+						//	file.close();
+					} else {
+						std::ifstream file(args[i].c_str()+10);
+						if (file.is_open()) {
+							std::string line;
+							while (std::getline(file, line)) {
+								ln = line.c_str();
+								//lxx(ss, ln.GetData())
+								args.push_back(STR(ln));
+							}
+						}
+						file.close();
+					}
+				}
+			} 
+			else {
+				QkString path_ = path.c_str();
+				if(!path_.EndWith(L".txt")) { // todo opt
+					//if (!append)
+					//{
+					//	_mainPlayer.PlayVideoFile(path_);
+					//	append = true;
+					//}
+					XPP->_playList.push_back(args[i].c_str());
+				}
+			}
+		}
+	}
 }
 
 int APIENTRY 
@@ -225,10 +336,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 
 	parseCommandLine(lpCmdLine, _args);
 
-	if(_args.size()) mLockStr.Append(_args[0].data());
-	else mLockStr.Append(L"WODPlayer");
-
-	// 创建互斥体
+	// 防止短时间打开许多实例
 	hMutexTemp = CreateMutex(NULL, TRUE, L"WODPLTMP1");
 	if (GetLastError() == ERROR_ALREADY_EXISTS) // 检查互斥体是否已存在
 	{
@@ -236,12 +344,22 @@ wWinMain(_In_ HINSTANCE hInstance,
 		hMutexTemp = 0;
 	}
 
-	HANDLE hMutex = CreateMutex(NULL, TRUE, STR(mLockStr));
+	// 单实例播放器
+	hMutexReady = CreateMutex(NULL, FALSE, L"WODPLTRDY");
 	if (GetLastError() == ERROR_ALREADY_EXISTS) // 检查互斥体是否已存在
 	{
+		if(hMutexReady) { // 释放互斥体
+			ReleaseMutex(hMutexReady);
+			CloseHandle(hMutexReady);
+			hMutexReady = 0;
+		}
 		if(prvInstance(lpCmdLine, FALSE)) return 0;
-		hMutex = 0;
 	}
+	if(hMutexReady) { // 释放互斥体
+		ReleaseMutex(hMutexReady);
+		CloseHandle(hMutexReady);
+	}
+
 
 	// 初始化公共空间
 	//INITCOMMONCONTROLSEX icc;
@@ -289,30 +407,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 	//lxx(ss dd, lpCmdLine, _args.size())
 	if (_args.size()>0)
 	{
-		for (size_t i = 0; i < _args.size(); i++)
-		{
-			auto &  path = _args[i];
-			if(path.size()>0) {
-				if(path[0]==L'-') {
-					if(StrCmpN(_args[i].c_str(), L"-loadArgs", 9)==0) {
-						std::ifstream file(_args[i].c_str()+10);
-						if (file.is_open()) {
-							std::string line;
-							QkString ln;
-							while (std::getline(file, line)) {
-								ln = line.c_str();
-								//lxx(ss, ln.GetData())
-								_args.push_back(STR(ln));
-							}
-							file.close();
-						}
-					}
-				} 
-				else {
-					XPP->_playList.push_back(_args[i].c_str());
-				}
-			}
-		}
+		parseArgs(_args);
 	}
 
 	//WODApplication app{};
@@ -401,11 +496,10 @@ wWinMain(_In_ HINSTANCE hInstance,
 
 	saveProf(usrDir, configFileName);
 
-	if(hMutex) { // 释放互斥体
-		ReleaseMutex(hMutex);
-		CloseHandle(hMutex);
+	if(hMutexReady) { // 释放互斥体
+		ReleaseMutex(hMutexReady);
+		CloseHandle(hMutexReady);
 	}
-	
 	if(hMutexTemp) { // 释放互斥体
 		ReleaseMutex(hMutexTemp);
 		CloseHandle(hMutexTemp);

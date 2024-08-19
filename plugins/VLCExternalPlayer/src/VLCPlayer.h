@@ -69,6 +69,11 @@ public:
 	void			SyncSize(unsigned int * x, unsigned int * y) ;
 	float  			SetRate(float rate);
 	float		    SetVolume(int rate);
+
+	void SetRotation(int value) {};
+	int	GetRotation() { return 0; };
+	void SetLoop(bool loop) ;
+
 private:
 	LONG_PTR mMediaPlayer;
 };

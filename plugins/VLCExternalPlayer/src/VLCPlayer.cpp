@@ -159,7 +159,7 @@ static void handleEvents(const libvlc_event_t *event, void *userData)
 
 VLCPlayer::VLCPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND hParent)
 {
-    error_code=1;
+    error_code=99;
     init(hPlugin, hParent);
     if (m_vlcInstance==NULL)
     {
@@ -488,6 +488,16 @@ float VLCPlayer::SetVolume(int value)
     if(value>=0 && libvlc_audio_set_volume(VPlayer, value)==0)
         return value;
     return libvlc_audio_get_volume(VPlayer);
+}
+
+void VLCPlayer::SetLoop(bool loop)
+{
+    //libvlc_playback_mode_loop
+    //if(loop && libvlc_audio_set_volume(VPlayer, value)==0)
+    //    return value;
+    //return libvlc_audio_get_volume(VPlayer);
+
+
 }
 
 void copyimage_1(const char* psz_filepath)

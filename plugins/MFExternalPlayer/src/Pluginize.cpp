@@ -129,3 +129,20 @@ extern "C" __declspec(dllexport) int vwSetVolume(MFPlayer2* player, int value)
 //}
 
 
+
+
+
+extern "C" __declspec(dllexport) void vwSetLoop(MFPlayer2* player, bool val) 
+{
+}
+
+
+extern "C" __declspec(dllexport) void vwSetRotation(MFPlayer2* player, int value) 
+{
+}
+
+
+extern "C" __declspec(dllexport) int64_t vwGetRotation(MFPlayer2* player) 
+{
+	return 0;
+}

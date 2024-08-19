@@ -30,6 +30,7 @@
 #define IDM_MIN                      110
 #define IDM_MAX                      111
 #define IDM_CLOSE                    112
+#define IDM_RESTORE                    113
 
 #define ID_FILE_OPEN                    40001
 #define ID_40002                        40002

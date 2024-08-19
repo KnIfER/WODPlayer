@@ -36,12 +36,229 @@ extern int testSqlite();
 
 SeekBar* seekbar;
 
+DWORD g_MainThreadID;
+
 WODApplication::WODApplication()
 {
 	_db = new WODBase();
 	_frameLess = 1;
 	//_roundwnd = 1;
 }
+
+
+BOOL teSetForegroundWindow(HWND hwnd)
+{
+	BOOL bResult = SetForegroundWindow(hwnd);
+	if (!bResult) {
+		DWORD dwForeThreadId = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
+		AttachThreadInput(g_MainThreadID, dwForeThreadId, TRUE);
+		SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		bResult = SetForegroundWindow(hwnd);
+		AttachThreadInput(g_MainThreadID, dwForeThreadId, FALSE);
+		if (!bResult) {
+			//DWORD dwTimeout = 0;
+			//SystemParametersInfo(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, &dwTimeout, 0);
+			//SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, NULL, 0);
+			//SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+			//bResult = SetForegroundWindow(hwnd);
+			//SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, &dwTimeout, 0);
+		}
+	}
+	return bResult;
+}
+
+
+
+
+bool IsWindowHung(HWND aWnd)
+{
+	if (!aWnd) return false;
+
+	DWORD_PTR dwResult;
+#define Slow_IsWindowHung !SendMessageTimeout(aWnd, WM_NULL, 0, 0, SMTO_ABORTIFHUNG, 5000, &dwResult)
+
+	typedef BOOL (WINAPI *MyIsHungAppWindow)(HWND);
+	static MyIsHungAppWindow IsHungAppWindow = (MyIsHungAppWindow)GetProcAddress(GetModuleHandle(_T("user32"))
+		, "IsHungAppWindow");
+	return IsHungAppWindow ? IsHungAppWindow(aWnd) : Slow_IsWindowHung;
+}
+
+bool g_WinActivateForce = false;
+
+HWND AttemptSetForeground(HWND aTargetWindow, HWND aForeWindow)
+// Returns NULL if aTargetWindow or its owned-window couldn't be brought to the foreground.
+// Otherwise, on success, it returns either aTargetWindow or an HWND owned by aTargetWindow.
+{
+	// Probably best not to trust its return value.  It's been shown to be unreliable at times.
+	// Example: I've confirmed that SetForegroundWindow() sometimes (perhaps about 10% of the time)
+	// indicates failure even though it succeeds.  So we specifically check to see if it worked,
+	// which helps to avoid using the keystroke (2-alts) method, because that may disrupt the
+	// desired state of the keys or disturb any menus that the user may have displayed.
+	// Also: I think the 2-alts last-resort may fire when the system is lagging a bit
+	// (i.e. a drive spinning up) and the window hasn't actually become active yet,
+	// even though it will soon become active on its own.  Also, SetForegroundWindow() sometimes
+	// indicates failure even though it succeeded, usually because the window didn't become
+	// active immediately -- perhaps because the system was under load -- but did soon become
+	// active on its own (after, say, 50ms or so).  UPDATE: If SetForegroundWindow() is called
+	// on a hung window, at least when AttachThreadInput is in effect and that window has
+	// a modal dialog (such as MSIE's find dialog), this call might never return, locking up
+	// our thread.  So now we do this fast-check for whether the window is hung first (and
+	// this call is indeed very fast: its worst case is at least 30x faster than the worst-case
+	// performance of the ABORT-IF-HUNG method used with SendMessageTimeout.
+	// UPDATE for v1.0.42.03: To avoid a very rare crashing issue, IsWindowHung() is no longer called
+	// here, but instead by our caller.  Search on "v1.0.42.03" for more comments.
+	BOOL result = SetForegroundWindow(aTargetWindow);
+	// Note: Increasing the sleep time below did not help with occurrences of "indicated success
+	// even though it failed", at least with metapad.exe being activated while command prompt
+	// and/or AutoIt2's InputBox were active or present on the screen:
+	//SLEEP_WITHOUT_INTERRUPTION(SLEEP_INTERVAL); // Specify param so that it will try to specifically sleep that long.
+	HWND new_fore_window = GetForegroundWindow();
+	if (new_fore_window == aTargetWindow)
+	{
+#ifdef _DEBUG_WINACTIVATE
+		if (!result)
+		{
+			FileAppend(LOGF, _T("SetForegroundWindow() indicated failure even though it succeeded: "), false);
+			FileAppend(LOGF, aTargetTitle);
+		}
+#endif
+		return aTargetWindow;
+	}
+	if (new_fore_window != aForeWindow && aTargetWindow == GetWindow(new_fore_window, GW_OWNER))
+		// The window we're trying to get to the foreground is the owner of the new foreground window.
+		// This is considered to be a success because a window that owns other windows can never be
+		// made the foreground window, at least if the windows it owns are visible.
+		return new_fore_window;
+	// Otherwise, failure:
+	return NULL;
+}
+
+
+HWND SetForegroundWindowEx(HWND aTargetWindow)
+// Caller must have ensured that aTargetWindow is a valid window or NULL, since we
+// don't call IsWindow() here.
+{
+	if (!aTargetWindow)
+		return NULL;  // When called this way (as it is sometimes), do nothing.
+	DWORD target_thread = GetWindowThreadProcessId(aTargetWindow, NULL);
+
+	HWND orig_foreground_wnd = GetForegroundWindow();
+
+	if (IsIconic(aTargetWindow))
+		ShowWindow(aTargetWindow, SW_RESTORE);
+
+	if (aTargetWindow == orig_foreground_wnd) // It's already the active window.
+		return aTargetWindow;
+
+	HWND new_foreground_wnd;
+
+	if (!g_WinActivateForce)
+		// Try a simple approach first:
+#ifdef _DEBUG_WINACTIVATE
+#define IF_ATTEMPT_SET_FORE if (new_foreground_wnd = AttemptSetForeground(aTargetWindow, orig_foreground_wnd, win_name))
+#else
+#define IF_ATTEMPT_SET_FORE if (new_foreground_wnd = AttemptSetForeground(aTargetWindow, orig_foreground_wnd))
+#endif
+		IF_ATTEMPT_SET_FORE
+		return new_foreground_wnd;
+
+#ifdef _DEBUG_WINACTIVATE
+	TCHAR buf[1024];
+#endif
+
+	bool is_attached_my_to_fore = false, is_attached_fore_to_target = false;
+	DWORD fore_thread;
+	if (orig_foreground_wnd) // Might be NULL from above.
+	{
+		// Based on MSDN docs, these calls should always succeed due to the other
+		// checks done above (e.g. that none of the HWND's are NULL):
+		fore_thread = GetWindowThreadProcessId(orig_foreground_wnd, NULL);
+		if (fore_thread && g_MainThreadID != fore_thread && !IsWindowHung(orig_foreground_wnd))
+			is_attached_my_to_fore = AttachThreadInput(g_MainThreadID, fore_thread, TRUE) != 0;
+		if (fore_thread && target_thread && fore_thread != target_thread) // IsWindowHung(aTargetWindow) was called earlier.
+			is_attached_fore_to_target = AttachThreadInput(fore_thread, target_thread, TRUE) != 0;
+	}
+
+	// The log showed that it never seemed to need more than two tries.  But there's
+	// not much harm in trying a few extra times.  The number of tries needed might
+	// vary depending on how fast the CPU is:
+	for (int i = 0; i < 5; ++i)
+	{
+		IF_ATTEMPT_SET_FORE
+		{
+#ifdef _DEBUG_WINACTIVATE
+			if (i > 0) // More than one attempt was needed.
+			{
+				sntprintf(buf, _countof(buf), _T("AttachThreadInput attempt #%d indicated success: %s")
+					, i + 1, win_name);
+				FileAppend(LOGF, buf);
+			}
+#endif
+		break;
+		}
+	}
+
+	// I decided to avoid the quick minimize + restore method of activation.  It's
+	// not that much more effective (if at all), and there are some significant
+	// disadvantages:
+	// - This call will often hang our thread if aTargetWindow is a hung window: ShowWindow(aTargetWindow, SW_MINIMIZE)
+	// - Using SW_FORCEMINIMIZE instead of SW_MINIMIZE has at least one (and probably more)
+	// side effect: When the window is restored, at least via SW_RESTORE, it is no longer
+	// maximized even if it was before the minimize.  So don't use it.
+	if (!new_foreground_wnd) // Not successful yet.
+	{
+		//KeyEvent(KEYDOWNANDUP, VK_MENU);
+		//KeyEvent(KEYDOWNANDUP, VK_MENU);
+
+		// Also replacing "2-alts" with "alt-tab" below, for now:
+
+		new_foreground_wnd = AttemptSetForeground(aTargetWindow, orig_foreground_wnd);
+
+	} // if()
+
+	  // Very important to detach any threads whose inputs were attached above,
+	  // prior to returning, otherwise the next attempt to attach thread inputs
+	  // for these particular windows may result in a hung thread or other
+	  // undesirable effect:
+	if (is_attached_my_to_fore)
+		AttachThreadInput(g_MainThreadID, fore_thread, FALSE);
+	if (is_attached_fore_to_target)
+		AttachThreadInput(fore_thread, target_thread, FALSE);
+
+	// Finally.  This one works, solving the problem of the MessageBox window
+	// having the input focus and being the foreground window, but not actually
+	// being visible (even though IsVisible() and IsIconic() say it is)!  It may
+	// help with other conditions under which this function would otherwise fail.
+	// Here's the way the repeat the failure to test how the absence of this line
+	// affects things, at least on my XP SP1 system:
+	// y::MsgBox, test
+	// #e::(some hotkey that activates Windows Explorer)
+	// Now: Activate explorer with the hotkey, then invoke the MsgBox.  It will
+	// usually be activated but invisible.  Also: Whenever this invisible problem
+	// is about to occur, with or without this fix, it appears that the OS's z-order
+	// is a bit messed up, because when you dismiss the MessageBox, an unexpected
+	// window (probably the one two levels down) becomes active rather than the
+	// window that's only 1 level down in the z-order:
+	if (new_foreground_wnd) // success.
+	{
+		// Even though this is already done for the IE 5.5 "hack" above, must at
+		// a minimum do it here: The above one may be optional, not sure (safest
+		// to leave it unless someone can test with IE 5.5).
+		// Note: I suspect the two lines below achieve the same thing.  They may
+		// even be functionally identical.  UPDATE: This may no longer be needed
+		// now that the first BringWindowToTop(), above, has been disabled due to
+		// its causing more trouble than it's worth.  But seems safer to leave
+		// this one enabled in case it does resolve IE 5.5 related issues and
+		// possible other issues:
+		BringWindowToTop(aTargetWindow);
+		//SetWindowPos(aTargetWindow, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		return new_foreground_wnd; // Return this rather than aTargetWindow because it's more appropriate.
+	}
+	else
+		return NULL;
+}
+
+
 
 //#include "../WndControl/ButtonList.h"
 
@@ -77,7 +294,7 @@ CControlUI* WODApplication::CreateControl(LPCTSTR pstrClass){
 DWORD initTimer;
 DWORD initTimerID = 3;
 DWORD initTimerInterval = 500;
-BOOL _singleInstance = 0;
+BOOL _singleInstance = False;
 
 void initTimerProc(HWND hwnd, UINT, UINT_PTR, DWORD)
 {
@@ -121,11 +338,15 @@ void deleteFileProc(HWND hwnd, UINT, UINT_PTR, DWORD)
 
 CControlUI* _timeLabel;
 CControlUI* _durationLabel;
+BOOL _threadInit = FALSE;
 
 void WODApplication::InitWindow()
 {
 	ResetWndOpacity();
 	initWodMenus(this);
+
+
+	g_MainThreadID = GetWindowThreadProcessId(GetHWND(), NULL);;
 
 	m_pm._bIsLayoutOnly = true;
 	_playBtn = m_pm.FindControl(_T("play"));
@@ -149,15 +370,44 @@ void WODApplication::InitWindow()
 
 	_db->Init();
 
-	auto file = GetProfString("file");
-	QkString path = file?file->c_str():"";
-	if(!path.IsEmpty())
-		_mainPlayer.PlayVideoFile(STR(path));
-	if (_playList.size()>0)
-	{
-		_mainPlayer.PlayVideoFile(_playList[0]);
+	//m_pm.GetRoot()->PostLambda(, 250);
+	string* player = GetProfString("player");
+	if(*player=="MPVExternalPlayer.dll") {
+		_threadInit = TRUE;
+		auto th = std::thread([this]{
+			//Sleep(250);
+			auto file = GetProfString("file");
+			QkString path = file?file->c_str():"";
+			if (_playList.size()>0)
+			{
+				_mainPlayer.PlayVideoFile(_playList[0]);
+			}
+			else if(!path.IsEmpty())
+				_mainPlayer.PlayVideoFile(STR(path));
+			//MarkPlaying(true);
+			int cc=0;
+			while(cc<100) 
+			{
+				cc++;
+				Sleep(150);
+				TimerProc();
+				if(_mainPlayer._seekbar._progress>=800 && cc>3)
+					break;
+			}
+			_threadInit = FALSE;
+			return false;
+		});
+		th.detach();
+	} else {
+		auto file = GetProfString("file");
+		QkString path = file?file->c_str():"";
+		if (_playList.size()>0)
+		{
+			_mainPlayer.PlayVideoFile(_playList[0]);
+		}
+		else if(!path.IsEmpty())
+			_mainPlayer.PlayVideoFile(STR(path));
 	}
-	//MarkPlaying(true);
 
 	//tg
 
@@ -436,6 +686,11 @@ void WODApplication::MarkPlaying(bool playing)
 		//else
 		//	::KillTimer(m_hWnd, 1);
 	}
+	if(playing && hMutexReady) { // 释放互斥体
+		ReleaseMutex(hMutexReady);
+		CloseHandle(hMutexReady);
+		hMutexReady = 0;
+	}
 }
 
 extern bool running;
@@ -656,6 +911,7 @@ void NavTime(int t)
 	}, 100);
 }
 
+
 void NavPlayList(int newIdx)
 {
 	auto & wod = XPP->_mainPlayer;
@@ -672,6 +928,23 @@ void NavPlayList(int newIdx)
 			wod.PlayVideoFile(lst[newIdx]);
 		}
 	}
+}
+
+void NextPlayList(bool prev, bool loop)
+{
+	auto & wod = XPP->_mainPlayer;
+	auto & player = wod._mMediaPlayer;
+	auto & lst = XPP->_playList;
+
+	int newIdx = XPP->_playIdx + (prev?-1:1);
+	if(newIdx<0) newIdx=0;
+	if(newIdx>=lst.size()) newIdx=loop?0:(lst.size()-1);
+	NavPlayList(newIdx);
+	//if (_mainPlayer._mMediaPlayer->IsPaused())
+	{
+		player->Play();
+	}
+	XPP->MarkPlaying(true);
 }
 
 // OnDrop
@@ -743,6 +1016,141 @@ void toggleFastforward(float rate) {
 	}
 }
 
+LRESULT WODApplication::TimerProc() 
+{
+	if(!_mainPlayer._mMediaPlayer)
+		return 0;
+	long pos = _mainPlayer._mMediaPlayer->GetPosition();
+	long duration = _mainPlayer._mMediaPlayer->GetDuration();
+
+	if(_mainPlayer._currentPath.EndWith("flv"))
+		if (_mainPlayer._durationCache != duration)
+		{
+			if(duration>_mainPlayer._durationCache) _mainPlayer._durationCache = duration;
+			else duration = _mainPlayer._durationCache;
+		}
+	int nPos =  int (pos / (double)duration * 1000);
+	//_timeLabel
+
+	int sec = pos/1000;
+	int minutes = sec/60;
+	int hour = minutes/60;
+	minutes %= 60;
+	sec %= 60;
+	_timeLabel->GetText().Empty();
+	_timeLabel->GetText().Format(L"%02d:%02d:%02d", hour, minutes, sec);
+	//_timeLabel->GetText().Format(L"%ld", duration);
+	_timeLabel->Invalidate();
+	//_timeLabel->GetText() += hour;
+	//_timeLabel->GetText() += L":";
+	//_timeLabel->GetText() += minutes;
+	//_timeLabel->GetText() += L":";
+	//_timeLabel->GetText() += sec;
+
+	sec = duration/1000;
+	minutes = sec/60;
+	hour = minutes/60;
+	minutes %= 60;
+	sec %= 60;
+	_durationLabel->GetText().Empty();
+	_durationLabel->GetText().Format(L"%02d:%02d:%02d", hour, minutes, sec);
+	_durationLabel->Invalidate();
+
+	if(!_mainPlayer._hPlayer) {
+		_mainPlayer._hPlayer = ::GetFirstChild(_mainPlayer.GetHWND());
+		_mainPlayer._mMediaPlayer->setHWND(_mainPlayer._hPlayer);
+	}
+
+	//TCHAR szPosition[64];
+	//TCHAR szDuration[64];
+	//g_MyPlayer.MillisecondToText(g_MyPlayer.m_nPosition, szPosition);
+	//g_MyPlayer.MillisecondToText(g_MyPlayer.m_nDuration, szDuration);
+
+	//lstrcat(szPosition, _T("/"));
+	//lstrcat(szPosition, szDuration);
+	// 
+	//SendMessage(GetDlgItem(hwnd, IDC_SLIDER1), TBM_SETPOS, (WPARAM)TRUE, (LPARAM)nPos);
+
+	if (!_mainPlayer._seekbar._isSeeking)
+	{
+		_mainPlayer._seekbar.SetProgressAndMax(pos, duration);
+		if(_mainPlayer.nSkipStart && pos<_mainPlayer.nSkipStart-250) {
+			_mainPlayer._mMediaPlayer->SetPosition(_mainPlayer.nSkipStart, true);
+		}
+		if(_mainPlayer.nSkipEnd && pos>=duration-_mainPlayer.nSkipEnd) {
+			_mainPlayer._mMediaPlayer->SetPosition(_mainPlayer.nSkipStart, true);
+		}
+	}
+	if(!deleting) 
+	{
+		if(pos >= duration-350 && _mainPlayer._isPlaying) 
+		{
+			if(!_mainPlayer._mMediaPlayer->IsPlaying()) 
+			{
+				if (_playList.size()>1)
+				{
+					NextPlayList(0, 1);
+				}
+				return 0;
+			}
+			if (_playList.size()>1)
+			{
+				//NextPlayList(0, 1);
+				_mainPlayer._mMediaPlayer->SetLoop(false);
+			}
+			//return 0;
+		}
+		if(pos >= duration-10 && _mainPlayer._isPlaying) 
+		{
+			if (_playList.size()>1)
+			{
+				NextPlayList(0, 1);
+			}
+			//return 0;
+		}
+	} else {
+		_mainPlayer._mMediaPlayer->SetLoop(1);
+	}
+
+	long sub_duration = 5*60*1000;
+	if(duration<=sub_duration/5) { // 1 分钟以下
+		sub_duration = 30*1000;
+	}
+	else if(duration<=sub_duration*2) { // 10 分钟以下
+		sub_duration /= 5;
+	}
+	else if(duration<=sub_duration*6) { // 30 分钟以下
+		sub_duration /= 2;
+	}
+	int range = _mainPlayer._seekfloat.GetWidth();
+	int maxRange  = _mainPlayer._seekbar.GetWidth();
+	sub_duration = min(sub_duration, range*1.f/2/maxRange*duration);
+	if(sub_duration==0)
+		sub_duration = 1000;
+
+	_mainPlayer.seekfloat_duration = sub_duration;
+	long sub_pos = pos % (sub_duration);
+	int lunhui = pos / sub_duration;
+	_mainPlayer._seekfloat.SetProgressAndMax(sub_pos, sub_duration);
+
+	//_seekfloat->GetFloatPercent().left = (lunhui * sub_duration)/duration;
+	//_seekfloat->NeedParentUpdate();
+
+	int x = (int)roundf((lunhui * sub_duration)*1.f/duration*maxRange);
+	if(x+range>maxRange) x = maxRange-range;
+	_mainPlayer._seekfloat.SetFixedXY({x,0});
+
+	int W = _mainPlayer._srcWidth, H=_mainPlayer._srcHeight;
+	_mainPlayer._mMediaPlayer->syncResolution(_mainPlayer._srcWidth, _mainPlayer._srcHeight);
+	if(_mainPlayer._srcWidth!=W || _mainPlayer._srcHeight!=H) {
+		//_mainPlayer._mMediaPlayer->Pause();
+		_mainPlayer.SetPos(_mainPlayer.GetPos());
+	}
+
+	//LogIs(3, "setPosition:: %d %d max=%d curr=%d\n", _mainPlayer._mMediaPlayer->m_nPosition, _mainPlayer._mMediaPlayer->m_nDuration, _mainPlayer._seekbar.GetMax(), _mainPlayer._seekbar.GetPosition());
+	return 0;
+}
+
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 	//if(isClosing) return 0;
@@ -795,107 +1203,11 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		}
 
 		//if(0)
+		if(!_threadInit)
 		if ((wParam == 1 && _mainPlayer._mMediaPlayer)
 			&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
 		{
-			long pos = _mainPlayer._mMediaPlayer->GetPosition();
-			long duration = _mainPlayer._mMediaPlayer->GetDuration();
-
-			if(_mainPlayer._currentPath.EndWith("flv"))
-				if (_mainPlayer._durationCache != duration)
-				{
-					if(duration>_mainPlayer._durationCache) _mainPlayer._durationCache = duration;
-					else duration = _mainPlayer._durationCache;
-				}
-			int nPos =  int (pos / (double)duration * 1000);
-			//_timeLabel
-
-			int sec = pos/1000;
-			int minutes = sec/60;
-			int hour = minutes/60;
-			minutes %= 60;
-			sec %= 60;
-			_timeLabel->GetText().Empty();
-			_timeLabel->GetText().Format(L"%02d:%02d:%02d", hour, minutes, sec);
-			//_timeLabel->GetText().Format(L"%ld", duration);
-			_timeLabel->Invalidate();
-			//_timeLabel->GetText() += hour;
-			//_timeLabel->GetText() += L":";
-			//_timeLabel->GetText() += minutes;
-			//_timeLabel->GetText() += L":";
-			//_timeLabel->GetText() += sec;
-
-			sec = duration/1000;
-			minutes = sec/60;
-			hour = minutes/60;
-			minutes %= 60;
-			sec %= 60;
-			_durationLabel->GetText().Empty();
-			_durationLabel->GetText().Format(L"%02d:%02d:%02d", hour, minutes, sec);
-			_durationLabel->Invalidate();
-
-			if(!_mainPlayer._hPlayer) {
-				_mainPlayer._hPlayer = ::GetFirstChild(_mainPlayer.GetHWND());
-				_mainPlayer._mMediaPlayer->setHWND(_mainPlayer._hPlayer);
-			}
-
-			//TCHAR szPosition[64];
-			//TCHAR szDuration[64];
-			//g_MyPlayer.MillisecondToText(g_MyPlayer.m_nPosition, szPosition);
-			//g_MyPlayer.MillisecondToText(g_MyPlayer.m_nDuration, szDuration);
-
-			//lstrcat(szPosition, _T("/"));
-			//lstrcat(szPosition, szDuration);
-			// 
-			//SendMessage(GetDlgItem(hwnd, IDC_SLIDER1), TBM_SETPOS, (WPARAM)TRUE, (LPARAM)nPos);
-
-			if (!_mainPlayer._seekbar._isSeeking)
-			{
-				_mainPlayer._seekbar.SetProgressAndMax(pos, duration);
-				if(_mainPlayer.nSkipStart && pos<_mainPlayer.nSkipStart-250) {
-					_mainPlayer._mMediaPlayer->SetPosition(_mainPlayer.nSkipStart, true);
-				}
-				if(_mainPlayer.nSkipEnd && pos>=duration-_mainPlayer.nSkipEnd) {
-					_mainPlayer._mMediaPlayer->SetPosition(_mainPlayer.nSkipStart, true);
-				}
-			}
-
-			long sub_duration = 5*60*1000;
-			if(duration<=sub_duration/5) { // 1 分钟以下
-				sub_duration = 30*1000;
-			}
-			else if(duration<=sub_duration*2) { // 10 分钟以下
-				sub_duration /= 5;
-			}
-			else if(duration<=sub_duration*6) { // 30 分钟以下
-				sub_duration /= 2;
-			}
-			int range = _mainPlayer._seekfloat.GetWidth();
-			int maxRange  = _mainPlayer._seekbar.GetWidth();
-			sub_duration = min(sub_duration, range*1.f/2/maxRange*duration);
-			if(sub_duration==0)
-				sub_duration = 1000;
-
-			_mainPlayer.seekfloat_duration = sub_duration;
-			long sub_pos = pos % (sub_duration);
-			int lunhui = pos / sub_duration;
-			_mainPlayer._seekfloat.SetProgressAndMax(sub_pos, sub_duration);
-
-			//_seekfloat->GetFloatPercent().left = (lunhui * sub_duration)/duration;
-			//_seekfloat->NeedParentUpdate();
-
-			int x = (int)roundf((lunhui * sub_duration)*1.f/duration*maxRange);
-			if(x+range>maxRange) x = maxRange-range;
-			_mainPlayer._seekfloat.SetFixedXY({x,0});
-
-			int W = _mainPlayer._srcWidth, H=_mainPlayer._srcHeight;
-			_mainPlayer._mMediaPlayer->syncResolution(_mainPlayer._srcWidth, _mainPlayer._srcHeight);
-			if(_mainPlayer._srcWidth!=W || _mainPlayer._srcHeight!=H) {
-				//_mainPlayer._mMediaPlayer->Pause();
-				_mainPlayer.SetPos(_mainPlayer.GetPos());
-			}
-
-			//LogIs(3, "setPosition:: %d %d max=%d curr=%d\n", _mainPlayer._mMediaPlayer->m_nPosition, _mainPlayer._mMediaPlayer->m_nDuration, _mainPlayer._seekbar.GetMax(), _mainPlayer._seekbar.GetPosition());
+			return TimerProc();
 		}
 	}
 	return 0;
@@ -955,59 +1267,45 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		//}, 5000);
 		COPYDATASTRUCT *pCopyData = reinterpret_cast<COPYDATASTRUCT *>(lParam);
 		if(pCopyData->dwData==WOD_COPYDATA) {
-			//::SetActiveWindow(GetHWND());
-			::SetForegroundWindow(GetHWND());
+			KillTimer(GetHWND(), initTimerID);
+			// ::SetActiveWindow(GetHWND())
+			if (IsIconic(GetHWND()))
+				ShowWindow(GetHWND(), SW_RESTORE);
+			auto bSetFore = ::SetForegroundWindow(GetHWND());
+			//;
 			//::SetFocus(GetHWND());
 			wchar_t *fileNamesW = static_cast<wchar_t *>(pCopyData->lpData);
 			//fileNamesW[pCopyData->dwData] = 0;
 			std::vector<std::wstring> args;
 			parseCommandLine(fileNamesW, args);
 			//lxx(ss dd, fileNamesW, args.size());
+			bool append = std::find(args.begin(), args.end(), L"-add")!= args.end();
+			if(!append) {
+				XPP->_mainPlayer.Stop();
+			}
+			bool stopped = XPP->_mainPlayer.bStopped;
 			if (args.size())
 			{
-				bool append = std::find(args.begin(), args.end(), L"-add")!= args.end();
-				KillTimer(GetHWND(), initTimerID);
+				if(append)
+					stopped = False;
+				if(stopped)
+					XPP->_playList.clear();
+				if(!hMutexTemp)
+					hMutexTemp = CreateMutex(NULL, TRUE, L"WODPLTMP1");
 				if (hMutexTemp)
 				{
 					initTimer = ::SetTimer(GetHWND(), initTimerID, initTimerInterval, (TIMERPROC)initTimerProc);
 				}
-				for (size_t i = 0; i < args.size(); i++)
-				{
-					auto &  path = args[i];
-
-					if(path.size()>0) {
-						if(path[0]==L'-') {
-							if(StrCmpN(args[i].c_str(), L"-loadArgs", 0)==0) {
-								std::wifstream file(args[i].c_str()+10);
-								if (file.is_open()) {
-									std::ifstream file(args[i].c_str()+10);
-									if (file.is_open()) {
-										std::string line;
-										QkString ln;
-										while (std::getline(file, line)) {
-											ln = line.c_str();
-											//lxx(ss, ln.GetData())
-											args.push_back(STR(ln));
-										}
-										file.close();
-									}
-								}
-							}
-						} 
-						else {
-							QkString path_ = path.c_str();
-							if(!path_.EndWith(L".txt")) { // todo opt
-								if (!append)
-								{
-									_mainPlayer.PlayVideoFile(path_);
-									append = true;
-								}
-								_playList.push_back(path_);
-							}
-						}
-					}
+				extern void parseArgs(std::vector<std::wstring> & args) ;
+				parseArgs(args);
+				if(stopped) {
+					XPP->_mainPlayer._currentPath.Empty();
+					NavPlayList(0);
+					XPP->_mainPlayer.Toggle(1);
 				}
-				
+			}
+			if(!bSetFore) {
+				SetForegroundWindowEx(GetHWND());
 			}
 		}
 	} break;
@@ -1036,6 +1334,10 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_STOP:
 			_mainPlayer.Stop();
 			MarkPlaying(false);
+			if(!hMutexReady)
+				hMutexReady = CreateMutex(NULL, TRUE, L"WODPLTRDY");
+			//QkString readyT = _titleBar->GetText();
+			::SetWindowText(GetHWND(), readyT);
 			break;
 		case IDM_FILE_OPEN:
 		case IDM_OPEN:
@@ -1045,13 +1347,25 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_DELETE_FOREVER: 
 		if(!keyPressed) {
 			keyPressed = true;
+			deleting = TRUE;
 			//lxxx(DELETE dd dd, wParam, lParam)
-			_mainPlayer.Stop();
-			MarkPlaying(false);
+			string* player = GetProfString("player");
+			if(*player!="MPVExternalPlayer.dll") 
+			{
+				_mainPlayer.Stop();
+				MarkPlaying(false);
+			}
 			//delPermanent = LOWORD(wParam)==IDM_DELETE_FOREVER;
 			//::KillTimer(GetHWND(), delTimerID);
 			//::SetTimer(GetHWND(), delTimerID, 150, (TIMERPROC)deleteFileProc);
 			DeleteCurrentFile(LOWORD(wParam)==IDM_DELETE_FOREVER);
+		} break;
+		case IDM_DELETE_ALL_FOREVER: 
+		if(!keyPressed) {
+			keyPressed = true;
+			_mainPlayer.Stop();
+			MarkPlaying(false);
+			DeleteAllFile(true);
 		} break;
 		case IDM_PASTE_PLAYLIST: 
 		case IDM_APPEND_PLAYLIST: 
@@ -1201,6 +1515,12 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				//SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0); 
 				break;
 			}
+		case IDM_RESTORE:
+			if(_isFullScreen) 
+				ToggleFullScreen();
+			if(::IsMaximized(GetHWND()))
+				SendMessage(WM_SYSCOMMAND, _isMaximized=SC_RESTORE, 0); 
+			break;
 		case IDM_MAX:
 			if(keyPressed) break;
 			keyPressed = 1;
@@ -1284,15 +1604,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_PLAY_NXT:
 			if(!keyPressed) {
 				keyPressed = true;
-				int newIdx = XPP->_playIdx + (LOWORD(wParam)==IDM_PLAY_PRV?-1:1);
-				if(newIdx<0) newIdx=0;
-				if(newIdx>=_playList.size()) newIdx=_playList.size()-1;
-				NavPlayList(newIdx);
-				//if (_mainPlayer._mMediaPlayer->IsPaused())
-				{
-					_mainPlayer._mMediaPlayer->Play();
-				}
-				MarkPlaying(true);
+				NextPlayList(LOWORD(wParam)==IDM_PLAY_PRV, 0);
 			}
 			return 1;
 		case IDM_PLAY_A:
@@ -1348,9 +1660,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			ResetWndOpacity();
 			break;
 		case IDM_PLUGIN:
-			//trackWodMenus((CControlUI*)lParam, wParam);
 			// 切换mpv+xunlei
-			if(1)
+			if(HIWORD(wParam))
 			{
 				string* player = GetProfString("player");
 				PutProfString("player", player && *player=="MPVExternalPlayer.dll"?"XunLeiExternalPlayer\\XunLeiExternalPlayer.dll":"MPVExternalPlayer.dll");
@@ -1366,7 +1677,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				menuBtn->NeedParentUpdate();
 				menuBtn->NeedUpdate();
 				menuBtn->Invalidate();
+				break;
 			}
+			trackWodMenus((CControlUI*)lParam, wParam);
 			break;
 
 		case IDM_PLUGIN_MF:
@@ -1462,12 +1775,12 @@ void WODApplication::ResetWndOpacity()
 void WODApplication::DeleteCurrentFile(BOOL permanent)
 {
 	BOOL bDelOK = 0;
+	deleting = TRUE;
 	if(permanent)
 	{
 		extern int MoveToVacuum(PCZZSTR path);
 		QkString toDel = _mainPlayer._currentPath;
 		//toDel.Prepend(L"\\\\?\\");
-		toDel.Append(L"\0");
 		toDel.Append(L"\0");
 		std::string ppp  ;
 		toDel.GetData(ppp, 0);
@@ -1481,7 +1794,6 @@ void WODApplication::DeleteCurrentFile(BOOL permanent)
 		extern int MoveToTrash(PCZZSTR path, BOOL bNoUI);
 		QkString toDel = _mainPlayer._currentPath;
 		//toDel.Prepend(L"\\\\?\\");
-		toDel.Append(L"\0");
 		toDel.Append(L"\0");
 		std::string ppp  ;
 		toDel.GetData(ppp, 0);
@@ -1508,4 +1820,50 @@ void WODApplication::DeleteCurrentFile(BOOL permanent)
 			}
 		}
 	}
+	deleting = FALSE;
 }
+
+void WODApplication::DeleteAllFile(BOOL permanent)
+{
+	auto & wod = XPP->_mainPlayer;
+	auto & player = wod._mMediaPlayer;
+	auto & lst = XPP->_playList;
+	BOOL bDelOK = 0;
+	if(permanent)
+	{
+		extern int MoveToVacuumW(LPCWSTR path);
+		QkString toDel;
+		string buffer;
+		toDel.AsBuffer();
+		vector<int> pos;
+		for (size_t i = 0; i < lst.size(); i++)
+		{
+			if(PathFileExists(lst[i])) {
+				toDel += lst[i];
+				toDel += L'\0';
+			}
+		}
+		toDel += L'\0';
+		bDelOK = !MoveToVacuumW(toDel.GetData());
+	}
+	else
+	{
+		////std::this_thread::sleep_for(std::chrono::microseconds(1200));
+		//extern int MoveToTrash(PCZZSTR path, BOOL bNoUI);
+		//QkString toDel = _mainPlayer._currentPath;
+		////toDel.Prepend(L"\\\\?\\");
+		//toDel.Append(L"\0");
+		//toDel.Append(L"\0");
+		//std::string ppp  ;
+		//toDel.GetData(ppp, 0);
+		//int ret = MoveToTrash(ppp.data(), TRUE);
+		////lxx(%ld , GetLastError() )
+		////lxx(dd MoveToTrash, ret)
+		//bDelOK = !ret;
+	}
+	if (bDelOK)
+	{
+		lst.clear();
+	}
+}
+

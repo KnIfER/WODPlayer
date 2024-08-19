@@ -57,6 +57,7 @@ void WODPlayer::Stop()
 	if(_mMediaPlayer) {
 		_mMediaPlayer->Stop();
 	}
+	bStopped = 1;
 }
 
 
@@ -68,7 +69,7 @@ void WODPlayer::Release()
 		_hPlayer = 0;
 	}
 	if(_mMediaPlayer) {
-		_mMediaPlayer->Release();
+		//_mMediaPlayer->Release();
 		delete _mMediaPlayer;
 		_mMediaPlayer = 0;
 	}
@@ -118,19 +119,23 @@ void WODPlayer::SetRotate(int delta)
 	SetPos(GetPos());
 }
 
-//class DummyPlayer : public VideoPlayer
-//{
-//public:
-//	void Play(){}
-//	void Stop(){}
-//	void Pause(){}
-//	bool IsPlaying(){}
-//	bool IsPaused(){}
-//	long GetPosition(){}
-//	void SetPosition(long pos){}
-//	long GetDuration(){}
-//	bool PlayVideoFile(const TCHAR* path){}
-//};
+class DummyPlayer : public VideoPlayer
+{
+public:
+	void Play(){}
+	void Stop(){}
+	void Pause(){}
+	bool IsPlaying(){return 0;}
+	bool IsPaused(){return 0;}
+	long GetPosition(){return 0;}
+	virtual void SetPosition(long pos, bool fastSeek){};
+	virtual void SetLoop(bool loop){};
+	void SetPosition(long pos){}
+	long GetDuration(){return 999;}
+	bool PlayVideoFile(const TCHAR* path, const CHAR* path1){return 0;}
+	float SetRate(float rate){return 1;};
+	int SetVolume(int volume){return 999;};
+};
 
 void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::SolidBrush & brush, RECT & rc)
 {
@@ -445,6 +450,7 @@ static void decryptFileName(QkString & fileName) {
 
 bool WODPlayer::PlayVideoFile(const TCHAR* path)
 {
+	bStopped = 0;
 	bool ret = false;
 	if (!_mMediaPlayer)
 	{
@@ -587,6 +593,9 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		}
 
 		MarkPlaying();
+		if(!_mMediaPlayer) {
+			_mMediaPlayer = new DummyPlayer();
+		}
 		if (_mMediaPlayer->IsPaused())
 		{
 			_mMediaPlayer->Play();

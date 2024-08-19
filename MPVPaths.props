@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <MPV_PATH>C:\Program Files (x86)\MPV\mpv-dev-x86_64-v3-20230702-git-f76c441\</MPV_PATH>
+    <MPV_PATH>C:\Program Files (x86)\MPV\mpv-dev-i686-20200126-git-ae0520c\</MPV_PATH>
     <MPV_INC>$(MPV_PATH)include</MPV_INC>
     <MPV_LIBS>mpv.lib</MPV_LIBS>
     <MPV_LIPA_64>$(MPV_PATH)x64</MPV_LIPA_64>

@@ -107,3 +107,22 @@ extern "C" __declspec(dllexport) int vwSetVolume(VLCPlayer* player, int value)
 {
 	return player->SetVolume(value);
 }
+
+
+extern "C" __declspec(dllexport) void vwSetLoop(VLCPlayer* player, bool val) 
+{
+	return player->SetLoop(val);
+}
+
+
+extern "C" __declspec(dllexport) void vwSetRotation(VLCPlayer* player, int value) 
+{
+	player->SetRotation(value);
+}
+
+
+extern "C" __declspec(dllexport) int64_t vwGetRotation(VLCPlayer* player) 
+{
+	return player->GetRotation();
+}
+

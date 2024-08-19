@@ -165,6 +165,9 @@ static void handleEvents(mpv_event *event, MPVPlayer *player)
     //    //PostMessage(player->getHParent(), MM_PREPARED
     //    //    , event->u.media_player_length_changed.new_length, 0);
     //    break;
+    case MPV_EVENT_END_FILE:
+        PostMessage(player->getHParent(), MM_STOPPED, player->GetDuration(), 0);
+        break;
     case MPV_EVENT_SHUTDOWN:
         mpv_terminate_destroy(mpv);
         mpv = NULL;
@@ -225,6 +228,10 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
     mpv_set_property_string(mpv, "sub-auto", "no");
     mpv_set_property_string(mpv, "autoload-files", "no");
 
+    mpv_set_property_string(mpv, "no-config", "yes");
+    mpv_set_option(mpv, "no-config", mpv_format::MPV_FORMAT_NONE, 0);
+    mpv_set_property_string(mpv, "log-file", "R:\\cahce\\mpv.log");
+
     //mpv_set_property_string(mpv, "hr-seek", "no");
 
     //mpv_set_option_string(mpv, "autofit", "no");
@@ -238,7 +245,7 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
 
     mpv_initialize(mpv);
 
-    mpv_command_string(mpv,"version");
+    //mpv_command_string(mpv,"version");
 
 
     //tg
@@ -388,7 +395,8 @@ void MPVPlayer::SyncSize(unsigned int * x, unsigned int * y) {
 
     //LogIs("syncResolution x=%d y=%d\n", *x, *y);
     // 处理 MPV 事件
-    while (mpv) {
+    int cc=0;
+    while (mpv) { //  && GetPosition()>250 && ++cc<3
         //LogIs("wakeup::\n");
         mpv_event *event = mpv_wait_event(mpv, 0);
         //LogIs("wakeup::mpv_wait_event\n");

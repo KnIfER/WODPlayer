@@ -58,9 +58,13 @@ public:
     
     LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) override;
 
+    LRESULT TimerProc();
+
     void ResetWndOpacity();
 
     void DeleteCurrentFile(BOOL permanent);
+
+    void DeleteAllFile(BOOL permanent);
 
     void buildAccelerator();
 

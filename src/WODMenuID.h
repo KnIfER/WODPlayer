@@ -17,6 +17,7 @@
 #define IDM_COPY_PLAYING         IDM_FILE+9
 #define IDM_VIEW_PROPERTY        IDM_FILE+10
 #define IDM_APPEND_PLAYLIST       IDM_FILE+11
+#define IDM_DELETE_ALL_FOREVER       IDM_FILE+44
 
 
 // 播放

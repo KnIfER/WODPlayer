@@ -89,5 +89,6 @@ public:
 
     long nSkipStart = 0;
     long nSkipEnd = 0;
+    bool bStopped = 1;
 };
 
