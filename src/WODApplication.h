@@ -30,7 +30,7 @@ public:
 
     UINT GetClassStyle() const override
     { 
-        return CS_DBLCLKS; 
+        return CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW; 
     }
 
     LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) override;
@@ -58,6 +58,11 @@ public:
     
     LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) override;
 
+
+    void onPause(bool min=false);
+
+    void onResume(bool min=false);
+
     LRESULT TimerProc();
 
     void ResetWndOpacity();
@@ -69,6 +74,9 @@ public:
     void buildAccelerator();
 
     void ToggleFullScreen();
+    void ToggleFullScreen1();
+    void setMini();
+    void ToggleMini();
     bool IsFullScreen();
     void MarkPlaying(bool playing=true);
     bool PickFile();
@@ -89,11 +97,11 @@ public:
     CControlUI* _topBar;
 
     WODBase* _db;
-    CDialogBuilder builder;
     Button* m_pSearch;
 
     WNDPROC _SysWndProc=NULL;
     bool _isFullScreen=false;
+    bool _isMini=false;
     int _isMaximized;
 
     int _WndOp;
@@ -102,4 +110,5 @@ public:
 
     std::vector<QkString> _playList;
     int _playIdx;
+    HWND _hFscBtmbar;
 };

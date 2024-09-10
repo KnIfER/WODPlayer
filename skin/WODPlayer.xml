@@ -3,7 +3,7 @@
 
 inset="0,0,0,0" sizebox="18,18,18,18" showdirty="false" 
 layered="false"
-showshadow="true"
+showshadow="false"
 >
  <Font id="0" name="宋体" size="13" bold="false"/>
  <Font id="1" name="宋体" size="12"/>
@@ -27,12 +27,17 @@ showshadow="true"
 			id="btn_wnd"
 			apply="false"
 			shared="true"
-			pushedbkcolor="#8effffff" 
+			pushedbkcolor="#ff333333" 
 			hotbkcolor="#34ffffff" 
 			bordersize="1"
 			textcolor="#FFffffff" 
 			width="55"
 			font="menu"
+		 />
+    <Default
+			id="btn_wnd1"
+			apply="false"
+     pushedbkcolor="#8effffff"
 		 />
 	</style>
  
@@ -44,7 +49,7 @@ showshadow="true"
 	inset="5,5,5,5"
 	>
 	<HBox  bkcolor="#FF0078d7" height="35" name="topBar">
-		<Button static="true" style="btn_wnd" width="34" bkimage="file='ic_launcher.png' size='24,24' align='center' " tooltip="无限播放器 WODPlayer"/>
+		<Button static="true" style="btn_wnd" style="btn_wnd1" width="34" bkimage="file='ic_launcher.png' size='24,24' align='center' " tooltip="无限播放器 WODPlayer"/>
 		<HBox minWidth="45" >
 			<HBox minWidth="45" name="menuBar" width="-2">
 				<Button style="btn_wnd" id="110" text="文件"/>
@@ -64,9 +69,9 @@ showshadow="true"
 			<Pad weight="1"/>
 		</HBox>
 		<!--Control static="true"/-->
-		<Button style="btn_wnd" id="110" text="—" />
-		<Button style="btn_wnd" id="111" text="☐" font="menu1"/>
-		<Button style="btn_wnd" id="112" text="X" inset="0,1,0,0" />
+		<Button style="btn_wnd" id="110" text="—" style="btn_wnd1"/>
+		<Button style="btn_wnd" id="111" text="☐" font="menu1" style="btn_wnd1"/>
+		<Button style="btn_wnd" id="112" text="X" inset="0,1,0,0" pushedbkcolor="#8eff0000" />
 	</HBox>
 	
 	<WinFrame height="-2" float="true" floatalign="top" name="topW">

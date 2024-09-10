@@ -15,25 +15,49 @@ void initWodMenus(WODApplication * xpp)
 		MenuDefine{L"file", L"文件", IDM_FILE, new std::vector<MenuDefine>{
 			MenuDefine{L"open", L"打开(&O)", IDM_FILE_OPEN}
 			, MenuDefine{L"close", L"关闭(F4)", IDM_FILE_CLOSE}
+            , MenuDefine{L"bkmk", L"书签", IDM_BKMK, new std::vector<MenuDefine>{
+                MenuDefine{L"bkmk_add", L"上一书签", IDM_BKMK_PRV}
+                , MenuDefine{L"bkmk_add", L"下一书签", IDM_BKMK_NXT}
+                , MenuDefine{L"", L"", 0}
+                , MenuDefine{L"bkmk_add", L"添加书签", IDM_BKMK_ADD}
+                , MenuDefine{L"", L"", 0}
+                , MenuDefine{L"bkmk_add", L"删除书签", IDM_BKMK_DEL}
+            }}
 			, MenuDefine{L"recent", L"最近文件 asdasdasd", IDM_FILE_RECENT, new std::vector<MenuDefine>{
                     MenuDefine{L"open", L"最近文件1", IDM_FILE_OPEN}
                     , MenuDefine{L"open", L"最近文件2", IDM_FILE_CLOSE}
                     , MenuDefine{L"open", L"最近文件3", IDM_FILE_CLOSE, }
             }}
 		}}
-        , MenuDefine{L"bkmk", L"书签", IDM_BKMK, new std::vector<MenuDefine>{
-            MenuDefine{L"bkmk_add", L"上一书签", IDM_BKMK_PRV}
-            , MenuDefine{L"bkmk_add", L"下一书签", IDM_BKMK_NXT}
+        , MenuDefine{L"win", L"窗口", IDM_WIN, new std::vector<MenuDefine>{
+           //MenuDefine{L"win1", L"迷你左分栏", IDM_WIN_L}
+           // , MenuDefine{L"win2", L"迷你右分栏", IDM_WIN_R}
+           // , MenuDefine{L"", L"", 0}
+            MenuDefine{L"mini", L"免干扰", IDM_MINI, 0, true}
             , MenuDefine{L"", L"", 0}
-            , MenuDefine{L"bkmk_add", L"添加书签", IDM_BKMK_ADD}
+
+           , MenuDefine{L"pin", L"置顶", IDM_PIN, 0, true}
+            , MenuDefine{L"pin1", L"置顶（高覆盖任务栏）", IDM_PIN_TOP, 0, true}
             , MenuDefine{L"", L"", 0}
-            , MenuDefine{L"bkmk_add", L"删除书签", IDM_BKMK_DEL}
+            , MenuDefine{L"fit", L"适应视频大小", IDM_FIT}
+            , MenuDefine{L"fit1", L"适应视频大小（自动）", IDM_FIT_AUTO, 0, true}
+           //, MenuDefine{L"bkmk_add", L"右分屏", IDM_SPLIT}
+           //, MenuDefine{L"", L"", 0}
+
+            //, MenuDefine{L"", L"左分屏", IDM_SPLIT}
+            //, MenuDefine{L"bkmk_add", L"右分屏", IDM_SPLIT}
+            //, MenuDefine{L"", L"", 0}
+
+            , MenuDefine{L"", L"", 0}
+                , MenuDefine{L"win_nrm", L"正常窗口", IDM_RESTORE}
+                , MenuDefine{L"win_full", L"全屏", IDM_FULLSCREEN,0,1}
+                , MenuDefine{L"win_max", L"最大化", IDM_MAXMISE}
         }}
         , MenuDefine{L"plugin", L"插件", IDM_PLUGIN, new std::vector<MenuDefine>{
-            MenuDefine{L"bkmk_add", L"Δ 原生MFPlayer", IDM_PLUGIN_MF}
-            , MenuDefine{L"bkmk_add", L"Δ VLCPlayer", IDM_PLUGIN_VLC}
-            , MenuDefine{L"bkmk_add", L"Δ 迅雷播放组件", IDM_PLUGIN_XL}
-            , MenuDefine{L"bkmk_add", L"Δ MVP", IDM_PLUGIN_MPV}
+            MenuDefine{L"bkmk_add", L"Δ 原生MFPlayer", IDM_PLUGIN_MF, 0, 1}
+            , MenuDefine{L"bkmk_add", L"Δ VLCPlayer", IDM_PLUGIN_VLC, 0, 1}
+            , MenuDefine{L"bkmk_add", L"Δ 迅雷播放组件", IDM_PLUGIN_XL, 0, 1}
+            , MenuDefine{L"bkmk_add", L"Δ MVP", IDM_PLUGIN_MPV, 0, 1}
         }}
         , MenuDefine{L"skin", L"皮肤", IDM_SKIN, new std::vector<MenuDefine>{
             MenuDefine{L"skin_norm", L"普通皮肤", IDM_SKIN_NORM}
@@ -51,6 +75,7 @@ void initWodMenus(WODApplication * xpp)
         }}
 	};
 
+    // main menus
     CHorizontalLayoutUI* menuBar = static_cast<CHorizontalLayoutUI*>(xpp->m_pm.FindControl(_T("menuBar")));
     if(menuBar) {
         menuBar->RemoveAll();
@@ -69,8 +94,48 @@ void initWodMenus(WODApplication * xpp)
             menu->SetAttribute(L"style", L"btn_wnd");
             menu->SetFixedWidth(-2);
             menu->SetMinWidth(50);
+            menu->isMenu = 1;
         }
     }
+}
+
+
+extern CContainerUI* toHide;
+int menuId;
+CControlUI* pMenuBtn;
+
+
+bool IsChecked(UINT id) {
+    string* player;
+    switch(id) {
+        case IDM_FULLSCREEN: 
+            return XPP->_isFullScreen;
+        case IDM_MINI: 
+            return !XPP->_isFullScreen && XPP->_isMini;
+        case IDM_PIN: 
+        case IDM_PIN_TOP: {
+            bool pin = GetWindowLong(XPP->GetHWND(), GWL_EXSTYLE)&WS_EX_TOPMOST;
+            if(pin) {
+                bool pin1 = GetWindowLong(XPP->GetHWND(), GWL_STYLE)&WS_POPUP;
+                if(id==IDM_PIN) return !pin1;
+                else return pin1;
+            }
+        }    return false;
+
+        case IDM_PLUGIN_MF: 
+            player = GetProfString("player");
+            return player && *player=="MFExternalPlayer.dll";
+        case IDM_PLUGIN_VLC: 
+            player = GetProfString("player");
+            return player && *player=="VLCExternalPlayer.dll";
+        case IDM_PLUGIN_XL: 
+            player = GetProfString("player");
+            return player && *player=="XunLeiExternalPlayer\\XunLeiExternalPlayer.dll";
+        case IDM_PLUGIN_MPV: 
+            player = GetProfString("player");
+            return player && *player=="MPVExternalPlayer.dll";
+    }
+    return false;
 }
 
 
@@ -118,11 +183,13 @@ class WODMenuAdapter : public MenuPopupAdapter
                     if(scope->at(i).id.IsEmpty())
                         sep_row++;
                 }
-                refer->SetText(scope->at(fat_row).name);
-                refer->GetText().Append(L"XXX");
+                //CControlUI* btn = dynamic_cast<CControlUI*>(refer->GetManager()->FindControl(L"text"));
+                CControlUI* btn = dynamic_cast<CControlUI*>(refer->FindControl(CPaintManagerUI::__FindControlFromName, (LPVOID)L"text", UIFIND_ALL));
+                btn->SetText(scope->at(fat_row).name);
+                btn->GetText().Append(L"XXX");
 
-                SIZE sz = refer->EstimateSize({100, 100});
-                sepHeight = 4;
+                SIZE sz = btn->EstimateSize({100, 100});
+                sepHeight = 2;
                 rowHeight = sz.cy;
                 height = sz.cy*(GetItemCount() - sep_row) + sep_row * sepHeight;
 
@@ -134,33 +201,24 @@ class WODMenuAdapter : public MenuPopupAdapter
 
         LRESULT OnKillFocus(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
         {
-            int sz = MenuChain.size();
-            int index = -1;
-            for (size_t i = 0; i < sz; i++)
-            {
-                WODMenuAdapter* adapter = (WODMenuAdapter*)MenuChain[i]->_adapter.get();
-                if(index>=0)
-                {
-                    MenuChain[i]->Close();
-                }
-                else if(MenuChain[i]->GetHWND()==::GetFocus()) 
-                {
-                    index = i;
-                }
+            if(pMenuBtn) {
+                int session = _menuSession;
+                pMenuBtn->PostLambda([session](){ // 看看待会儿是不是还要显示菜单
+                    if(_menuSession==session)
+                        closeWodMenus();
+                    if(!MenuChain.size()) {
+                        _trackingMenu = false;
+                        if(_pMMenuBtn) {
+                            _pMMenuBtn->SetAttribute(L"pushed", L"0");
+                            _pMMenuBtn = nullptr;
+                        }
+                        pMenuBtn = nullptr;
+                    }
+                    return false;
+                }, 1);
+                return 0;
             }
-            if(index >= 0)
-            {
-                MenuChain.resize(index+1);
-                ::SetFocus(MenuChain[index]->GetHWND());
-            }
-            else
-            {
-                for (size_t i = 0; i < sz; i++)
-                {
-                    MenuChain[i]->Close();
-                }
-                MenuChain.resize(0);
-            }
+            closeWodMenus();
             return 0;
         }
 
@@ -179,7 +237,7 @@ class WODMenuAdapter : public MenuPopupAdapter
             {
                 int index = control->GetTag();
                 int cmd = control->GetID();
-                trackWodMenus(control, cmd, this->scope);
+                trackWodMenus(control, cmd, false, this->scope);
             }
         }
 
@@ -192,17 +250,30 @@ class WODMenuAdapter : public MenuPopupAdapter
 
         void OnBindItemView(CControlUI* view, size_t index, size_t type, bool pseudoBind)
         {
-            CControlUI* btn = dynamic_cast<CControlUI*>(view);
+            auto & menuItem = scope->at(index);
+            Button* btn = dynamic_cast<Button*>(view->GetManager()->FindControl(L"text"));
+            btn->isMenu = 2;
+            CControlUI* ck = dynamic_cast<CControlUI*>(view->GetManager()->FindControl(L"ck"));
             if (btn)
             {
                 btn->SetRichEvent(true);
-                btn->SetID(scope->at(index).cmd);
+                btn->SetID(menuItem.cmd);
                 btn->SetTag(index);
                 QkString & label = btn->GetText();
                 label.AsBuffer();
-                label = scope->at(index).name;
-                btn->SetFixedHeight(scope->at(index).id.IsEmpty() ? sepHeight : rowHeight);
+                label = menuItem.name;
+                bool is_sep = menuItem.id.IsEmpty();
+                btn->SetFixedHeight(is_sep ? sepHeight : rowHeight);
+                if (is_sep)
+                {
+                    btn->SetBkColor(0xff888888);
+                }
+                if(menuItem.checkable) {
+                    ck->SetVisible(IsChecked(menuItem.cmd));
+                }
+                else ck->SetVisible(false);
             }
+            view->SetID(menuItem.cmd);
         }
     public:
         const std::vector<MenuDefine>* scope; // display menu items
@@ -211,11 +282,79 @@ class WODMenuAdapter : public MenuPopupAdapter
         int sepHeight = 0;
 };
 
-bool trackWodMenus(CControlUI* control, int cmd, const std::vector<MenuDefine>* parentScope)
+bool closeWodMenus(bool closeAll, HWND closeTill)
+{
+    //lxxx(haha::closeWodMenus)
+    int sz = MenuChain.size();
+    int index = -1; bool closeThis=false;
+    if(!closeAll && !closeTill) 
+        closeTill = ::GetFocus();
+    else if(closeTill)
+        closeThis = true;
+    if(!closeAll) {
+        for (size_t i = 0; i < sz; i++)
+        {
+            WODMenuAdapter* adapter = (WODMenuAdapter*)MenuChain[i]->_adapter.get();
+            if(index>=0)
+            {
+                MenuChain[i]->Close();
+            }
+            else if(MenuChain[i]->GetHWND()==closeTill) 
+            {
+                index = i;
+                if(closeThis) {
+                    MenuChain[i]->Close();
+                    index--;
+                    if(index<0) break; 
+                }
+            }
+        }
+    }
+    if(index >= 0)
+    {
+        MenuChain.resize(index+1);
+        ::SetFocus(MenuChain[index]->GetHWND());
+    }
+    else
+    {
+        for (size_t i = 0; i < sz; i++)
+        {
+            MenuChain[i]->Close();
+        }
+        MenuChain.resize(0);
+        // change menu
+        if(_pMMenuBtn) {
+            _pMMenuBtn->SetAttribute(L"pushed", L"0");
+        }
+    }
+    if(toHide) toHide->SetVisible(false);
+    toHide = nullptr;
+    _menuShown = false;
+    return 0;
+}
+
+
+
+bool trackWodMenus(CControlUI* control, int cmd, int mainMenu, const std::vector<MenuDefine>* parentScope)
 {
     bool tracked = false;
     if(control)
     {
+        //lxxx(主菜单::dd dd, mainMenu, menuId==cmd)
+        if(mainMenu) { // 主菜单
+            _menuSession++;
+            if(MenuChain.size()) {
+                if(menuId==cmd) {
+                    //_menuShown = true;
+                    //if(HIWORD(cmd)==5) { // 手动再次点击
+                        closeWodMenus(true);
+                    //}
+                    return 0;
+                }
+                closeWodMenus(true);
+            }
+           _pMMenuBtn = control;
+        }
         int sz = MenuChain.size();
         int index = -1;
         for (size_t i = 0; i < sz; i++)
@@ -255,8 +394,16 @@ bool trackWodMenus(CControlUI* control, int cmd, const std::vector<MenuDefine>* 
                 //LogIs(2, "asdasd");
             }
         }
+        if(tracked) {
+            menuId = cmd;
+            pMenuBtn = control;
+        }
         if(!tracked && switched) {
             control->SetFocus();
+        }
+        _menuShown = MenuChain.size();
+        if(!_menuShown) {
+            pMenuBtn = _pMMenuBtn = nullptr;
         }
     }
     return tracked;

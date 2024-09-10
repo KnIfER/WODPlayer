@@ -321,7 +321,7 @@ std::string buffer;
 
 void seekchange(SeekBar* bar, int pos) {
 	WODPlayer* player = (WODPlayer*)bar->GetTag();
-	player->_mMediaPlayer->SetPosition(pos, true);
+	player->SetPosition(pos, true);
 }
 
 void seekchangefloat(SeekBar* bar, int posf) {
@@ -333,7 +333,7 @@ void seekchangefloat(SeekBar* bar, int posf) {
 	long sub_pos = pos % (sub_duration);
 	int lunhui = pos / sub_duration;
 
-	player->_mMediaPlayer->SetPosition(lunhui*sub_duration + posf, true);
+	player->SetPosition(lunhui*sub_duration + posf, true);
 }
 
 extern CControlUI* _timeLabel;
@@ -461,6 +461,8 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	{
 		_durationCache = 0;
 		_currentPath = path;
+		isPng = _currentPath.EndWith(L".webp") || _currentPath.EndWith(L".jpg") || _currentPath.EndWith(L".jpeg") || _currentPath.EndWith(L".png");
+		fakePos = 0;
 	}
 	nSkipStart = nSkipEnd = 0;
 	int seekStart = _currentPath.Find(L"[p");
@@ -606,11 +608,46 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 }
 
 
+
+int WODPlayer::GetDuration() 
+{
+	int duration = _mMediaPlayer->GetDuration();
+	if(duration==0) {
+		duration = 2.3*1000; // 3 秒
+	}
+	return duration;
+}
+
+extern bool _playing;
+
+
+int WODPlayer::GetPosition(bool tick) 
+{
+	lxxx(GetPosition dd dd, tick, _playing)
+	int pos = _mMediaPlayer->GetPosition();
+	if(isPng) {
+		if(tick && _playing) fakePos += 200;
+		pos = fakePos;
+	}
+	return pos;
+}
+
+
+
+void WODPlayer::SetPosition(long pos, bool fastSeek)
+{
+	_mMediaPlayer->SetPosition(pos, fastSeek);
+	if(isPng) {
+		fakePos = pos;
+	}
+}
+
+
 bool WODPlayer::AddBookmark()
 {
 	if(_mMediaPlayer) { // todo use binary insert
 		int pos = _mMediaPlayer->GetPosition();
-		int duration = _mMediaPlayer->GetDuration();
+		int duration = GetDuration();
 		//LogIs(2, L"%s", (LPCWSTR)_currentPath);
 
 
@@ -682,7 +719,7 @@ void WODPlayer::SelectBookMark(int index)
 {
 	if (index>=0 && index<_bookmarks.size())
 	{
-		_mMediaPlayer->SetPosition(_bookmarks[index].pos, false);
+		SetPosition(_bookmarks[index].pos, false);
 		_selectedBookmark = index;
 		if (!_isPlaying)
 		{

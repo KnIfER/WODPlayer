@@ -20,7 +20,7 @@ PopupMenu::~PopupMenu()
 
 void PopupMenu::Close(UINT nRet)
 {
-	ASSERT(::IsWindow(m_hWnd));
+	//ASSERT(::IsWindow(m_hWnd));
 	isClosing = true;
 	if (!::IsWindow(m_hWnd)) return;
 	PostMessage(WM_CLOSE, (WPARAM)nRet, 0L);
@@ -233,7 +233,7 @@ LRESULT PopupMenu::OnSize(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandle
 
 LRESULT PopupMenu::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	LogIs( "HandleMessage %d, %d", uMsg, uMsg==WM_CREATE);
+	//LogIs( "HandleMessage %d, %d", uMsg, uMsg==WM_CREATE);
 	LRESULT lRes = 0;
 	BOOL bHandled = TRUE;
 	switch( uMsg )
@@ -241,8 +241,13 @@ LRESULT PopupMenu::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE: lRes = OnCreate(uMsg, wParam, lParam, bHandled);  break;
 	case WM_KILLFOCUS: lRes = OnKillFocus(uMsg, wParam, lParam, bHandled);  break;
 	case WM_KEYDOWN:
-		if( wParam == VK_ESCAPE || wParam == VK_LEFT)
-			Close();
+		if( wParam == VK_ESCAPE || wParam == VK_LEFT) {
+			if(!isClosing) {
+				extern bool closeWodMenus(bool closeAll, HWND closeTill);
+				closeWodMenus(false, GetHWND());
+			}
+				//_adapter->OnKillFocus(uMsg, wParam, lParam, bHandled);
+		}
 		break;
 	case WM_SIZE: lRes = OnSize(uMsg, wParam, lParam, bHandled); break;
 	case WM_CLOSE:

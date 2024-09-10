@@ -29,6 +29,9 @@ int scheduleExitFsc = 0;
 int scheduleMoveWnd = 0;
 extern RECT rcNScPos;
 
+extern void makeTopmost(HWND hwnd, bool mayTop);
+
+CContainerUI* toHide;
 
 void hookMouseMove(MSG & msg)
 {
@@ -38,33 +41,49 @@ void hookMouseMove(MSG & msg)
 	if(scheduleExitFsc)
 	{
 		//LogIs("hookMouseMove", msg.pt.x, msg.pt.y);
-		if((GetKeyState(VK_LBUTTON) & 0x8000) != 0) // 从全屏窗口拖拽下标题栏
+		if((!_trackingMenu && GetKeyState(VK_LBUTTON) & 0x8000) != 0) // 从全屏窗口拖拽下标题栏
 		{
 			if(abs(scheduleExitFsc-yPos)>5)
 			{
-				rcNScPos.bottom += yPos - rcNScPos.top;
-				rcNScPos.top = yPos;
+				if(XPP->_isFullScreen) {
+					rcNScPos.bottom += yPos - rcNScPos.top;
+					rcNScPos.top = yPos;
 
-				int xPos = msg.pt.x, w = (rcNScPos.right-rcNScPos.left)/2;
-				rcNScPos.left = xPos - w;
-				rcNScPos.right = xPos + w;
+					int xPos = msg.pt.x, w = (rcNScPos.right-rcNScPos.left)/2;
+					rcNScPos.left = xPos - w;
+					rcNScPos.right = xPos + w;
 
-				scheduleExitFsc = 0;
-				XPP->ToggleFullScreen();
-				ReleaseCapture();
+					scheduleExitFsc = 0;
+					XPP->ToggleFullScreen();
+					ReleaseCapture();
+					XPP->ToggleFullScreen1();
+				}
 				::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
 			}
 			return;
 		}
 		else scheduleExitFsc = 0;
 	}
-	if(XPP->_bottomBar->IsVisible() ^ (yPos >= rc.bottom - XPP->_bottomBar->GetHeight()))
+	bool v = !XPP->_bottomBar->IsVisible();
+	if((!v) ^ (yPos >= rc.bottom - XPP->_bottomBar->GetHeight()))
 	{
-		XPP->_bottomBar->SetVisible(!XPP->_bottomBar->IsVisible());
+		if(!v && _menuShown) toHide = (XPP->_bottomBar);
+		else XPP->_bottomBar->SetVisible(v);
+		v = !v;
+	} 
+	if(!v && XPP->_hFscBtmbar) {
+		makeTopmost(XPP->_bottomBar->GetHWND(), 1);
 	}
-	if(XPP->_topBarFscWnd->IsVisible() ^ (yPos <= rc.top + XPP->_topBar->GetHeight()))
+
+	v = !XPP->_topBarFscWnd->IsVisible();
+	if((!v) ^ (yPos <= rc.top + XPP->_topBar->GetHeight()))
 	{
-		XPP->_topBarFscWnd->SetVisible(!XPP->_topBarFscWnd->IsVisible());
+		if(!v && _menuShown) toHide = (XPP->_topBarFscWnd);
+		else XPP->_topBarFscWnd->SetVisible(v);
+		v = !v;
+	}
+	if(!v && XPP->_hFscBtmbar) {
+		makeTopmost(XPP->_topBarFscWnd->GetHWND(), 1);
 	}
 }
 
@@ -74,6 +93,7 @@ void hookLButtonDown(MSG & msg)
 	if(XPP->_mainPlayer.IsMediaPlayerWindow(msg.hwnd)) 
 	{
 		//LogIs(2, "hookLButtonDown %d %d", msg.pt.x, msg.pt.y);
+		BOOL fullscreen = XPP->_isFullScreen || XPP->_isMini;
 		if (!XPP->_isFullScreen && ::GetKeyState(VK_CONTROL) >= 0) // 拖拽窗体
 		{
 			scheduleMoveWnd = 1;
@@ -82,17 +102,10 @@ void hookLButtonDown(MSG & msg)
 			//SetFocus(XPP->GetHWND());
 			//return;
 		}
-		if(XPP->_mainPlayer.GetHWND() != msg.hwnd && (XPP->_isFullScreen || ::GetKeyState(VK_CONTROL) < 0)) 
+		if(XPP->_mainPlayer.GetHWND() != msg.hwnd && (fullscreen || ::GetKeyState(VK_CONTROL) < 0)) 
 		{
 			XPP->_mainPlayer.HandleCustomMessage(msg.message, msg.wParam, msg.lParam, 0);
 		}
-	}
-	else if(msg.pt.y<=4 || XPP->_topBarFscWnd->GetHWND()==msg.hwnd) 
-	{
-		scheduleExitFsc = msg.pt.y;
-		if(scheduleExitFsc==0)
-			scheduleExitFsc=1;
-		return;
 	}
 	else if(msg.pt.y<=4 || XPP->_topBarFscWnd->GetHWND()==msg.hwnd) 
 	{
@@ -159,6 +172,7 @@ void hookMButtonClick(MSG & msg)
 	{
 		XPP->ToggleFullScreen();
 		SetFocus(XPP->GetHWND());
+		XPP->ToggleFullScreen1();
 		return;
 	}
 }	
@@ -403,6 +417,8 @@ wWinMain(_In_ HINSTANCE hInstance,
 	//::PathAppend();
 	loadProf(usrDir, configFileName);
 
+	ImmDisableIME(0);
+
 	XPP = new WODApplication();
 	//lxx(ss dd, lpCmdLine, _args.size())
 	if (_args.size()>0)
@@ -442,6 +458,12 @@ wWinMain(_In_ HINSTANCE hInstance,
 				case WM_MOUSEWHEEL:
 					hookMouseWheel(msg);
 					break;
+				case WM_SYSCOMMAND:
+				{
+					BOOL bHandled = TRUE;
+					LRESULT lRes = XPP->HandleCustomMessage(msg.message, msg.wParam, msg.lParam, bHandled);
+					//if (bHandled) return lRes;
+				} break;
 				case WM_SYSKEYDOWN :
 				case WM_KEYDOWN:
 					lxxx(WM_KEYDOWN dd, msg.wParam)
@@ -454,8 +476,18 @@ wWinMain(_In_ HINSTANCE hInstance,
 				//	lxxx(WM_KEYUP dd dd, msg.wParam, msg.lParam)
 
 				//	break;
+				case WM_MOUSELEAVE:
+				{
+					//lxx(1)
+					if(msg.hwnd==XPP->_topBarFscWnd->GetHWND()) {
+						XPP->_topBarFscWnd->SetVisible(false);
+					}
+					if(msg.hwnd==XPP->_hFscBtmbar) {
+						XPP->_bottomBar->SetVisible(false);
+					}
+				} break;
 				case WM_MOUSEMOVE:
-				case WM_NCMOUSEMOVE:
+				//case WM_NCMOUSEMOVE:
 					if(scheduleMoveWnd) {
 						if((GetKeyState(VK_LBUTTON) & 0x8000) != 0)
 						{
@@ -464,8 +496,8 @@ wWinMain(_In_ HINSTANCE hInstance,
 						}
 						scheduleMoveWnd = 0;
 					}
-					if (XPP->_isFullScreen)
-						hookMouseMove(msg);
+					if (XPP->_isFullScreen||XPP->_isMini)
+						hookMouseMove(msg); // show hover bar
 					break;
 				case WM_MBUTTONUP:
 					hookMButtonClick(msg);

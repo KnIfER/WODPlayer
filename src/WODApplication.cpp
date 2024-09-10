@@ -38,13 +38,29 @@ SeekBar* seekbar;
 
 DWORD g_MainThreadID;
 
+void makeNoTopmost(HWND hwnd) {
+	if (hwnd)
+	{
+		::SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 100, 100, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
+	}
+}
+
+void makeTopmost(HWND hwnd, bool mayTop) {
+	if (hwnd)
+	{
+		::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 100, 100, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
+		if(!mayTop || !XPP || !(GetWindowLong(XPP->GetHWND(), GWL_EXSTYLE)&WS_EX_TOPMOST)) 
+			makeNoTopmost(hwnd);
+	}
+}
+
 WODApplication::WODApplication()
 {
 	_db = new WODBase();
-	_frameLess = 1;
+	_frameLess = 2;
+	//_frameLess = 1;
 	//_roundwnd = 1;
 }
-
 
 BOOL teSetForegroundWindow(HWND hwnd)
 {
@@ -433,9 +449,9 @@ void WODApplication::InitWindow()
 	auto hwnd = XPP->GetHWND();
 	//auto wndSty = GetWindowLong(hwnd, GWL_STYLE);
 	//SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_TOPMOST);
-	SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
-	SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
-
+	//makeTopmost(hwnd, 0);
+	::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+	::SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
 }
 
 LRESULT WODApplication::OnClose(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
@@ -467,6 +483,10 @@ LRESULT WODApplication::OnDestroy( UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam
 
 void WODApplication::OnFinalMessage( HWND hWnd )
 {
+	if(_hFscBtmbar) {
+		::ShowWindow(_hFscBtmbar, SW_HIDE);
+		if(_topBar) ::ShowWindow(_topBar->GetHWND(), SW_HIDE);
+	}
 	__super::OnFinalMessage(hWnd);
 	delete this;
 }
@@ -540,8 +560,11 @@ void WOD_Register(HINSTANCE hInstance)
 }
 
 
-static DWORD dwNScStyle = WS_CAPTION|WS_THICKFRAME; 
+//static DWORD dwNScStyle = WS_CAPTION|WS_THICKFRAME; 
+static DWORD dwNScStyle = WS_THICKFRAME; 
+BOOL bUseSameMiniRc = TRUE;
 RECT rcNScPos;
+RECT rcMiniPos;
 
 
 LRESULT WINAPI FullScreenBarsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -550,6 +573,62 @@ LRESULT WINAPI FullScreenBarsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 }
 
 void SetFloatHwnd(HWND hwnd)
+{
+	auto wndSty = GetWindowLong(hwnd, GWL_STYLE);
+	SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) 
+		| WS_EX_LAYERED
+		| WS_EX_TOOLWINDOW
+	);
+	SetParent(hwnd, 0);
+	SetWindowLong(hwnd, GWL_STYLE, (wndSty  ) 
+		| WS_POPUP
+		| WS_SYSMENU
+		//| WS_CLIPSIBLINGS 
+	);
+	SetWindowLong(hwnd, GWL_EXSTYLE, 0
+		| WS_EX_LAYERED 
+		| WS_EX_TOOLWINDOW
+		//| WS_EX_TOPMOST
+	);
+	//SetWindowPos(hwnd, HWND_TOP , 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
+	makeTopmost(hwnd, 1);
+}
+
+void unsetFloatHwnd(HWND hwnd)
+{
+	auto wndSty = GetWindowLong(hwnd, GWL_STYLE);
+	SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) 
+		& ~WS_EX_LAYERED
+		& ~WS_EX_TOOLWINDOW
+	);
+	SetWindowLong(hwnd, GWL_STYLE, (wndSty  ) 
+		& ~WS_POPUP
+		//| WS_CLIPSIBLINGS 
+	);
+	SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE)
+		& ~WS_EX_LAYERED 
+		& ~WS_EX_TOOLWINDOW
+		//| WS_EX_TOPMOST
+	);
+}
+
+void SetFloatHwnd1(HWND hwnd)
+{
+	//auto wndSty = GetWindowLong(hwnd, GWL_STYLE);
+	//SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TOOLWINDOW);
+	//SetWindowLong(hwnd, GWL_STYLE, (wndSty  ) 
+	//	| WS_POPUP
+	//	//| WS_CLIPSIBLINGS 
+	//);
+	SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE)
+		| WS_EX_LAYERED 
+		| WS_EX_TOOLWINDOW
+		| WS_EX_TOPMOST
+	);
+	//SetWindowPos(hwnd, HWND_BOTTOM , 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
+}
+
+void SetFloatHwndX(HWND hwnd)
 {
 	auto wndSty = GetWindowLong(hwnd, GWL_STYLE);
 	SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TOOLWINDOW);
@@ -564,10 +643,115 @@ void SetFloatHwnd(HWND hwnd)
 
 bool _lastTopMost;
 
+
+void WODApplication::ToggleFullScreen1()
+{
+	if(!_isFullScreen && _isMini) {
+		setMini();
+	}
+}
+
+void WODApplication::setMini()
+{
+	HWND hWnd = m_hWnd;
+	DWORD style = GetWindowLong(hWnd, GWL_STYLE);
+	_hFscBtmbar = _bottomBar->GetHWND();
+	_bottomBar->SetFloat(true);
+
+	_topBar->GetParent()->Remove(_topBar);
+	_topBarFscH->Add(_topBar);
+	_topBarFscWnd->SetVisible(true);
+
+	SetFloatHwnd(_hFscBtmbar);
+	SetFloatHwnd(_topBarFscH->GetHWND());
+	//SetFloatHwnd1(hWnd);
+
+	//::SetWindowPos(_hFscBtmbar, HWND_TOPMOST, 0, 0, 100, 100, 0);
+	//::SetWindowPos(_topBarFscH->GetHWND(), HWND_TOPMOST, 0, 0, 100, 100, 0);
+
+	SetLayeredWindowAttributes(_hFscBtmbar, TransparentKey, 200, LWA_ALPHA);
+
+	GetWindowRect(hWnd, &rcNScPos);
+
+	/* POPUP 可以覆盖任务栏 */
+	//SetWindowLong(hWnd, GWL_STYLE , style & ~dwNScStyle  | WS_POPUP );
+	//SetWindowLong(hWnd, GWL_STYLE , style & ~WS_THICKFRAME | WS_POPUP | WS_CAPTION );
+
+	//style = GetWindowLong(hWnd, GWL_EXSTYLE);
+	//dwNScStyle = WS_EX_DLGMODALFRAME |
+	//	WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE;
+	SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_TOPMOST);
+	SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
+
+	_topBarFscWnd->SetVisible(false);
+	_bottomBar->SetVisible(false);
+
+	_bottomBar->SetFloat(true);
+	m_pm.GetSizeBox().top = 0;
+
+	//int w = ::GetSystemMetrics(SM_CXSCREEN)/2;
+	//int h = ::GetSystemMetrics(SM_CYSCREEN);
+	////_lastTopMost = GetWindowLong(hWnd, GWL_EXSTYLE)&WS_EX_TOPMOST;
+	//::SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, w, h, 0);
+	bool b1 = _isMini||_isMaximized==SC_MAXIMIZE;
+	m_pm.GetRoot()->SetInset(b1?1:5);
+}
+
+void WODApplication::ToggleMini()
+{
+	HWND hWnd = m_hWnd;
+	DWORD style = GetWindowLong(hWnd, GWL_STYLE);
+	if (!_isMini)
+	{
+		_isMini = true;
+		setMini();
+		return;
+	}
+	else
+	{
+		_bottomBar->SetFloat(false);
+		SetParent(_mainPlayer._seekbar.GetHWND(), m_hWnd);
+		_hFscBtmbar = nullptr;
+		_isMini = false;
+		GetWindowRect(hWnd, &rcMiniPos);
+		style = GetWindowLong(hWnd, GWL_STYLE);
+		SetWindowLong(hWnd, GWL_STYLE , style | WS_THICKFRAME );
+
+		if(bUseSameMiniRc) {
+			GetWindowRect(hWnd, &rcNScPos);
+		}
+		::SetWindowPos(hWnd, NULL, rcNScPos.left, rcNScPos.top
+			, rcNScPos.right-rcNScPos.left, rcNScPos.bottom-rcNScPos.top, 0);
+
+		_topBar->GetParent()->Remove(_topBar);
+		m_pm.GetRoot()->AddAt(_topBar, 0);
+		_bottomBar->SetVisible(true);
+		_topBarFscWnd->SetVisible(false);
+		m_pm.GetSizeBox().top = 4;
+		unsetFloatHwnd(_bottomBar->GetHWND());
+		//_bottomBar->PostLambda([this](){
+		//	_bottomBar->Invalidate();
+		//	return false;
+		//}
+		//, 1000);
+		if(_lastTopMost) {
+			SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE)|WS_EX_TOPMOST);
+			::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
+		}
+	}
+	bool b1 = _isMini||_isMaximized==SC_MAXIMIZE;
+	m_pm.GetRoot()->SetInset(b1?1:5);
+	/* 配合 POPUP 使用 */
+	//_frameLess = 1;
+
+}
+
+
 void WODApplication::ToggleFullScreen()
 {
 	HWND hWnd = m_hWnd;
 	DWORD style = GetWindowLong(hWnd, GWL_STYLE);
+	_frameLess = !_isFullScreen?1:2;
 	if (!_isFullScreen)
 	{
 		HWND _hFullScreenBtmbar = _bottomBar->GetHWND();
@@ -639,7 +823,7 @@ void WODApplication::ToggleFullScreen()
 	else
 	{
 		_bottomBar->SetFloat(false);
-		SetParent(_mainPlayer._seekbar.GetHWND(), m_hWnd);
+		::SetParent(_mainPlayer._seekbar.GetHWND(), m_hWnd);
 		_isFullScreen = false;
 		style = GetWindowLong(hWnd, GWL_STYLE);
 		SetWindowLong(hWnd, GWL_STYLE , style | WS_THICKFRAME );
@@ -656,6 +840,46 @@ void WODApplication::ToggleFullScreen()
 			SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE)|WS_EX_TOPMOST);
 			::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
 		}
+
+
+		//_bottomBar->SetVisible(false);
+		//_bottomBar->SetFloat(true);
+		//_bottomBar->SetFloat(false);
+		//_bottomBar->SetVisible(true);
+
+		if(!_isMini)
+		if(::GetParent(_bottomBar->GetHWND())!=m_hWnd) { // 退出全屏后。重建底栏，因为有时分离
+			//lxx(wtf)
+			//::SetParent(_bottomBar->GetHWND(), m_hWnd);
+			
+
+
+			auto old = _bottomBar;
+			_bottomBar = new WinFrame();
+			auto inner = old->GetInnerView();
+			_bottomBar->Add(inner);
+			_bottomBar->SetFloatAlign(DT_BOTTOM);
+			old->GetParent()->AddAt(_bottomBar, old->GetParent()->GetItemIndex(old));
+			old->GetParent()->Remove(old);
+			_bottomBar->Init();
+			_bottomBar->SetVisible(true);
+
+
+			_bottomBar->SetFixedHeight(-2);
+			_bottomBar->SetFixedWidth(-1);
+			//_bottomBar->Add(inner);
+
+			//lxx(dd dd dd dd, ::GetParent(_bottomBar->GetHWND())==m_hWnd, _bottomBar->GetHWND(), _bottomBar->GetCount(), inner);
+
+
+			//::ShowWindow(old->GetHWND(), SW_HIDE);
+			::DestroyWindow(old->GetHWND());
+			//auto inner = old->GetItemAt(0);
+			//old->Remove(inner);
+			//m_pm.GetRoot()->Add(inner);
+			delete old;
+		}
+
 	}
 	bool b1 = _isFullScreen||_isMaximized==SC_MAXIMIZE;
 	m_pm.GetRoot()->SetInset(b1?0:5);
@@ -896,8 +1120,8 @@ void NavTime(int t)
 	if(!wod._mMediaPlayer) return;
 	auto & player = wod._mMediaPlayer;
 	LONG pos = t==-1?wod.nSkipStart//0
-		:t==-2?wod._mMediaPlayer->GetDuration()/2
-		:wod._mMediaPlayer->GetDuration()-1;
+		:t==-2?wod.GetDuration()/2
+		:wod.GetDuration()-1;
 	player->SetLoop(false);
 	player->SetPosition(pos, true);
 	bool playing = wod._isPlaying;
@@ -945,6 +1169,45 @@ void NextPlayList(bool prev, bool loop)
 		player->Play();
 	}
 	XPP->MarkPlaying(true);
+}
+
+
+void NextPlayGroup(bool prev, bool loop)
+{
+	auto & wod = XPP->_mainPlayer;
+	auto & player = wod._mMediaPlayer;
+	auto & lst = XPP->_playList;
+
+	int d = (prev?-1:1);
+	int newIdx = XPP->_playIdx;
+	QkString prefix = wod._currentPath;
+	int tmp = prefix.Find(L" - ");
+	if(tmp>0) {
+		prefix.MidFast(0, tmp);
+		QkString pfx1;
+		while(1) {
+			newIdx += d;
+			if(newIdx<0 || newIdx>=lst.size()) {
+				if(newIdx<0) newIdx=lst.size()-1;
+				else newIdx=0;
+				break;
+			}
+			pfx1 = lst[newIdx];
+			tmp = pfx1.Find(L" - ");
+			if(tmp>0) {
+				pfx1.MidFast(0, tmp);
+				if(pfx1!=prefix) {
+					break;
+				}
+			}
+		}
+		NavPlayList(newIdx);
+		//if (_mainPlayer._mMediaPlayer->IsPaused())
+		{
+			player->Play();
+		}
+		XPP->MarkPlaying(true);
+	}
 }
 
 // OnDrop
@@ -1020,8 +1283,8 @@ LRESULT WODApplication::TimerProc()
 {
 	if(!_mainPlayer._mMediaPlayer)
 		return 0;
-	long pos = _mainPlayer._mMediaPlayer->GetPosition();
-	long duration = _mainPlayer._mMediaPlayer->GetDuration();
+	long pos = _mainPlayer.GetPosition(true);
+	long duration = _mainPlayer.GetDuration();
 
 	if(_mainPlayer._currentPath.EndWith("flv"))
 		if (_mainPlayer._durationCache != duration)
@@ -1075,38 +1338,41 @@ LRESULT WODApplication::TimerProc()
 	{
 		_mainPlayer._seekbar.SetProgressAndMax(pos, duration);
 		if(_mainPlayer.nSkipStart && pos<_mainPlayer.nSkipStart-250) {
-			_mainPlayer._mMediaPlayer->SetPosition(_mainPlayer.nSkipStart, true);
+			_mainPlayer.SetPosition(_mainPlayer.nSkipStart, true);
 		}
 		if(_mainPlayer.nSkipEnd && pos>=duration-_mainPlayer.nSkipEnd) {
-			_mainPlayer._mMediaPlayer->SetPosition(_mainPlayer.nSkipStart, true);
+			_mainPlayer.SetPosition(_mainPlayer.nSkipStart, true);
 		}
 	}
 	if(!deleting) 
 	{
-		if(pos >= duration-350 && _mainPlayer._isPlaying) 
+		if (_playList.size()>1)
 		{
-			if(!_mainPlayer._mMediaPlayer->IsPlaying()) 
+			if(pos >= duration-350 && _mainPlayer._isPlaying) 
+			{
+				if(!_mainPlayer._mMediaPlayer->IsPlaying()) 
+				{
+					if (_playList.size()>1)
+					{
+						NextPlayList(0, 1);
+					}
+					return 0;
+				}
+				if (_playList.size()>1)
+				{
+					//NextPlayList(0, 1);
+					_mainPlayer._mMediaPlayer->SetLoop(false);
+				}
+				//return 0;
+			}
+			if(pos >= duration-10 && _mainPlayer._isPlaying) 
 			{
 				if (_playList.size()>1)
 				{
 					NextPlayList(0, 1);
 				}
-				return 0;
+				//return 0;
 			}
-			if (_playList.size()>1)
-			{
-				//NextPlayList(0, 1);
-				_mainPlayer._mMediaPlayer->SetLoop(false);
-			}
-			//return 0;
-		}
-		if(pos >= duration-10 && _mainPlayer._isPlaying) 
-		{
-			if (_playList.size()>1)
-			{
-				NextPlayList(0, 1);
-			}
-			//return 0;
 		}
 	} else {
 		_mainPlayer._mMediaPlayer->SetLoop(1);
@@ -1151,6 +1417,36 @@ LRESULT WODApplication::TimerProc()
 	return 0;
 }
 
+void WODApplication::onPause(bool min) 
+{
+	if(min) {
+		if(_hFscBtmbar && _bottomBar->IsVisible()) {
+			::ShowWindow(_hFscBtmbar, SW_HIDE);
+			//_bottomBar->SetVisible(false);
+			//lxx(1)
+			//makeNoTopmost(_hFscBtmbar);
+
+			//_bottomBar->PostLambda([this](){
+			//	ShowWindow(GetHWND(), SW_MINIMIZE);
+			//	return false;
+			//}, 800);
+			
+		}
+	}
+}
+
+void WODApplication::onResume(bool min) {
+	if(_bottomBar && _bottomBar->IsVisible()) {
+		if(min) {
+			if(_hFscBtmbar && _bottomBar->IsVisible()) {
+				::ShowWindow(_hFscBtmbar, SW_SHOWNOACTIVATE);
+			}
+		}
+		makeTopmost(_hFscBtmbar, 1);
+	}
+	
+}
+
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 	//if(isClosing) return 0;
@@ -1161,6 +1457,15 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	//	return HandleDropFiles(uMsg, wParam, lParam);
 	//} break;
 
+	case WM_STYLECHANGED:
+	{
+		//if(wParam==GWL_STYLE) {
+		//	LPSTYLESTRUCT lpSty = (LPSTYLESTRUCT)lParam;
+		//	if((lpSty->styleNew&WS_POPUP) != (lpSty->styleOld&WS_POPUP)) {
+		//		_frameLess = (lpSty->styleNew&WS_POPUP)?1:2;
+		//	}
+		//}
+	} break;
 	case WM_SETFOCUS:
 	{
 		LogIs(L"WM_SETFOCUS");
@@ -1178,14 +1483,17 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		
 	} return 0;
 	//case WM_PAINT: case WM_CLOSE: case WM_DESTROY:
-	//case WM_SIZE: // old layout code see ::  https://github.com/KnIfER/WODPlayer/blob/9a19f3e5f0893ba82c1a8a3566e5b55f7a3e6290/src/WndControl/WODWindow.cpp#L425
-
+	case WM_SIZE: // old layout code see ::  https://github.com/KnIfER/WODPlayer/blob/9a19f3e5f0893ba82c1a8a3566e5b55f7a3e6290/src/WndControl/WODWindow.cpp#L425
+		if (wParam == SIZE_MINIMIZED) {
+			onPause(1);
+		}
+	return 0;
 	case WM_LBUTTONUP:
 	{
 		::ReleaseCapture();
 	} return 0;
 
-	case WM_TIMER:
+	case WM_TIMER: // sese
 	{
 		if (wParam==10086)
 		{
@@ -1205,11 +1513,39 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		//if(0)
 		if(!_threadInit)
 		if ((wParam == 1 && _mainPlayer._mMediaPlayer)
-			&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
+			&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused() || _mainPlayer.isPng && _playing) )
 		{
 			return TimerProc();
 		}
 	}
+	return 0;
+
+	case WM_SYSCOMMAND:
+	{
+		if (wParam == SC_MINIMIZE)
+		{
+			//lxx(min)
+			//onPause(1);
+		}
+		if (wParam == SC_RESTORE)
+		{
+			//LogIs(2, "onResume");
+			onResume(1);
+		}
+	} 
+	case WM_ACTIVATEAPP:
+	{
+		if (wParam == TRUE) // if npp is about to be activated
+		{
+			onResume();
+		}
+		else
+		{
+			onPause();
+		}
+		return FALSE;
+	}
+
 	return 0;
 
 	case WM_HSCROLL:
@@ -1220,7 +1556,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			if (_mainPlayer._seekbar._isSeeking && _mainPlayer._mMediaPlayer
 				&& (_mainPlayer._mMediaPlayer->IsPlaying() || _mainPlayer._mMediaPlayer->IsPaused()) )
 			{
-				_mainPlayer._mMediaPlayer->SetPosition(wParam, true);
+				_mainPlayer.SetPosition(wParam, true);
 			}
 		}
 	} 
@@ -1327,6 +1663,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	//	break;
 	case WM_COMMAND:
 	{
+		HWND hwnd = GetHWND();
+		UINT style;
 		bHandled = true;
 		switch (LOWORD(wParam))
 		{
@@ -1518,6 +1856,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_RESTORE:
 			if(_isFullScreen) 
 				ToggleFullScreen();
+			if(_isMini) 
+				ToggleMini();
 			if(::IsMaximized(GetHWND()))
 				SendMessage(WM_SYSCOMMAND, _isMaximized=SC_RESTORE, 0); 
 			break;
@@ -1537,6 +1877,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			if(keyPressed) break;
 			keyPressed = 1;
 			ToggleFullScreen();
+			ToggleFullScreen1();
 			break;
 		case IDM_SHUTDOWN:
 			Close();
@@ -1568,9 +1909,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			break;
 
 		case IDM_PLAY_TIME:
-			return _mainPlayer._mMediaPlayer->GetPosition();
+			return _mainPlayer.GetPosition(0);
 		case IDM_PLAY_SEEK:
-			_mainPlayer._mMediaPlayer->SetPosition(lParam, HIWORD(wParam)==0);
+			_mainPlayer.SetPosition(lParam, HIWORD(wParam)==0);
 			return 1;
 
 		case IDM_SEEK_FORE: SeekDelta(1, 0); break;
@@ -1605,6 +1946,13 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			if(!keyPressed) {
 				keyPressed = true;
 				NextPlayList(LOWORD(wParam)==IDM_PLAY_PRV, 0);
+			}
+			return 1;
+		case IDM_PLAY_PRV_GP:
+		case IDM_PLAY_NXT_GP:
+			if(!keyPressed) {
+				keyPressed = true;
+				NextPlayGroup(LOWORD(wParam)==IDM_PLAY_PRV_GP, 0);
 			}
 			return 1;
 		case IDM_PLAY_A:
@@ -1653,15 +2001,75 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_BKMK:
 			trackWodMenus((CControlUI*)lParam, wParam);
 			break;
+		case IDM_WIN:
+			if(!HIWORD(wParam) || HIWORD(wParam)>=5)
+			{
+				trackWodMenus((CControlUI*)lParam, wParam);
+				break;
+			}
+		case IDM_MINI:
+			if(_isFullScreen) ToggleFullScreen();
+			ToggleMini();
+			break;
+		case IDM_WIN_L:
+			if(_isFullScreen) ToggleFullScreen();
+			if(!_isMini) ToggleMini();
+			{
+
+			}
+			break;
+		case IDM_PIN:
+		{	
+			style = GetWindowLong(GetHWND(), GWL_EXSTYLE); // ex_style
+			if(style&WS_POPUP) {
+				SetWindowLong(GetHWND(), GWL_STYLE , style & ~WS_POPUP  | WS_THICKFRAME );
+				style &= ~WS_EX_TOPMOST;
+			}
+			if(style&WS_EX_TOPMOST) {
+				SetWindowLong(GetHWND(), GWL_EXSTYLE , style & ~WS_EX_TOPMOST );
+				::SetWindowPos(GetHWND(), HWND_NOTOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+			} else {
+				SetWindowLong(GetHWND(), GWL_EXSTYLE , style | WS_EX_TOPMOST );
+				::SetWindowPos(GetHWND(), HWND_TOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+			}
+		}	break;
+		case IDM_PIN_TOP:
+		{
+			UINT style = GetWindowLong(GetHWND(), GWL_STYLE);
+			if(style&WS_POPUP) {
+				SetWindowLong(GetHWND(), GWL_STYLE , style & ~WS_POPUP  | WS_THICKFRAME );
+
+				SetWindowLong(GetHWND(), GWL_EXSTYLE , GetWindowLong(GetHWND(), GWL_EXSTYLE) & ~WS_EX_TOPMOST );
+				::SetWindowPos(GetHWND(), HWND_NOTOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+			} else {
+				SetWindowLong(GetHWND(), GWL_STYLE , style & ~WS_THICKFRAME  | WS_POPUP );
+
+
+				SetWindowLong(GetHWND(), GWL_EXSTYLE , GetWindowLong(GetHWND(), GWL_EXSTYLE) | WS_EX_TOPMOST );
+				::SetWindowPos(GetHWND(), HWND_TOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+
+
+				int w = ::GetSystemMetrics(SM_CXSCREEN)/2;
+				int h = ::GetSystemMetrics(SM_CYSCREEN);
+				//_lastTopMost = GetWindowLong(hWnd, GWL_EXSTYLE)&WS_EX_TOPMOST;
+				::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, XPP->m_pm.GetRoot()->GetWidth(), h, 0);
+			}
+			//SetWindowLong(GetHWND(), GWL_STYLE , style & ~dwNScStyle | WS_POPUP );
+			SetFocus(XPP->GetHWND());
+		} break;
 		case IDM_SKIN:
-			//trackWodMenus((CControlUI*)lParam, wParam);
-			// 切换hollow
-			PutProfInt("WndOp", GetProfInt("WndOp", -1)!=1?1:0);
-			ResetWndOpacity();
+			if(HIWORD(wParam) && HIWORD(wParam)<5)
+			{
+				// 切换hollow
+				PutProfInt("WndOp", GetProfInt("WndOp", -1)!=1?1:0);
+				ResetWndOpacity();
+				break;
+			}
+			trackWodMenus((CControlUI*)lParam, wParam);
 			break;
 		case IDM_PLUGIN:
 			// 切换mpv+xunlei
-			if(HIWORD(wParam))
+			if(HIWORD(wParam) && HIWORD(wParam)<5)
 			{
 				string* player = GetProfString("player");
 				PutProfString("player", player && *player=="MPVExternalPlayer.dll"?"XunLeiExternalPlayer\\XunLeiExternalPlayer.dll":"MPVExternalPlayer.dll");

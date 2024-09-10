@@ -13,7 +13,7 @@
 		bkcolor="#0000FFFF" 
 		hotbkcolor="#ff0096c9" 
 		hottextcolor="#ffffffff" 
-		inset="10,0"
+		inset="10,4"
 		vscrollbar="true" 
 		hscrollbar="true"
 		hscrollbar="false"
@@ -21,7 +21,7 @@
 		autocalcwidth="true"
 		autocalcheight="false"
 		multiline="false"
-		align="center"
+		align="left"
 		valign="vcenter"
 		font="menu"
 		/>

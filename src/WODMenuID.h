@@ -18,6 +18,7 @@
 #define IDM_VIEW_PROPERTY        IDM_FILE+10
 #define IDM_APPEND_PLAYLIST       IDM_FILE+11
 #define IDM_DELETE_ALL_FOREVER       IDM_FILE+44
+#define IDM_RESTORE                    113
 
 
 // 播放
@@ -63,6 +64,8 @@
 #define IDM_PLAY_PLAY			   IDM_PLAY+34
 #define IDM_PLAY_TIME			   IDM_PLAY+35
 #define IDM_PLAY_SEEK			   IDM_PLAY+36
+#define IDM_PLAY_PRV_GP			   IDM_PLAY+37
+#define IDM_PLAY_NXT_GP			   IDM_PLAY+38
 
 #define IDM_ROTATE IDM_PLAY+50
 #define IDM_ROTATE_RIGHT	  IDM_PLAY+51
@@ -104,3 +107,14 @@
 #define IDM_SKIN_ALPHA_10     IDM_SKIN+12
 #define IDM_SKIN_SEEKBAR_MAGNIFIER     IDM_SKIN+13
 
+
+// 窗口模式
+#define IDM_WIN IDM + 6000
+#define IDM_WIN_L IDM_WIN + 1
+#define IDM_WIN_R IDM_WIN + 2
+
+#define IDM_PIN IDM_WIN + 10
+#define IDM_PIN_TOP IDM_WIN + 11
+#define IDM_FIT IDM_WIN + 12
+#define IDM_FIT_AUTO IDM_WIN + 13
+#define IDM_MINI IDM_WIN + 14

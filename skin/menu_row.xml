@@ -1,21 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Window caption="0,0,0,30" roundcorner="5,5,5,5" showdirty="false">
- 	
-	<Button 
+
+  <Button
+    name="text"
 		type="o"
-		bkcolor="#ffffFFFF" 
-		hotbkcolor="#ff0096c9" 
-		hottextcolor="#ffffffff" 
-		inset="10,0"
-		vscrollbar="true" 
-		hscrollbar="true"
-		hscrollbar="false"
-		menu="true"
+		bkcolor="#333"
+		hotbkcolor="#ff0096c9"
+		hottextcolor="#fff"
+		textcolor="#fff"
+		inset="35,4,10,4"
 		autocalcwidth="true"
 		autocalcheight="true"
 		multiline="false"
-		align="center"
+		align="left"
 		valign="vcenter"
 		font="menu"
-		/>
+		ignorechwh="true"
+		>
+
+    <VBox
+        name="ck"
+        width="-1"
+        height="-1"
+		    inset="10,0"
+        childvalign="vcenter"
+        visible="false"
+      >
+      <Button
+        type="o"
+        bkcolor="#ff6f3709"
+        textcolor="#fff"
+        inset="0"
+        width="20"
+        height="20"
+        multiline="false"
+        align="center"
+        valign="vcenter"
+        font="menu"
+        text="√"
+		    />
+    </VBox>
+    
+  </Button>
 </Window>
