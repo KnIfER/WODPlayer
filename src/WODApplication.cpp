@@ -361,14 +361,21 @@ WinFrame* _osd;
 
 void SetFloatHwndX(HWND hwnd)
 {
-	SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) 
-		| WS_EX_LAYERED
-		| WS_EX_TOOLWINDOW
-	);
+
+	SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+
+	//SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) 
+	//	| WS_EX_LAYERED
+	//	| WS_EX_TOOLWINDOW
+	//);
 	//::SetParent(hwnd, 0);
 	//auto TransparentKey = RGB(0,0,0xff);
-	auto TransparentKey = RGB(0x55,0x88,0x88);
+	auto TransparentKey = RGB(0x55,0x88,0x55);
+	//TransparentKey = RGB(0,1,0);
 	SetLayeredWindowAttributes(hwnd, TransparentKey, 0, LWA_COLORKEY);
+
+	//RECT rc; GetClientRect(hwnd, &rc);
+	//::InvalidateRect(hwnd, 0, true);
 
 	//::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 100, 100, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
 }
@@ -1553,7 +1560,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	return 0;
 	case WM_MOVE:
 	{
-		if(0) { // _osd
+		if(_osd) { // _osd
 			RECT rc = _osd->GetPos();
 			RECT pRc;
 

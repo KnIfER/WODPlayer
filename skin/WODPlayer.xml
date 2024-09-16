@@ -84,8 +84,9 @@ showshadow="false"
     <_v height="0" name="ch0"/>
 
 
-    <WinFrame float="1"  name="osd" dlgex="b100" floatalign="top">
-      <VBox    bkcolor="#ff558888" >
+    <WinFrame float="1"  name="osd" dlgex="b100" floatalign="top" hitless="1" >
+      <!--<VBox    bkcolor="#ff000100" xhitless="1" name="osd_inner">-->
+      <VBox    bkcolor="#ff558855" hitless="1" name="osd_inner">
 
         <!--<RichEdit
           float="1"
