@@ -25,18 +25,18 @@ __declspec(selectany) bool ProfDirty=false;
 
 __declspec(selectany) TCHAR			g_IniFilePath[MAX_PATH]{0};
 
-std::string* GetProfString( const char* name);
+std::string* GetProfString( const char* name, std::map<std::string, std::string>* prof=&Profile);
 
-std::string* GetLocalText(std::map<std::string, std::string> & m, const char* name);
+std::string* GetLocalText(std::map<std::string, std::string> & m, const char* name, std::map<std::string, std::string>* prof=&Profile);
 
-int GetProfInt(const char* name, int defVal);
+int GetProfInt(const char* name, int defVal, std::map<std::string, std::string>* prof=&Profile);
 
-bool PutProfString(const char* name, const char* data);
+bool PutProfString(const char* name, const char* data, std::map<std::string, std::string>* prof=&Profile);
 
-bool PutProfInt(const char* name, int val);
+bool PutProfInt(const char* name, int val, std::map<std::string, std::string>* prof=&Profile);
 
-bool loadProf(const TCHAR* path, const const TCHAR* name);
+bool loadProf(const TCHAR* path, const const TCHAR* name, std::map<std::string, std::string>* prof=&Profile);
 
-void loadLanguge(const TCHAR* path);
+void loadLanguge(const TCHAR* path, std::map<std::string, std::string>* prof=&Profile);
 
-void saveProf(const TCHAR* path, const const TCHAR* name);
+void saveProf(const TCHAR* path, const const TCHAR* name, std::map<std::string, std::string>* prof=&Profile);

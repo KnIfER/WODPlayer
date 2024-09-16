@@ -33,8 +33,11 @@ extern void makeTopmost(HWND hwnd, bool mayTop);
 
 CContainerUI* toHide;
 
+BOOL iconized = FALSE;
+
 void hookMouseMove(MSG & msg)
 {
+	if(iconized) return;
 	int yPos = msg.pt.y;
 	RECT rc;
 	GetWindowRect(XPP->GetHWND(), &rc);
@@ -107,12 +110,17 @@ void hookLButtonDown(MSG & msg)
 			XPP->_mainPlayer.HandleCustomMessage(msg.message, msg.wParam, msg.lParam, 0);
 		}
 	}
+	//else if(XPP->_topBarFscWnd->GetHWND()==msg.hwnd) 
+	//{
+	//	//scheduleMoveWnd = 1;
+	//	::SendMessage(XPP->GetHWND(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+	//	SetFocus(XPP->GetHWND());
+	//}
 	else if(msg.pt.y<=4 || XPP->_topBarFscWnd->GetHWND()==msg.hwnd) 
 	{
 		scheduleExitFsc = msg.pt.y;
 		if(scheduleExitFsc==0)
 			scheduleExitFsc=1;
-		return;
 	}
 }
 
@@ -251,10 +259,13 @@ TCHAR* ReadUTF16File(const TCHAR* filePath) {
 	ReadFile(hFile, buffer, fileSize, &bytesRead, NULL);
 	buffer[fileSize / sizeof(TCHAR)] = '\0';
 
-	CloseHandle(hFile);
+	CloseHandle(hFile); 
 
 	return buffer;
 }
+
+
+int initX=-1, initY=-1, initW=500, initH=500, initM;
 
 
 void parseArgs(std::vector<std::wstring> & args) 
@@ -266,10 +277,12 @@ void parseArgs(std::vector<std::wstring> & args)
 		//lxx(ss, (path.data()))
 		if(path.size()>0) {
 			if(path[0]==L'-') {
-				if(StrCmpN(args[i].c_str(), L"-loadArgs", 9)==0) {
+				auto data = args[i].c_str();
+				//lxx(ss, data)
+				if(StrCmpN(data, L"-loadArgs", 9)==0) {
 					QkString ln;
-					if(StrCmpN(args[i].c_str(), L"-loadArgsW", 10)==0) {
-						TCHAR* all = ReadUTF16File(args[i].c_str()+11)+1;
+					if(StrCmpN(data, L"-loadArgsW", 10)==0) {
+						TCHAR* all = ReadUTF16File(data+11)+1;
 						TCHAR* current = all;
 						TCHAR* next = nullptr;
 						while ((next = _tcschr(current, _T('\n'))) != nullptr) {
@@ -291,7 +304,7 @@ void parseArgs(std::vector<std::wstring> & args)
 						}
 
 
-						//	std::wifstream file(args[i].c_str()+11, std::ios::binary);
+						//	std::wifstream file(data+11, std::ios::binary);
 						//	if (file.is_open()) {
 						//		// apply BOM-sensitive UTF-16 facet
 						//		std::locale loc("chs");	
@@ -310,8 +323,9 @@ void parseArgs(std::vector<std::wstring> & args)
 						//		}
 						//	}
 						//	file.close();
-					} else {
-						std::ifstream file(args[i].c_str()+10);
+					} 
+					else {
+						std::ifstream file(data+10);
 						if (file.is_open()) {
 							std::string line;
 							while (std::getline(file, line)) {
@@ -323,17 +337,51 @@ void parseArgs(std::vector<std::wstring> & args)
 						file.close();
 					}
 				}
+
+				else if(StrCmpN(data, L"-init", 5)==0) {
+					long tmp;
+					if(StrCmpN(data, L"-initX", 6)==0) {
+						STR2Decimal(data+7, tmp);
+						initX = tmp;
+					}
+					if(StrCmpN(data, L"-initY", 6)==0) {
+						STR2Decimal(data+7, tmp);
+						initY = tmp;
+					}
+					if(StrCmpN(data, L"-initW", 6)==0) {
+						STR2Decimal(data+7, tmp);
+						initW = tmp;
+					}
+					if(StrCmpN(data, L"-initH", 6)==0) {
+						STR2Decimal(data+7, tmp);
+						initH = tmp;
+					}
+					if(StrCmpN(data, L"-initM", 6)==0) {
+						STR2Decimal(data+7, tmp);
+						initM = tmp;
+					}
+				}
 			} 
 			else {
-				QkString path_ = path.c_str();
-				if(!path_.EndWith(L".txt")) { // todo opt
-					//if (!append)
-					//{
-					//	_mainPlayer.PlayVideoFile(path_);
-					//	append = true;
-					//}
-					XPP->_playList.push_back(args[i].c_str());
+				auto & lst = XPP->_playList;
+				lst.push_back(args[i].c_str());
+				int idx = lst.size()-1;
+				auto & added = lst.at(idx);
+				if(added.EndWith(L".txt")) {
+					lst.erase(lst.begin()+idx);
+				} else if(added.GetLength()>5){
+					if(added[0]==L'"') {
+						added.Mid(1, added.GetLength()-2);
+					}
 				}
+				//QkString path_ = path.c_str();
+				//if(!path_.EndWith(L".txt")) { // todo opt
+				//	//if (!append)
+				//	//{
+				//	//	_mainPlayer.PlayVideoFile(path_);
+				//	//	append = true;
+				//	//}
+				//}
 			}
 		}
 	}
@@ -350,12 +398,32 @@ wWinMain(_In_ HINSTANCE hInstance,
 
 	parseCommandLine(lpCmdLine, _args);
 
-	// 防止短时间打开许多实例
-	hMutexTemp = CreateMutex(NULL, TRUE, L"WODPLTMP1");
-	if (GetLastError() == ERROR_ALREADY_EXISTS) // 检查互斥体是否已存在
+	bool bNoWait = false;
+
+
+	bool append = std::find(_args.begin(), _args.end(), L"-add")!= _args.end();
+	for (size_t i = 0; i < _args.size(); i++)
 	{
-		if(prvInstance(lpCmdLine, TRUE)) return 0;
-		hMutexTemp = 0;
+		auto &  path = _args[i];
+		//lxx(ss, (path.data()))
+		if(path.size()>0) {
+			if(path[0]==L'-') {
+				if(StrCmpN(_args[i].c_str(), L"-nowait", 7)==0) {
+					bNoWait = true;
+				}
+			}
+		}
+	}
+
+
+	if(!bNoWait) {
+		// 防止短时间打开许多实例
+		hMutexTemp = CreateMutex(NULL, TRUE, L"WODPLTMP1");
+		if (GetLastError() == ERROR_ALREADY_EXISTS) // 检查互斥体是否已存在
+		{
+			if(prvInstance(lpCmdLine, TRUE)) return 0;
+			hMutexTemp = 0;
+		}
 	}
 
 	// 单实例播放器
@@ -415,9 +483,16 @@ wWinMain(_In_ HINSTANCE hInstance,
 	::GetModuleFileName(NULL, usrDir, MAX_PATH);
 	::PathRemoveFileSpec(usrDir);
 	//::PathAppend();
-	loadProf(usrDir, configFileName);
 
 	ImmDisableIME(0);
+
+	loadProf(usrDir, configFileName);
+
+	initX=GetProfInt("initX", -1);
+	initY=GetProfInt("initY", -1);
+	initW=GetProfInt("initW", 500);
+	initH=GetProfInt("initH", 500);
+
 
 	XPP = new WODApplication();
 	//lxx(ss dd, lpCmdLine, _args.size())
@@ -429,13 +504,31 @@ wWinMain(_In_ HINSTANCE hInstance,
 	//WODApplication app{};
 	//XPP = new WODApplication();
 	//XPP = &app;
-	XPP->Create(NULL, _T("无限播放器"), UI_WNDSTYLE_FRAME, WS_EX_APPWINDOW|WS_EX_ACCEPTFILES, 0, 0, 500, 500);
+	XPP->Create(NULL, _T("无限播放器"), UI_WNDSTYLE_FRAME, WS_EX_APPWINDOW|WS_EX_ACCEPTFILES, initX, initY, initW, initH);
 	XPP->ShowWindow();
-	XPP->CenterWindow();
+	if(initX==-1 && initY==-1) // todo
+		XPP->CenterWindow();
 	XPP->buildAccelerator();
 	//XPP->init(hInstance, NULL);
 	//XPP->ShowModal();
 	CControlUI* btn = new CControlUI();
+
+	if(initM) {
+		XPP->m_pm.GetRoot()->PostLambda([](){
+			if(initM&0x1) {
+				XPP->ToggleMini();
+			}
+			if(initM&0x2) {
+				XPP->ToggleFullScreen();
+			}
+			//if(initM&0x2) {
+			//	XPP->SendMessage(WM_SYSCOMMAND, XPP->_isMaximized=SC_MAXIMIZE, 0);
+			//	XPP->m_pm._bStaticMovable = false; 
+			//	XPP->m_pm.GetRoot()->SetInset(0);
+			//}
+			return false;
+		}, 250);
+	}
 
 	MSG    msg;
 	//while(running)

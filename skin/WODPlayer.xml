@@ -10,7 +10,9 @@ showshadow="false"
  <Font id="2" name="宋体" size="30"/>
  <Font id="edit" name="宋体" size="22"/>
  <Font id="menu" name="Microsoft YaHei" size="18" shared="true"/>
+ <Font id="subtitle" name="Microsoft YaHei" size="35" shared="true"/>
  <Font id="menu1" name="Microsoft YaHei" size="19" shared="true"/>
+ <Font id="subtitle" name="Microsoft YaHei" size="35" shared="true"/>
 
 	<style>
 		 <Button
@@ -78,9 +80,69 @@ showshadow="false"
 		<BOX height="-2" name="topH"></BOX>
 	</WinFrame>
 
-	
-	<_v height="0" name="ch0"/>
-	
+	<Box>
+    <_v height="0" name="ch0"/>
+
+
+    <WinFrame float="1"  name="osd" dlgex="b100" floatalign="top">
+      <VBox    bkcolor="#ff558888" >
+
+        <!--<RichEdit
+          float="1"
+          floatalign="bottom"
+          
+          height="-2"
+          width="-1"
+          
+          name="subtitle"
+          bkcolor="#FF000000"
+          hotbkcolor="#ff000000"
+          textcolor="#ffffffff"
+          inset="0"
+          multiline="true"
+          wrap="true"
+          font="edit"
+	vscrollbar="true"
+          readonly="true"
+          
+          align="center"
+          fontSize="23"
+          
+          text="R:\ship\胡萝卜糊了yu - 李白乘舟将欲行，忽闻岸上牛马醒 - [24491265] - [2024-08-03] - [203101894].flv"
+						/>-->
+
+        <Edit
+          float="1"
+          floatalign="bottom"
+          
+          height="-2"
+          width="-1"
+          
+          name="subtitle"
+          hotbkcolor="#ff000000"
+          textcolor="#ffffffff"
+          inset="0"
+          multiline="true"
+          wrap="true"
+          font="subtitle"
+					vscrollbar="true"
+          
+          align="center"
+          readonly="true"
+          
+          fontSize="23"
+          
+          text="R:\ship\胡萝卜糊了yu - 李白乘舟将欲行，忽闻岸上牛马醒 - [24491265] - [2024-08-03] - [203101894].flv"
+					/>
+        
+        
+        
+      </VBox>
+    </WinFrame>
+    
+  </Box>
+
+
 	
 	<WinFrame height="-2" name="ch1" floatalign="bottom">
 		<VBox bkcolor="#FF555555"

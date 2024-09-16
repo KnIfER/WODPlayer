@@ -19,6 +19,9 @@
 #define IDM_APPEND_PLAYLIST       IDM_FILE+11
 #define IDM_DELETE_ALL_FOREVER       IDM_FILE+44
 #define IDM_RESTORE                    113
+#define IDM_WINDOW_MODE			   IDM_FILE+45
+
+#define IDM_TEAM_UP			   IDM_FILE+50
 
 
 // 播放

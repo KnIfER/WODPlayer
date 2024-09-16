@@ -448,6 +448,9 @@ static void decryptFileName(QkString & fileName) {
 }
 
 
+set<QkString> touchedTags;
+
+
 bool WODPlayer::PlayVideoFile(const TCHAR* path)
 {
 	bStopped = 0;
@@ -463,6 +466,24 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		_currentPath = path;
 		isPng = _currentPath.EndWith(L".webp") || _currentPath.EndWith(L".jpg") || _currentPath.EndWith(L".jpeg") || _currentPath.EndWith(L".png");
 		fakePos = 0;
+		// touch time
+		int st = _currentPath.ReverseFind(L"\\");
+		int st1 = _currentPath.ReverseFind(L"/");
+		st = MAX(st, st1)+1;
+		int tagIdx = _currentPath.Find(L" - ", st);
+		if(tagIdx==-1) tagIdx = _currentPath.GetLength();
+		QkString tags = _currentPath.Mid(st, tagIdx-st);
+		if(touchedTags.find(tags)==touchedTags.end()) {
+			touchedTags.insert(tags);
+			HANDLE hFile = CreateFile(_currentPath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			if (hFile != INVALID_HANDLE_VALUE) {
+				FILETIME ft;
+				GetSystemTimeAsFileTime(&ft);
+				SetFileTime(hFile, NULL, &ft, NULL);
+				CloseHandle(hFile);
+			}
+		}
+
 	}
 	nSkipStart = nSkipEnd = 0;
 	int seekStart = _currentPath.Find(L"[p");
@@ -613,6 +634,7 @@ int WODPlayer::GetDuration()
 {
 	int duration = _mMediaPlayer->GetDuration();
 	if(duration==0) {
+		isPng = 1;
 		duration = 2.3*1000; // 3 秒
 	}
 	return duration;

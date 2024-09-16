@@ -24,17 +24,17 @@ using namespace std;
 
 extern HWND mainAppWnd;
 
-string* GetProfString(const char* name)
+string* GetProfString(const char* name, std::map<std::string, std::string>* prof)
 {
-	auto idx = Profile.find(name);
-	if(idx!=Profile.end())
+	auto idx = prof->find(name);
+	if(idx!=prof->end())
 	{		
 		return &(*idx).second;
 	}
 	return 0;
 }
 
-string* GetLocalText(std::map<std::string, std::string> & m, const char* name)
+string* GetLocalText(std::map<std::string, std::string> & m, const char* name, std::map<std::string, std::string>* prof)
 {
 	if(!m.size())
 	{
@@ -48,7 +48,7 @@ string* GetLocalText(std::map<std::string, std::string> & m, const char* name)
 	return NULL;
 }
 
-int GetProfInt(const char* name, int defVal)
+int GetProfInt(const char* name, int defVal, std::map<std::string, std::string>* prof)
 {
 	auto data=GetProfString(name);
 	if(data)
@@ -87,10 +87,10 @@ int GetProfInt(const char* name, int defVal)
 	return defVal;
 }
 
-bool PutProfString(const char* name, const char* data)
+bool PutProfString(const char* name, const char* data, std::map<std::string, std::string>* prof)
 {
-	auto idx = Profile.find(name);
-	if(idx!=Profile.end())
+	auto idx = prof->find(name);
+	if(idx!=prof->end())
 	{		
 		auto & item=(*idx).second;
 		if(item==data)
@@ -103,14 +103,14 @@ bool PutProfString(const char* name, const char* data)
 	return 1;
 }
 
-bool PutProfInt(const char* name, int val)
+bool PutProfInt(const char* name, int val, std::map<std::string, std::string>* prof)
 {
 	char buffer[64]={0};
 	itoa(val, buffer, 10);
 	return PutProfString(name, buffer);
 }
 
-void loadProfile(const TCHAR* path, std::map<std::string, std::string> & m, bool skipSpace)
+void loadProfile(const TCHAR* path, std::map<std::string, std::string> * m, bool skipSpace)
 {
 	char buffer[256]; int len, i;
 	ifstream in(path, ios::in);
@@ -152,7 +152,8 @@ void loadProfile(const TCHAR* path, std::map<std::string, std::string> & m, bool
 								else break;
 							}
 						}
-						m[buffer]=buffer+i+1;
+						m->insert({buffer, buffer+i+1});
+						//m[buffer]=buffer+i+1;
 						break;
 					}
 				}
@@ -168,15 +169,16 @@ void loadProfile(const TCHAR* path, std::map<std::string, std::string> & m, bool
 	}
 }
 
-bool loadProf(const TCHAR* path, const const TCHAR* name)
+// public 
+bool loadProf(const TCHAR* path, const TCHAR* name, std::map<std::string, std::string>* prof)
 {
-	if(Profile.size()==0)
+	if(prof->size()==0)
 	{
 		lstrcpy(g_IniFilePath, path);
 		PathAppend(g_IniFilePath, name);
 		if (PathFileExists(g_IniFilePath))
 		{
-			loadProfile(g_IniFilePath, Profile, false);
+			loadProfile(g_IniFilePath, prof, false);
 			return true;
 		}
 		//auto len=lstrlen(g_IniFilePath);
@@ -195,16 +197,16 @@ bool loadProf(const TCHAR* path, const const TCHAR* name)
 	return false;
 }
 
-void loadLanguge(const TCHAR* path)
+void loadLanguge(const TCHAR* path, std::map<std::string, std::string>* prof)
 {
 	localizefile.clear();
 	if (PathFileExists(path))
 	{
-		loadProfile(path, localizefile, true);
+		loadProfile(path, &localizefile, true);
 	}
 }
 
-void saveProf(const TCHAR* path, const const TCHAR* name)
+void saveProf(const TCHAR* path, const const TCHAR* name, std::map<std::string, std::string>* prof)
 {
 	if(ProfDirty)
 	{
@@ -213,7 +215,8 @@ void saveProf(const TCHAR* path, const const TCHAR* name)
 		ofstream out(g_IniFilePath, ios::out);
 		if (out.is_open())
 		{
-			for(auto val:Profile)
+			auto & profile = *prof;
+			for(auto val:profile)
 			{
 				out << val.first << "=" << val.second << endl;
 			}

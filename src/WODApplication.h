@@ -73,6 +73,8 @@ public:
 
     void buildAccelerator();
 
+    void resetInset();
+
     void ToggleFullScreen();
     void ToggleFullScreen1();
     void setMini();
@@ -111,4 +113,6 @@ public:
     std::vector<QkString> _playList;
     int _playIdx;
     HWND _hFscBtmbar;
+
+    vector<HWND> _team;
 };
