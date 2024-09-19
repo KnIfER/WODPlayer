@@ -273,7 +273,7 @@ void parseArgs(std::vector<std::wstring> & args)
 	for (size_t i = 0; i < args.size(); i++)
 	{
 		auto &  path = args[i];
-		//lxx(ss, (path.data()))
+		//if(append) lxxz(ss, (path.data()))
 		if(path.size()>0) {
 			if(path[0]==L'-') {
 				auto data = args[i].c_str();

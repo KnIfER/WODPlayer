@@ -418,16 +418,21 @@ void WODApplication::InitWindow()
 	string* player = GetProfString("player");
 	if(*player=="MPVExternalPlayer.dll") {
 		_threadInit = TRUE;
-		auto th = std::thread([this]{
+		QkString file0;
+		if (_playList.size()>0)
+		{
+			file0 = (_playList[0]);
+		}
+		auto th = std::thread([this, file0]{
 			//Sleep(250);
 			auto file = GetProfString("file");
 			QkString path = file?file->c_str():"";
-			if (_playList.size()>0)
+			if (!file0.IsEmpty())
 			{
-				_mainPlayer.PlayVideoFile(_playList[0]);
+				_mainPlayer.PlayVideoFile(file0);
 			}
-			else if(!path.IsEmpty())
-				_mainPlayer.PlayVideoFile(STR(path));
+			//else if(!path.IsEmpty())
+			//	_mainPlayer.PlayVideoFile(STR(path));
 			//MarkPlaying(true);
 			int cc=0;
 			while(cc<100) 
@@ -1754,7 +1759,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//fileNamesW[pCopyData->dwData] = 0;
 			std::vector<std::wstring> args;
 			parseCommandLine(fileNamesW, args);
-			//lxx(ss dd, fileNamesW, args.size());
+			//lxxz(ss dd, fileNamesW, args.size());
 			bool append = std::find(args.begin(), args.end(), L"-add")!= args.end();
 			if(!append) {
 				XPP->_mainPlayer.Stop();
