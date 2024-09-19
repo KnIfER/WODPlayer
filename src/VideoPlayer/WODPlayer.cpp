@@ -5,7 +5,7 @@
 #include "utils/PathUtils.h"
 //#include "VideoPlayer/VLCPlayer.h"
 
-extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName);
+extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName, bool isMain);
 
 void volume_seekbar_change(SeekBar* bar, int pos) 
 {
@@ -37,15 +37,15 @@ void WODPlayer::newVideoView()
 		}
 	}
 	QkString playerName;
-	auto playerName_ = GetProfString("player");
+	auto playerName_ = GetProfString(isMain?"player":"player");
 	if(playerName_)
 		playerName = playerName_->c_str();
 	else 
-		playerName = L"VLCExternalPlayer.dll";
+		playerName = isMain?L"VLCExternalPlayer.dll":L"MFExternalPlayer.dll";
 	//playerName = L"MFExternalPlayer.dll";
 	//playerName = L"VLCExternalPlayer.dll";
 	//playerName = L"XunLeiExternalPlayer\\XunLeiExternalPlayer.dll";
-	_mMediaPlayer = initVidePlayerImpl(this, playerName);
+	_mMediaPlayer = initVidePlayerImpl(this, playerName, isMain);
 	if (_mMediaPlayer)
 	{
 		_hPlayer = _mMediaPlayer->getHWND();
@@ -318,10 +318,15 @@ void TimeMarksFloatDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdipl
 }
 
 std::string buffer;
+bool hasTrack = false;
 
 void seekchange(SeekBar* bar, int pos) {
 	WODPlayer* player = (WODPlayer*)bar->GetTag();
 	player->SetPosition(pos, true);
+	if(player->isMain && hasTrack) 
+	{
+		player->_app->_audioPlayer.SetPosition(pos, true);
+	}
 }
 
 void seekchangefloat(SeekBar* bar, int posf) {
@@ -459,6 +464,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	{
 		newVideoView();
 	}
+	//if(!isMain) return 1;
 	//ASSERT(_mMediaPlayer);
 	if (_currentPath!=path)
 	{
@@ -520,6 +526,12 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		//_mMediaPlayer->setIni
 		ret = _mMediaPlayer->PlayVideoFile(path, _currentPath.GetData(buffer, 0, endIdx));
 	}
+
+	if(!isMain) {
+		hasTrack = true;
+		return true;
+	}
+
 	int ed, wenhao, b1=title.IsEmpty();
 	if(b1) {
 		idx = _currentPath.ReverseFind('/');
@@ -537,6 +549,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		}
 
 	}
+
 	_app->_titleBar->SetText(title);
 	_app->_titleBar->SetNeedAutoCalcSize();
 
@@ -658,7 +671,8 @@ int WODPlayer::GetPosition(bool tick)
 
 void WODPlayer::SetPosition(long pos, bool fastSeek)
 {
-	_mMediaPlayer->SetPosition(pos, fastSeek);
+	if(_mMediaPlayer)
+		_mMediaPlayer->SetPosition(pos, fastSeek);
 	if(isPng) {
 		fakePos = pos;
 	}
@@ -882,6 +896,9 @@ void WODPlayer::Toggle(int play)
 		if(!_hPlayer) // fixme
 		lxx(%ld = %ld != %ld, _hPlayer, _mMediaPlayer->getHWND(), GetHWND())
 	}
+	if(isMain && hasTrack) {
+		_app->_audioPlayer.Toggle(_isPlaying?1:0);
+	}
 }
 
 void WODPlayer::MarkPlaying(bool playing)
@@ -909,6 +926,9 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 		{
 			//lxx("MPM_PREPARED max=%d %ld\n", wParam, _hPlayer);
 			//lxx(MPM_PREPARED dd, _mMediaPlayer->GetDuration())
+			if(!isMain) {
+				return 1;
+			}
 			if(!_hPlayer) {
 				_hPlayer = ::GetFirstChild(_hWnd);
 				_mMediaPlayer->setHWND(_hPlayer);

@@ -19,6 +19,7 @@
 //#include "WindowBase.h"
 //#include <VideoPlayerInerface.h>
 
+class mpv_handle;
 
 class MPVPlayer //: public VideoPlayer
 {
@@ -76,6 +77,7 @@ public:
 	float		    SetVolume(int rate);
 	void		    SetRotation(int value);
 	int				GetRotation();
+	mpv_handle *mpv = NULL;
 private:
 	LONG_PTR mMediaPlayer;
 	__int64 mRotation;

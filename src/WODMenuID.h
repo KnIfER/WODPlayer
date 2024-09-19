@@ -23,6 +23,11 @@
 
 #define IDM_TEAM_UP			   IDM_FILE+50
 
+#define IDM_FILE_AUDIO			   IDM_FILE+200
+#define IDM_AUDIO_OPEN			   IDM_FILE_AUDIO+1
+#define IDM_AUDIO_COPY			   IDM_FILE_AUDIO+2
+#define IDM_AUDIO_RELOAD		   IDM_FILE_AUDIO+5
+
 
 // 播放
 #define IDM_PLAY IDM + 1000

@@ -12,7 +12,7 @@ showshadow="false"
  <Font id="menu" name="Microsoft YaHei" size="18" shared="true"/>
  <Font id="subtitle" name="Microsoft YaHei" size="35" shared="true"/>
  <Font id="menu1" name="Microsoft YaHei" size="19" shared="true"/>
- <Font id="subtitle" name="Microsoft YaHei" size="35" shared="true"/>
+ <Font id="subtitle" name="Microsoft YaHei" size="50" shared="true"/>
 
 	<style>
 		 <Button
@@ -84,10 +84,9 @@ showshadow="false"
     <_v height="0" name="ch0"/>
 
 
-    <WinFrame float="1"  name="osd" dlgex="b100" floatalign="top" hitless="1" >
+    <WinFrame float="1"  name="osd" dlgex="b100" floatalign="top" hitless="1" visible="0">
       <!--<VBox    bkcolor="#ff000100" xhitless="1" name="osd_inner">-->
       <VBox    bkcolor="#ff558855" hitless="1" name="osd_inner">
-
         <!--<RichEdit
           float="1"
           floatalign="bottom"
@@ -112,9 +111,14 @@ showshadow="false"
           text="R:\ship\胡萝卜糊了yu - 李白乘舟将欲行，忽闻岸上牛马醒 - [24491265] - [2024-08-03] - [203101894].flv"
 						/>-->
 
-        <Edit
+
+
+      <VBox height="-2" 
           float="1"
           floatalign="bottom"
+            >
+        
+        <Edit
           
           height="-2"
           width="-1"
@@ -130,14 +134,16 @@ showshadow="false"
           
           align="center"
           readonly="true"
+          nocursor="true"
           
-          fontSize="23"
           
-          text="R:\ship\胡萝卜糊了yu - 李白乘舟将欲行，忽闻岸上牛马醒 - [24491265] - [2024-08-03] - [203101894].flv"
+          text="李白乘舟将欲行，忽闻岸上牛马醒"
 					/>
+
         
-        
-        
+					<PAD    hitless="1" height="25" name="bpad"/>
+      </VBox>
+
       </VBox>
     </WinFrame>
     

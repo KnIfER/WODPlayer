@@ -52,6 +52,8 @@
     <ClInclude Include="src\targetver.h" />
     <ClInclude Include="src\WODMenus.h" />
     <ClInclude Include="src\WODMenuID.h" />
+    <ClInclude Include="WODLrc.h" />
+    <ClInclude Include="WODLrc.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\demo\res\icons.bmp" />

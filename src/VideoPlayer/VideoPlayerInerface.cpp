@@ -26,7 +26,7 @@
 #define SUCCEED error_code==0
 
 
-VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName)
+VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName, bool isMain)
 {
 	int error_code=-1;
 	VideoPlayer* ret;
@@ -98,7 +98,7 @@ VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName)
 			}
 		}
 		//LogIs(2, dllDir?dllDir:L"null");
-		ret = new ExternalPlayer(error_code, CPaintManagerUI::GetInstance(), xpp->GetHWND(), buffer, dllDir);
+		ret = new ExternalPlayer(error_code, CPaintManagerUI::GetInstance(), isMain?xpp->GetHWND():NULL, buffer, dllDir);
 		if (SUCCEED)
 		{
 			return ret;

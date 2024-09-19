@@ -84,6 +84,7 @@ public:
     bool PickFile();
 
     WODPlayer _mainPlayer;
+    WODPlayer _audioPlayer;
 	//TabLayout _tabLayout;
 	//ButtonList _toolbar;
     CControlUI* _playBtn;

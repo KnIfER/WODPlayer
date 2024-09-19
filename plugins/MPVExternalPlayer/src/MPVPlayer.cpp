@@ -37,8 +37,6 @@ typedef unsigned int ssize_t;
 #define MM_PREPARED              (WM_USER)
 #define MM_STOPPED               (WM_USER+1)
 
-mpv_handle *mpv = NULL;
-
 #define kClassWindow L"VideoFrameMVP"
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -169,8 +167,8 @@ static void handleEvents(mpv_event *event, MPVPlayer *player)
         PostMessage(player->getHParent(), MM_STOPPED, player->GetDuration(), 0);
         break;
     case MPV_EVENT_SHUTDOWN:
-        mpv_terminate_destroy(mpv);
-        mpv = NULL;
+        mpv_terminate_destroy(player->mpv);
+        player->mpv = NULL;
         break;
     default:
         break;
@@ -196,7 +194,7 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
     error_code=1;
     init(hPlugin, hParent);
     //testVlc(hParent,0);
-    if (mpv==NULL)
+    if (mpv==NULL) // ||1
     {
         mpv = mpv_create();
 
@@ -213,6 +211,7 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
     mpv_set_option_string(mpv, "loop", "inf");
     mpv_set_option_string(mpv, "keep-open", "yes");
 
+    if(hParent)
     mpv_set_option_string(mpv, "force-window", "yes");
     mpv_set_option_string(mpv, "auto-window-resize", "no");
     //mpv_set_property_string(mpv, "af", "volume=10");
@@ -230,7 +229,8 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
 
     mpv_set_property_string(mpv, "no-config", "yes");
     mpv_set_option(mpv, "no-config", mpv_format::MPV_FORMAT_NONE, 0);
-    mpv_set_property_string(mpv, "log-file", "R:\\cahce\\mpv.log");
+
+    //mpv_set_property_string(mpv, "log-file", "R:\\cahce\\mpv.log");
 
     //mpv_set_property_string(mpv, "hr-seek", "no");
 
@@ -239,6 +239,14 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
     //mpv_set_option_string(mpv, "keepaspect-window", "no");
 
     //mpv_set_option(m_mpvInstance, "ctx", mpv_format::MPV_FORMAT_INT64, this);
+
+    if(!hParent) {
+        mpv_set_option_string(mpv, "audio-display", "no");
+        mpv_set_option_string(mpv, "no-audio-display", "yes");
+        mpv_set_option_string(mpv, "no-video", "yes");
+        mpv_set_option_string(mpv, "video", "no");
+    }
+
 
     // 设置 MPV 事件回调函数
     mpv_set_wakeup_callback(mpv, wakeup, this);

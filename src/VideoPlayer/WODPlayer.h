@@ -96,5 +96,6 @@ public:
 
     long fakePos;
     bool isPng;
+    bool isMain;
 };
 

@@ -16,7 +16,6 @@
 */
 #include "pch.h"
 
-
 struct DemoData
 {
 	const TCHAR* title;
@@ -631,6 +630,3 @@ wWinMain(_In_ HINSTANCE hInstance,
 	}
 
 }
-
-
-

@@ -24,6 +24,8 @@
 #include <chrono>
 
 
+#include "WODLrc.h"
+
 struct DemoData
 {
 	const TCHAR* title;
@@ -410,6 +412,8 @@ void WODApplication::InitWindow()
 
 	_db->Init();
 
+	_mainPlayer.isMain = 1;
+
 	//m_pm.GetRoot()->PostLambda(, 250);
 	string* player = GetProfString("player");
 	if(*player=="MPVExternalPlayer.dll") {
@@ -498,6 +502,11 @@ void WODApplication::InitWindow()
 		}, 500);
 
 	}
+
+	//const TCHAR* filePath = L"R:\\ship\\Godot - Using Terrain3D in Godot 4 - Part 2.srt";
+	//LoadSubtitle(filePath);
+	//void resetOSD();
+	//resetOSD();
 }
 
 LRESULT WODApplication::OnClose(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
@@ -778,6 +787,14 @@ void WODApplication::ToggleMini()
 }
 
 
+void resetOSD()
+{
+	if(_osd) {
+		bool vis = subsCnt>0;
+		_osd->SetVisible(vis);
+	}
+}
+
 void WODApplication::resetInset()
 {
 	//m_pm.GetRoot()->SetInset(0);
@@ -787,11 +804,30 @@ void WODApplication::resetInset()
 
 	int val = 1;
 
-	if(_isMaximized==SC_MAXIMIZE||_isFullScreen)
+	if(::IsMaximized(GetHWND())||_isFullScreen)
 		val = 0;
 
 
 	m_pm.GetRoot()->SetInset(val);
+
+
+	if(_osd) {
+		_osd->SupressChildLayouts(1);
+		int nPad = _isFullScreen||_isMini?_bottomBar->GetHeight():25;
+		CControlUI* pad = dynamic_cast<CControlUI*>(_osd->GetManager()->FindControl(_T("bpad")));
+		if(pad) {
+			pad->SetFixedHeight(nPad);
+		}
+		//_osd->GetInnerView()->GetItemAt(0)->NeedUpdate();
+		InputBox* edit = dynamic_cast<InputBox*>(_osd->GetManager()->FindControl(_T("subtitle")));
+		if(edit) {
+			edit->PostLambda([edit](){
+				edit->NeedParentAutoUpdate();
+				return false;
+			}, 250);
+		}
+		_osd->SupressChildLayouts(0);
+	}
 }
 
 void WODApplication::ToggleFullScreen()
@@ -800,7 +836,7 @@ void WODApplication::ToggleFullScreen()
 	DWORD style = GetWindowLong(hWnd, GWL_STYLE);
 	_frameLess = !_isFullScreen?1:2;
 	DWORD dwNCSty = dwNScStyle;
-	if(_isMini && (_isMaximized==SC_MAXIMIZE))
+	if(/*_isMini && */(::IsMaximized(GetHWND())))
 		dwNCSty = dwNScStyle1;
 	if (!_isFullScreen)
 	{
@@ -1286,7 +1322,12 @@ LRESULT WODApplication::HandleDropFiles(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	, -1, buffer, 256, 0, 0) ;
 			//MarkPlaying();
 			QkString path_ = szFileName;
-			if(!path_.EndWith(L".txt")) { // todo opt
+			if(path_.EndWith(L".srt")) {
+				LoadSubtitle(path_);
+				//lxxz(dd, subsCnt);
+				resetOSD();
+			}
+			else if(!path_.EndWith(L".txt")) { // todo opt
 				//LogIs(2, STR(path_));
 				if (!nxt_file[0])
 				{
@@ -1349,6 +1390,7 @@ LRESULT WODApplication::TimerProc()
 		}
 	int nPos =  int (pos / (double)duration * 1000);
 	//_timeLabel
+	SyncSubtitles(pos);
 
 	int sec = pos/1000;
 	int minutes = sec/60;
@@ -1507,7 +1549,13 @@ void WODApplication::onResume(bool min) {
 		}
 		makeTopmost(_hFscBtmbar, 1);
 	}
-	
+
+	//makeTopmost(GetHWND(),0);
+
+	//if (IsIconic(GetHWND()))
+	//	::SendMessage(GetHWND(), WM_SYSCOMMAND, SC_RESTORE, 0);
+	//teSetForegroundWindow(GetHWND());
+	SetForegroundWindow(GetHWND());
 }
 
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
@@ -1556,6 +1604,12 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	case WM_SIZE: // old layout code see ::  https://github.com/KnIfER/WODPlayer/blob/9a19f3e5f0893ba82c1a8a3566e5b55f7a3e6290/src/WndControl/WODWindow.cpp#L425
 		if (wParam == SIZE_MINIMIZED) {
 			onPause(1);
+		}
+		if (wParam == SIZE_MAXIMIZED) {
+			resetInset();
+		}
+		if (wParam == SIZE_RESTORED) {
+			resetInset();
 		}
 	return 0;
 	case WM_MOVE:
@@ -1767,6 +1821,25 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_OPEN:
 			PickFile();
 			break;
+		case IDM_AUDIO_OPEN:
+			PickAudio();
+			break;
+		case IDM_AUDIO_RELOAD: // reload track
+			//PickAudio();
+			extern bool hasTrack;
+			if(hasTrack) {
+				_audioPlayer.Stop();
+				if(_audioPlayer.PlayVideoFile(_audioPlayer._currentPath))
+					_audioPlayer.SetPosition(_mainPlayer.GetPosition(false), true);
+			}
+			break;
+		case IDM_AUDIO_COPY:
+			//PickAudio();
+			extern bool hasTrack;
+			if(hasTrack) {
+				SetTmpText(_audioPlayer._currentPath, _audioPlayer._currentPath.GetLength());
+			}
+			break;
 		case IDM_DELETE:
 		case IDM_DELETE_FOREVER: 
 		if(!keyPressed) {
@@ -1797,18 +1870,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//keyPressed = true;
 			QkString data;
 			bool purgeLst = LOWORD(wParam)==IDM_PASTE_PLAYLIST;
-			if (OpenClipboard(GetHWND())) {
-				HANDLE hData = GetClipboardData(CF_UNICODETEXT);
-				if (hData) {
-					LPWSTR pData = (LPWSTR)GlobalLock(hData);
-					if (pData)
-					{
-						data = pData;
-						GlobalUnlock(hData);
-					}
-				}
-				CloseClipboard();
-			}
+			GetTmpText(data, GetHWND());
 			std::vector<QkString> paths;
 			data.Split(L"\n", paths);
 			bool detect = true;
@@ -1879,19 +1941,22 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_COPY_PLAYING: 
 		if(!keyPressed) {
 			//keyPressed = true;
-			const TCHAR* szText = _mainPlayer._currentPath;
-			int length = _mainPlayer._currentPath.GetLength();
-			if (OpenClipboard(NULL)) {
-				EmptyClipboard();
-				HANDLE hData = GlobalAlloc(GHND|GMEM_SHARE, (length+1)*sizeof(wchar_t));
-				LPWSTR pData = (LPWSTR)GlobalLock(hData);
-				CopyMemory(pData, szText, length*sizeof(wchar_t));
-				pData[length] = L'\0';
-
-				GlobalUnlock(hData);
-				SetClipboardData(CF_UNICODETEXT, hData);
-				CloseClipboard();
+			QkString & text = _mainPlayer._currentPath;
+			const TCHAR* pText = text;
+			int length = text.GetLength();
+			if(_osd) {
+				InputBox* edit = dynamic_cast<InputBox*>(_osd->GetManager()->FindControl(_T("subtitle")));
+				if(edit && edit->HasFocus()) {
+					int ed=0;
+					int st = edit->GetSel(&ed);
+					if(st>=0 && st<ed) {
+						//buff = edit->GetText().Mid(st, ed-st);
+						pText = STR(edit->GetText())+st;
+						length = ed-st;
+					}
+				}
 			}
+			SetTmpText(pText, length);
 		} break;
 		case IDM_COPY_PLAYLIST: 
 		if(!keyPressed) {
@@ -1916,17 +1981,19 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//std::string narrowStr = WStringToString(allPaths);
 			//const char* cstr = narrowStr.c_str();
 			const TCHAR* szText = allPaths.c_str();
-			if (OpenClipboard(NULL)) {
-				EmptyClipboard();
-				HANDLE hData = GlobalAlloc(GHND|GMEM_SHARE, (allPaths.size()+1)*sizeof(wchar_t));
-				LPWSTR pData = (LPWSTR)GlobalLock(hData);
-				CopyMemory(pData, szText, allPaths.size()*sizeof(wchar_t));
-				pData[allPaths.size()] = L'\0';
 
-				GlobalUnlock(hData);
-				SetClipboardData(CF_UNICODETEXT, hData);
-				CloseClipboard();
-			}
+			SetTmpText(szText, allPaths.size());
+			//if (OpenClipboard(NULL)) {
+			//	EmptyClipboard();
+			//	HANDLE hData = GlobalAlloc(GHND|GMEM_SHARE, (allPaths.size()+1)*sizeof(wchar_t));
+			//	LPWSTR pData = (LPWSTR)GlobalLock(hData);
+			//	CopyMemory(pData, szText, allPaths.size()*sizeof(wchar_t));
+			//	pData[allPaths.size()] = L'\0';
+
+			//	GlobalUnlock(hData);
+			//	SetClipboardData(CF_UNICODETEXT, hData);
+			//	CloseClipboard();
+			//}
 		} break;
 		case IDM_MIN:
 			SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0); 
@@ -1996,7 +2063,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 		case IDM_WINDOW_MODE:{
 			int ret = 0;
-			if(_isMaximized==SC_MAXIMIZE) ret |= 1<<2;
+			if(::IsMaximized(GetHWND())) ret |= 1<<2;
 			if(_isFullScreen) ret |= 1<<1;
 			if(_isMini) ret |= 1;
 			return ret;
@@ -2378,3 +2445,38 @@ void WODApplication::DeleteAllFile(BOOL permanent)
 	}
 }
 
+
+
+#include "WODLrc.hpp"
+
+long lastFrom=-1;
+long lastTo=-1;
+
+void SyncSubtitles(long current) {
+	//long current = XPP->_mainPlayer.GetPosition(false);
+
+	if(current>=lastFrom && current<lastTo) {
+		return;
+	}
+	if(_osd) {
+		for (size_t i = 0; i < subtitles.size(); i++)
+		{
+			if(current>=subtitles[i].from && current<subtitles[i].to) {
+				lastFrom = subtitles[i].from;
+				lastTo = subtitles[i].to;
+				//lxx(SyncSubtitles ss, STR(subtitles[i].line))
+
+				InputBox* edit = dynamic_cast<InputBox*>(_osd->GetManager()->FindControl(_T("subtitle")));
+				if(edit) {
+					edit->SetText(subtitles[i].line);
+					edit->SetScrollPos({0,0});
+					edit->SetSel(0,0);
+					//edit->NeedUpdate(); // todo optimize
+					edit->NeedParentAutoUpdate();
+					//edit->NeedParentUpdate();
+				}
+				break;
+			}
+		}
+	}
+}
