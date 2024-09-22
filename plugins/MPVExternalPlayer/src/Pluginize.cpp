@@ -4,6 +4,7 @@
 #include <string>
 
 #include "MPVPlayer.h"
+#include "Pluginize.h"
 
 
 struct VWCreateOptions{
@@ -130,6 +131,13 @@ extern "C" __declspec(dllexport) void vwSetRotation(MPVPlayer* player, int value
 extern "C" __declspec(dllexport) int64_t vwGetRotation(MPVPlayer* player) 
 {
 	return player->GetRotation();
+}
+
+
+
+extern "C" __declspec(dllexport) int64_t vwSetPositionEx(MPVPlayer* player, LONG wParam, LONG LPARAM) 
+{
+	return player->SetPositionEx(wParam, LPARAM);
 }
 
 

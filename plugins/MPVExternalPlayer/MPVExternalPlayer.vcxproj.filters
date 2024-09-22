@@ -32,5 +32,8 @@
     <ClInclude Include="src\InsituDebug.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Pluginize.h">
+      <Filter>Resource Files\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

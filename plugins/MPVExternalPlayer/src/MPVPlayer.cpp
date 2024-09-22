@@ -447,3 +447,34 @@ int MPVPlayer::GetRotation()
     mpv_get_property(mpv, "video-rotate", MPV_FORMAT_INT64, &mRotation);
     return mRotation;
 }
+
+
+int MPVPlayer::SetPositionEx(LONG WPARAM, LONG LPARAM)
+{
+    int cmd = WPARAM;
+    if(cmd==1) { // step
+        mpv_command_string(mpv,"frame-back-step");
+    }
+    if(cmd==2) { // step
+        mpv_command_string(mpv,"frame-step");
+    }
+    if(cmd==3) { // keyframe
+        const char** args = new const char*[] {
+            "seek", "-0.1"
+                // , "exact", "synchronous"
+                , "relative+keyframes"
+                , NULL
+        };
+        mpv_command(mpv, args);
+    }
+    if(cmd==4) { // keyframe
+        const char** args = new const char*[] {
+            "seek", "+0.1"
+                // , "exact", "synchronous"
+                , "relative+keyframes"
+                , NULL
+        };
+        mpv_command(mpv, args);
+    }
+    return 0;
+}

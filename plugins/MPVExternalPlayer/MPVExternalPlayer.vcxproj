@@ -26,6 +26,7 @@
   <ItemGroup>
     <ClInclude Include="src\InsituDebug.h" />
     <ClInclude Include="src\MPVPlayer.h" />
+    <ClInclude Include="src\Pluginize.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -418,18 +418,19 @@ void WODApplication::InitWindow()
 	string* player = GetProfString("player");
 	if(*player=="MPVExternalPlayer.dll") {
 		_threadInit = TRUE;
-		QkString file0;
 		if (_playList.size()>0)
 		{
-			file0 = (_playList[0]);
+			_mainPlayer._currentPath = _playList[0];
 		}
-		auto th = std::thread([this, file0]{
+		auto th = std::thread([this]{ // async
 			//Sleep(250);
 			auto file = GetProfString("file");
 			QkString path = file?file->c_str():"";
-			if (!file0.IsEmpty())
+			if (!_mainPlayer._currentPath.IsEmpty())
 			{
-				_mainPlayer.PlayVideoFile(file0);
+				QkString tmp = _mainPlayer._currentPath;
+				_mainPlayer._currentPath = "";
+				_mainPlayer.PlayVideoFile(tmp);
 			}
 			//else if(!path.IsEmpty())
 			//	_mainPlayer.PlayVideoFile(STR(path));
@@ -1147,6 +1148,16 @@ void SeekDelta(int delta, int level)
 		if(!XPP->_mainPlayer._isPlaying && !XPP->_mainPlayer._seekbar._isSeeking) {
 			XPP->_mainPlayer._seekbar.SetProgressAndMax(delta, player->GetDuration());
 		}
+	}
+}
+
+
+void SeekEx(int cmd)
+{
+	auto & player = XPP->_mainPlayer._mMediaPlayer;
+	if (player)
+	{
+		player->SetPositionEx(cmd, (LONG)NULL);
 	}
 }
 
@@ -2096,6 +2107,10 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_SEEK_BACK_FAST: SeekDelta(-1, 1); break;
 		case IDM_SEEK_BACK_FASTER: SeekDelta(-1, 2); break;
 
+		case IDM_SEEK_BACK_FRAME: SeekEx(1); break;
+		case IDM_SEEK_FORE_FRAME: SeekEx(2); break;
+		case IDM_SEEK_BACK_KEYFRAME: SeekEx(3); break;
+		case IDM_SEEK_FORE_KEYFRAME: SeekEx(4); break;
 
 		case IDM_ROTATE_RIGHT: 
 		case IDM_ROTATE_LEFT: 

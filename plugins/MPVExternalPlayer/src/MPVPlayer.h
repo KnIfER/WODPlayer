@@ -77,6 +77,7 @@ public:
 	float		    SetVolume(int rate);
 	void		    SetRotation(int value);
 	int				GetRotation();
+	int				SetPositionEx(LONG WPARAM, LONG LPARAM);
 	mpv_handle *mpv = NULL;
 private:
 	LONG_PTR mMediaPlayer;

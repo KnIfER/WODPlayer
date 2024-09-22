@@ -86,6 +86,11 @@ void WODApplication::buildAccelerator()
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_LEFT, IDM_SEEK_BACK_FAST});
 	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_LEFT, IDM_SEEK_BACK_FASTER});
 
+	_accelerators.push_back({FVIRTKEY, VK_D, IDM_SEEK_BACK_FRAME});
+	_accelerators.push_back({FVIRTKEY, VK_F, IDM_SEEK_FORE_FRAME});
+	_accelerators.push_back({FVIRTKEY|FALT, VK_LEFT, IDM_SEEK_BACK_KEYFRAME});
+	_accelerators.push_back({FVIRTKEY|FALT, VK_RIGHT, IDM_SEEK_FORE_KEYFRAME});
+
 
 	// speed
 	_accelerators.push_back({FVIRTKEY, VK_C, IDM_SPEED_UP});

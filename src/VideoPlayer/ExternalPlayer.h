@@ -52,6 +52,7 @@ typedef float (__cdecl* VW_SETRATE)(LONG_PTR, float);
 typedef int (__cdecl* VW_SETVOLUME)(LONG_PTR, int);
 typedef void (__cdecl* VW_SETROTATION)(LONG_PTR, int);
 typedef int (__cdecl* VW_GETROTATION)(LONG_PTR);
+typedef int (__cdecl* VW_SETPOSITIONEX)(LONG_PTR, LONG, LONG);
 
 // D:\Code\FigureOut\XunLeiExternalPlayer\bin\XunLeiExternalPlayer.dll
 
@@ -82,6 +83,7 @@ public:
 	int				SetVolume(int volume) EXP_MV_API;
 	void		    SetRotation(int value) EXP_MV_API;
 	int			GetRotation() EXP_MV_API;
+	int	SetPositionEx(LONG wParam, LONG LPARAM);
 	HMODULE vwInit(int & error_code, const TCHAR* dllPath, bool blame=false, const TCHAR* dllDir=0);
 protected:
 	LONG_PTR _player;
@@ -115,5 +117,6 @@ private:
 	VW_SETVOLUME vwSetVolume = nullptr;
 	VW_SETROTATION vwSetRotation = nullptr;
 	VW_GETROTATION vwGetRotation = nullptr;
+	VW_SETPOSITIONEX vwSetPositionEx = nullptr;
 
 };

@@ -88,6 +88,7 @@ HMODULE ExternalPlayer::vwInit(int & error_code, const TCHAR* dllPath, bool blam
 			DEF_FUNC(hPlayer, vwSetVolume, VW_SETVOLUME, "vwSetVolume");
 			DEF_FUNC(hPlayer, vwSetRotation, VW_SETROTATION, "vwSetRotation");
 			DEF_FUNC(hPlayer, vwGetRotation, VW_GETROTATION, "vwGetRotation");
+			DEF_FUNC(hPlayer, vwSetPositionEx, VW_SETPOSITIONEX, "vwSetPositionEx");
 			if(PRINTLEN!=PRINTLEN_0)
 			{
 				PRINTBUFF[PRINTLEN]='\0';
@@ -222,6 +223,17 @@ int ExternalPlayer::GetRotation()
 	if(_player && vwSetVolume) 
 	{
 		return vwGetRotation(_player);
+	}
+	return 0;
+}
+
+
+
+int ExternalPlayer::SetPositionEx(LONG wParam, LONG LPARAM)
+{
+	if(_player && vwSetPositionEx) 
+	{
+		return vwSetPositionEx(_player, wParam, LPARAM);
 	}
 	return 0;
 }

@@ -503,7 +503,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 	//WODApplication app{};
 	//XPP = new WODApplication();
 	//XPP = &app;
-	XPP->Create(NULL, _T("无限播放器"), UI_WNDSTYLE_FRAME, WS_EX_APPWINDOW|WS_EX_ACCEPTFILES, initX, initY, initW, initH);
+	XPP->Create(NULL, _T("无限播放器"), UI_WNDSTYLE_FRAME & ~WS_SYSMENU, WS_EX_APPWINDOW|WS_EX_ACCEPTFILES, initX, initY, initW, initH);
 	XPP->ShowWindow();
 	if(initX==-1 && initY==-1) // todo
 		XPP->CenterWindow();
