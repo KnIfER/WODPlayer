@@ -208,15 +208,15 @@ class WODMenuAdapter : public MenuPopupAdapter
         LRESULT OnKillFocus(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
         {
             if(pMenuBtn) {
-                int session = _menuSession;
+                int session = g_menuSession;
                 pMenuBtn->PostLambda([session](){ // 看看待会儿是不是还要显示菜单
-                    if(_menuSession==session)
+                    if(g_menuSession==session)
                         closeWodMenus();
                     if(!MenuChain.size()) {
-                        _trackingMenu = false;
-                        if(_pMMenuBtn) {
-                            _pMMenuBtn->SetAttribute(L"pushed", L"0");
-                            _pMMenuBtn = nullptr;
+                        g_trackingMenu = false;
+                        if(g_pMMenuBtn) {
+                            g_pMMenuBtn->SetAttribute(L"pushed", L"0");
+                            g_pMMenuBtn = nullptr;
                         }
                         pMenuBtn = nullptr;
                     }
@@ -329,13 +329,13 @@ bool closeWodMenus(bool closeAll, HWND closeTill)
         }
         MenuChain.resize(0);
         // change menu
-        if(_pMMenuBtn) {
-            _pMMenuBtn->SetAttribute(L"pushed", L"0");
+        if(g_pMMenuBtn) {
+            g_pMMenuBtn->SetAttribute(L"pushed", L"0");
         }
     }
     if(toHide) toHide->SetVisible(false);
     toHide = nullptr;
-    _menuShown = false;
+    g_menuShown = false;
     return 0;
 }
 
@@ -348,7 +348,7 @@ bool trackWodMenus(CControlUI* control, int cmd, int mainMenu, const std::vector
     {
         //lxxx(主菜单::dd dd, mainMenu, menuId==cmd)
         if(mainMenu) { // 主菜单
-            _menuSession++;
+            g_menuSession++;
             if(MenuChain.size()) {
                 if(menuId==cmd) {
                     //_menuShown = true;
@@ -359,7 +359,7 @@ bool trackWodMenus(CControlUI* control, int cmd, int mainMenu, const std::vector
                 }
                 closeWodMenus(true);
             }
-           _pMMenuBtn = control;
+           g_pMMenuBtn = control;
         }
         int sz = MenuChain.size();
         int index = -1;
@@ -407,9 +407,9 @@ bool trackWodMenus(CControlUI* control, int cmd, int mainMenu, const std::vector
         if(!tracked && switched) {
             control->SetFocus();
         }
-        _menuShown = MenuChain.size();
-        if(!_menuShown) {
-            pMenuBtn = _pMMenuBtn = nullptr;
+        g_menuShown = MenuChain.size();
+        if(!g_menuShown) {
+            pMenuBtn = g_pMMenuBtn = nullptr;
         }
     }
     return tracked;

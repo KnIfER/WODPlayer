@@ -33,6 +33,7 @@ extern void makeTopmost(HWND hwnd, bool mayTop);
 CContainerUI* toHide;
 
 BOOL iconized = FALSE;
+BOOL paused = FALSE;
 
 void hookMouseMove(MSG & msg)
 {
@@ -43,7 +44,7 @@ void hookMouseMove(MSG & msg)
 	if(scheduleExitFsc)
 	{
 		//LogIs("hookMouseMove", msg.pt.x, msg.pt.y);
-		if((!_trackingMenu && GetKeyState(VK_LBUTTON) & 0x8000) != 0) // 从全屏窗口拖拽下标题栏
+		if((!g_trackingMenu && GetKeyState(VK_LBUTTON) & 0x8000) != 0) // 从全屏窗口拖拽下标题栏
 		{
 			if(abs(scheduleExitFsc-yPos)>5)
 			{
@@ -69,7 +70,7 @@ void hookMouseMove(MSG & msg)
 	bool v = !XPP->_bottomBar->IsVisible();
 	if((!v) ^ (yPos >= rc.bottom - XPP->_bottomBar->GetHeight()))
 	{
-		if(!v && _menuShown) toHide = (XPP->_bottomBar);
+		if(!v && g_menuShown) toHide = (XPP->_bottomBar);
 		else XPP->_bottomBar->SetVisible(v);
 		v = !v;
 	} 
@@ -80,7 +81,7 @@ void hookMouseMove(MSG & msg)
 	v = !XPP->_topBarFscWnd->IsVisible();
 	if((!v) ^ (yPos <= rc.top + XPP->_topBar->GetHeight()))
 	{
-		if(!v && _menuShown) toHide = (XPP->_topBarFscWnd);
+		if(!v && g_menuShown) toHide = (XPP->_topBarFscWnd);
 		else XPP->_topBarFscWnd->SetVisible(v);
 		v = !v;
 	}
@@ -503,7 +504,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 	//WODApplication app{};
 	//XPP = new WODApplication();
 	//XPP = &app;
-	XPP->Create(NULL, _T("无限播放器"), UI_WNDSTYLE_FRAME & ~WS_SYSMENU, WS_EX_APPWINDOW|WS_EX_ACCEPTFILES, initX, initY, initW, initH);
+	XPP->Create(NULL, _T("无限播放器"), UI_WNDSTYLE_FRAME, WS_EX_APPWINDOW|WS_EX_ACCEPTFILES, initX, initY, initW, initH);
 	XPP->ShowWindow();
 	if(initX==-1 && initY==-1) // todo
 		XPP->CenterWindow();
@@ -570,7 +571,6 @@ wWinMain(_In_ HINSTANCE hInstance,
 				//	break;
 				case WM_MOUSELEAVE:
 				{
-					//lxx(1)
 					if(msg.hwnd==XPP->_topBarFscWnd->GetHWND()) {
 						XPP->_topBarFscWnd->SetVisible(false);
 					}

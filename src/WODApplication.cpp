@@ -15,6 +15,7 @@
 * Foundation.
 */
 #include <pch.h>
+#include <Utils/VU.h>
 #include "../resource.h"
 #include "database\database_helper.h"
 #include "WODMenus.h"
@@ -37,8 +38,6 @@ extern WODApplication* XPP;
 extern int testSqlite();
 
 SeekBar* seekbar;
-
-DWORD g_MainThreadID;
 
 void makeNoTopmost(HWND hwnd) {
 	if (hwnd)
@@ -63,219 +62,6 @@ WODApplication::WODApplication()
 	//_frameLess = 1;
 	//_roundwnd = 1;
 }
-
-BOOL teSetForegroundWindow(HWND hwnd)
-{
-	BOOL bResult = SetForegroundWindow(hwnd);
-	if (!bResult) {
-		DWORD dwForeThreadId = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
-		AttachThreadInput(g_MainThreadID, dwForeThreadId, TRUE);
-		SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-		bResult = SetForegroundWindow(hwnd);
-		AttachThreadInput(g_MainThreadID, dwForeThreadId, FALSE);
-		if (!bResult) {
-			//DWORD dwTimeout = 0;
-			//SystemParametersInfo(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, &dwTimeout, 0);
-			//SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, NULL, 0);
-			//SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-			//bResult = SetForegroundWindow(hwnd);
-			//SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, &dwTimeout, 0);
-		}
-	}
-	return bResult;
-}
-
-
-
-
-bool IsWindowHung(HWND aWnd)
-{
-	if (!aWnd) return false;
-
-	DWORD_PTR dwResult;
-#define Slow_IsWindowHung !SendMessageTimeout(aWnd, WM_NULL, 0, 0, SMTO_ABORTIFHUNG, 5000, &dwResult)
-
-	typedef BOOL (WINAPI *MyIsHungAppWindow)(HWND);
-	static MyIsHungAppWindow IsHungAppWindow = (MyIsHungAppWindow)GetProcAddress(GetModuleHandle(_T("user32"))
-		, "IsHungAppWindow");
-	return IsHungAppWindow ? IsHungAppWindow(aWnd) : Slow_IsWindowHung;
-}
-
-bool g_WinActivateForce = false;
-
-HWND AttemptSetForeground(HWND aTargetWindow, HWND aForeWindow)
-// Returns NULL if aTargetWindow or its owned-window couldn't be brought to the foreground.
-// Otherwise, on success, it returns either aTargetWindow or an HWND owned by aTargetWindow.
-{
-	// Probably best not to trust its return value.  It's been shown to be unreliable at times.
-	// Example: I've confirmed that SetForegroundWindow() sometimes (perhaps about 10% of the time)
-	// indicates failure even though it succeeds.  So we specifically check to see if it worked,
-	// which helps to avoid using the keystroke (2-alts) method, because that may disrupt the
-	// desired state of the keys or disturb any menus that the user may have displayed.
-	// Also: I think the 2-alts last-resort may fire when the system is lagging a bit
-	// (i.e. a drive spinning up) and the window hasn't actually become active yet,
-	// even though it will soon become active on its own.  Also, SetForegroundWindow() sometimes
-	// indicates failure even though it succeeded, usually because the window didn't become
-	// active immediately -- perhaps because the system was under load -- but did soon become
-	// active on its own (after, say, 50ms or so).  UPDATE: If SetForegroundWindow() is called
-	// on a hung window, at least when AttachThreadInput is in effect and that window has
-	// a modal dialog (such as MSIE's find dialog), this call might never return, locking up
-	// our thread.  So now we do this fast-check for whether the window is hung first (and
-	// this call is indeed very fast: its worst case is at least 30x faster than the worst-case
-	// performance of the ABORT-IF-HUNG method used with SendMessageTimeout.
-	// UPDATE for v1.0.42.03: To avoid a very rare crashing issue, IsWindowHung() is no longer called
-	// here, but instead by our caller.  Search on "v1.0.42.03" for more comments.
-	BOOL result = SetForegroundWindow(aTargetWindow);
-	// Note: Increasing the sleep time below did not help with occurrences of "indicated success
-	// even though it failed", at least with metapad.exe being activated while command prompt
-	// and/or AutoIt2's InputBox were active or present on the screen:
-	//SLEEP_WITHOUT_INTERRUPTION(SLEEP_INTERVAL); // Specify param so that it will try to specifically sleep that long.
-	HWND new_fore_window = GetForegroundWindow();
-	if (new_fore_window == aTargetWindow)
-	{
-#ifdef _DEBUG_WINACTIVATE
-		if (!result)
-		{
-			FileAppend(LOGF, _T("SetForegroundWindow() indicated failure even though it succeeded: "), false);
-			FileAppend(LOGF, aTargetTitle);
-		}
-#endif
-		return aTargetWindow;
-	}
-	if (new_fore_window != aForeWindow && aTargetWindow == GetWindow(new_fore_window, GW_OWNER))
-		// The window we're trying to get to the foreground is the owner of the new foreground window.
-		// This is considered to be a success because a window that owns other windows can never be
-		// made the foreground window, at least if the windows it owns are visible.
-		return new_fore_window;
-	// Otherwise, failure:
-	return NULL;
-}
-
-
-HWND SetForegroundWindowEx(HWND aTargetWindow)
-// Caller must have ensured that aTargetWindow is a valid window or NULL, since we
-// don't call IsWindow() here.
-{
-	if (!aTargetWindow)
-		return NULL;  // When called this way (as it is sometimes), do nothing.
-	DWORD target_thread = GetWindowThreadProcessId(aTargetWindow, NULL);
-
-	HWND orig_foreground_wnd = GetForegroundWindow();
-
-	if (IsIconic(aTargetWindow))
-		ShowWindow(aTargetWindow, SW_RESTORE);
-
-	if (aTargetWindow == orig_foreground_wnd) // It's already the active window.
-		return aTargetWindow;
-
-	HWND new_foreground_wnd;
-
-	if (!g_WinActivateForce)
-		// Try a simple approach first:
-#ifdef _DEBUG_WINACTIVATE
-#define IF_ATTEMPT_SET_FORE if (new_foreground_wnd = AttemptSetForeground(aTargetWindow, orig_foreground_wnd, win_name))
-#else
-#define IF_ATTEMPT_SET_FORE if (new_foreground_wnd = AttemptSetForeground(aTargetWindow, orig_foreground_wnd))
-#endif
-		IF_ATTEMPT_SET_FORE
-		return new_foreground_wnd;
-
-#ifdef _DEBUG_WINACTIVATE
-	TCHAR buf[1024];
-#endif
-
-	bool is_attached_my_to_fore = false, is_attached_fore_to_target = false;
-	DWORD fore_thread;
-	if (orig_foreground_wnd) // Might be NULL from above.
-	{
-		// Based on MSDN docs, these calls should always succeed due to the other
-		// checks done above (e.g. that none of the HWND's are NULL):
-		fore_thread = GetWindowThreadProcessId(orig_foreground_wnd, NULL);
-		if (fore_thread && g_MainThreadID != fore_thread && !IsWindowHung(orig_foreground_wnd))
-			is_attached_my_to_fore = AttachThreadInput(g_MainThreadID, fore_thread, TRUE) != 0;
-		if (fore_thread && target_thread && fore_thread != target_thread) // IsWindowHung(aTargetWindow) was called earlier.
-			is_attached_fore_to_target = AttachThreadInput(fore_thread, target_thread, TRUE) != 0;
-	}
-
-	// The log showed that it never seemed to need more than two tries.  But there's
-	// not much harm in trying a few extra times.  The number of tries needed might
-	// vary depending on how fast the CPU is:
-	for (int i = 0; i < 5; ++i)
-	{
-		IF_ATTEMPT_SET_FORE
-		{
-#ifdef _DEBUG_WINACTIVATE
-			if (i > 0) // More than one attempt was needed.
-			{
-				sntprintf(buf, _countof(buf), _T("AttachThreadInput attempt #%d indicated success: %s")
-					, i + 1, win_name);
-				FileAppend(LOGF, buf);
-			}
-#endif
-		break;
-		}
-	}
-
-	// I decided to avoid the quick minimize + restore method of activation.  It's
-	// not that much more effective (if at all), and there are some significant
-	// disadvantages:
-	// - This call will often hang our thread if aTargetWindow is a hung window: ShowWindow(aTargetWindow, SW_MINIMIZE)
-	// - Using SW_FORCEMINIMIZE instead of SW_MINIMIZE has at least one (and probably more)
-	// side effect: When the window is restored, at least via SW_RESTORE, it is no longer
-	// maximized even if it was before the minimize.  So don't use it.
-	if (!new_foreground_wnd) // Not successful yet.
-	{
-		//KeyEvent(KEYDOWNANDUP, VK_MENU);
-		//KeyEvent(KEYDOWNANDUP, VK_MENU);
-
-		// Also replacing "2-alts" with "alt-tab" below, for now:
-
-		new_foreground_wnd = AttemptSetForeground(aTargetWindow, orig_foreground_wnd);
-
-	} // if()
-
-	  // Very important to detach any threads whose inputs were attached above,
-	  // prior to returning, otherwise the next attempt to attach thread inputs
-	  // for these particular windows may result in a hung thread or other
-	  // undesirable effect:
-	if (is_attached_my_to_fore)
-		AttachThreadInput(g_MainThreadID, fore_thread, FALSE);
-	if (is_attached_fore_to_target)
-		AttachThreadInput(fore_thread, target_thread, FALSE);
-
-	// Finally.  This one works, solving the problem of the MessageBox window
-	// having the input focus and being the foreground window, but not actually
-	// being visible (even though IsVisible() and IsIconic() say it is)!  It may
-	// help with other conditions under which this function would otherwise fail.
-	// Here's the way the repeat the failure to test how the absence of this line
-	// affects things, at least on my XP SP1 system:
-	// y::MsgBox, test
-	// #e::(some hotkey that activates Windows Explorer)
-	// Now: Activate explorer with the hotkey, then invoke the MsgBox.  It will
-	// usually be activated but invisible.  Also: Whenever this invisible problem
-	// is about to occur, with or without this fix, it appears that the OS's z-order
-	// is a bit messed up, because when you dismiss the MessageBox, an unexpected
-	// window (probably the one two levels down) becomes active rather than the
-	// window that's only 1 level down in the z-order:
-	if (new_foreground_wnd) // success.
-	{
-		// Even though this is already done for the IE 5.5 "hack" above, must at
-		// a minimum do it here: The above one may be optional, not sure (safest
-		// to leave it unless someone can test with IE 5.5).
-		// Note: I suspect the two lines below achieve the same thing.  They may
-		// even be functionally identical.  UPDATE: This may no longer be needed
-		// now that the first BringWindowToTop(), above, has been disabled due to
-		// its causing more trouble than it's worth.  But seems safer to leave
-		// this one enabled in case it does resolve IE 5.5 related issues and
-		// possible other issues:
-		BringWindowToTop(aTargetWindow);
-		//SetWindowPos(aTargetWindow, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-		return new_foreground_wnd; // Return this rather than aTargetWindow because it's more appropriate.
-	}
-	else
-		return NULL;
-}
-
 
 
 //#include "../WndControl/ButtonList.h"
@@ -386,9 +172,6 @@ void WODApplication::InitWindow()
 {
 	ResetWndOpacity();
 	initWodMenus(this);
-
-
-	g_MainThreadID = GetWindowThreadProcessId(GetHWND(), NULL);;
 
 	m_pm._bIsLayoutOnly = true;
 	_playBtn = m_pm.FindControl(_T("play"));
@@ -1531,9 +1314,11 @@ LRESULT WODApplication::TimerProc()
 }
 
 extern  BOOL iconized;
+extern  BOOL paused;
 
 void WODApplication::onPause(bool min) 
 {
+	paused = true;
 	if(min) {
 		iconized = 1;
 		if(_hFscBtmbar && _bottomBar->IsVisible()) {
@@ -1556,6 +1341,7 @@ void WODApplication::onPause(bool min)
 }
 
 void WODApplication::onResume(bool min) {
+	paused = false;
 	iconized = 0;
 	if(_bottomBar && _bottomBar->IsVisible()) {
 		if(min) {
@@ -1571,7 +1357,7 @@ void WODApplication::onResume(bool min) {
 	//if (IsIconic(GetHWND()))
 	//	::SendMessage(GetHWND(), WM_SYSCOMMAND, SC_RESTORE, 0);
 	//teSetForegroundWindow(GetHWND());
-	SetForegroundWindow(GetHWND());
+	//SetForegroundWindow(GetHWND()); // 会导致mini底栏首次聚焦无法点击
 }
 
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
@@ -1797,7 +1583,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				}
 			}
 			if(!bSetFore) {
-				SetForegroundWindowEx(GetHWND());
+				VU::SetForegroundWindowEx(GetHWND());
 			}
 		}
 	} break;

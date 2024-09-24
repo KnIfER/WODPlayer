@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommand>bin/$(TargetName)$(TargetExt)</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>-loadArgsW=R:\Cache\args_open.txt</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-loadArgsW=R:\Cache\args_open.txt -initM=1</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommand>bin/$(TargetName)$(TargetExt)</LocalDebuggerCommand>
