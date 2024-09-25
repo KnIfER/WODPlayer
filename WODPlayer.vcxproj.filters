@@ -54,9 +54,6 @@
     <ClCompile Include="src\WODMenus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\WndControl\PopupMenu.cpp">
-      <Filter>Source Files\WndControl</Filter>
-    </ClCompile>
     <ClCompile Include="src\Utils\ProfileStd.cpp">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
@@ -103,9 +100,6 @@
     </ClInclude>
     <ClInclude Include="src\WODMenuID.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\WndControl\PopupMenu.h">
-      <Filter>Source Files\WndControl</Filter>
     </ClInclude>
     <ClInclude Include="src\Utils\ProfileStd.h">
       <Filter>Source Files\utils</Filter>

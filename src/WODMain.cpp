@@ -30,7 +30,7 @@ extern RECT rcNScPos;
 
 extern void makeTopmost(HWND hwnd, bool mayTop);
 
-CContainerUI* toHide;
+extern CContainerUI* toHide;
 
 BOOL iconized = FALSE;
 BOOL paused = FALSE;
@@ -559,7 +559,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 				} break;
 				case WM_SYSKEYDOWN :
 				case WM_KEYDOWN:
-					lxxx(WM_KEYDOWN dd, msg.wParam)
+					//lxxx(WM_KEYDOWN dd, msg.wParam)
 					if(msg.wParam==VK_CONTROL || msg.wParam==VK_SHIFT || msg.wParam==VK_MENU)
 						{}
 					else

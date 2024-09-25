@@ -1880,6 +1880,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				}
 			}
 			break;
+		case IDM_SINGLE_INSTANCE:
+
+			break;
 		case IDM_PLAY_TIME:
 			return _mainPlayer.GetPosition(0);
 		case IDM_PLAY_SEEK:

@@ -26,7 +26,6 @@
     <ClCompile Include="src\VideoPlayer\ExternalPlayer.cpp" />
     <ClCompile Include="src\VideoPlayer\VideoPlayerInerface.cpp" />
     <ClCompile Include="src\VideoPlayer\WODPlayer.cpp" />
-    <ClCompile Include="src\WndControl\PopupMenu.cpp" />
     <ClCompile Include="src\WndControl\SeekBar.cpp" />
     <ClCompile Include="src\WndControl\Shortcut\WODShortcut.cpp" />
     <ClCompile Include="src\WODMain.cpp" />
@@ -43,7 +42,6 @@
     <ClInclude Include="src\Utils\WindowUtils.h" />
     <ClInclude Include="src\VideoPlayer\ExternalPlayer.h" />
     <ClInclude Include="src\VideoPlayer\WODPlayer.h" />
-    <ClInclude Include="src\WndControl\PopupMenu.h" />
     <ClInclude Include="src\WndControl\SeekBar.h" />
     <ClInclude Include="src\WndControl\Shortcut\virtual_keys.h" />
     <ClInclude Include="src\WODApplication.h" />
