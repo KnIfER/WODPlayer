@@ -83,6 +83,8 @@ public:
     void MarkPlaying(bool playing=true);
     bool PickFile();
 
+    void onNewVideo();
+
     WODPlayer _mainPlayer;
     WODPlayer _audioPlayer;
 	//TabLayout _tabLayout;

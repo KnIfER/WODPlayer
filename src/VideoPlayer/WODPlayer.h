@@ -32,12 +32,12 @@ public:
 
 
     bool PlayVideoFile(const TCHAR* path);
-    bool AddBookmark();
-    int GetDuration();
+    int AddBookmark();
+    long GetDuration();
     int GetPosition(bool tick);
     void SetPosition(long pos, bool fastSeek);
     void SelectBookMark(int index);
-    void DelBookmark(int index);
+    int DelBookmark(int index);
 
     void newVideoView();
 
@@ -97,5 +97,7 @@ public:
     long fakePos;
     bool isPng;
     bool isMain;
+
+    long lastDuration;
 };
 

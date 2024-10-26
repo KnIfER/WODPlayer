@@ -6,6 +6,7 @@
 //#include "VideoPlayer/VLCPlayer.h"
 
 extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName, bool isMain);
+extern long _bakTime;
 
 void volume_seekbar_change(SeekBar* bar, int pos) 
 {
@@ -468,6 +469,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	//ASSERT(_mMediaPlayer);
 	if (_currentPath!=path)
 	{
+		lastDuration = 0;
 		_durationCache = 0;
 		_currentPath = path;
 		isPng = _currentPath.EndWith(L".webp") || _currentPath.EndWith(L".jpg") || _currentPath.EndWith(L".jpeg") || _currentPath.EndWith(L".png");
@@ -489,7 +491,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 				CloseHandle(hFile);
 			}
 		}
-
+		
 	}
 	nSkipStart = nSkipEnd = 0;
 	int seekStart = _currentPath.Find(L"[p");
@@ -581,6 +583,8 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	_durationLabel->GetText() = L"--:--:--";
 	_durationLabel->NeedParentUpdate();
 
+	_app->onNewVideo();
+
 	if(!_seekbar._decorator)
 	{
 		_seekbar.SetTag((LONG_PTR)this);
@@ -643,14 +647,16 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 
 
 
-int WODPlayer::GetDuration() 
+long WODPlayer::GetDuration() 
 {
-	int duration = _mMediaPlayer->GetDuration();
+	long duration = _mMediaPlayer->GetDuration();
 	if(duration==0) {
 		isPng = 1;
 		duration = 2.3*1000; // 3 秒
 	}
-	return duration;
+	lastDuration=MAX(lastDuration, duration);
+	lastDuration=MAX(lastDuration, 10);
+	return lastDuration;
 }
 
 extern bool _playing;
@@ -658,7 +664,7 @@ extern bool _playing;
 
 int WODPlayer::GetPosition(bool tick) 
 {
-	lxxx(GetPosition dd dd, tick, _playing)
+	//lxxx(GetPosition dd dd, tick, _playing)
 	int pos = _mMediaPlayer->GetPosition();
 	if(isPng) {
 		if(tick && _playing) fakePos += 200;
@@ -679,7 +685,7 @@ void WODPlayer::SetPosition(long pos, bool fastSeek)
 }
 
 
-bool WODPlayer::AddBookmark()
+int WODPlayer::AddBookmark()
 {
 	if(_mMediaPlayer) { // todo use binary insert
 		int pos = _mMediaPlayer->GetPosition();
@@ -742,13 +748,14 @@ bool WODPlayer::AddBookmark()
 		}
 		else
 		{
+			idx = _bookmarks.size();
 			_selectedBookmark = _bookmarks.size();
 			_bookmarks.push_back({pos, rowId});
 		}
 		_seekbar.Invalidate();
-		return true;
+		return idx;
 	}
-	return false;
+	return -1;
 }
 
 void WODPlayer::SelectBookMark(int index)
@@ -764,16 +771,19 @@ void WODPlayer::SelectBookMark(int index)
 	}
 }
 
-void WODPlayer::DelBookmark(int index)
+int WODPlayer::DelBookmark(int index)
 {
 	if (index>=0 && index<_bookmarks.size())
 	{
 		const auto & bkmk =  _bookmarks[index];
 		_app->_db->DelBookmark(bkmk.rowID);
+		_bakTime = bkmk.pos;
 		_bookmarks.erase(_bookmarks.begin()+index);
 		_seekbar.Invalidate();
 		_selectedBookmark = -1;
+		return index;
 	}
+	return -1;
 }
 
 void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)

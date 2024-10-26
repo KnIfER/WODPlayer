@@ -24,6 +24,7 @@ void WODApplication::buildAccelerator()
 	//_accelerators.push_back({FVIRTKEY, VK_RETURN, IDM_FULLSCREEN});
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_RETURN, IDM_FULLSCREEN});
 	_accelerators.push_back({FVIRTKEY, VK_SPACE, IDM_TOGGLE_PLAY});
+	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_SPACE, IDM_PLAY_LOOP_ONE});
 
 	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_DELETE, IDM_DELETE});
 	_accelerators.push_back({FVIRTKEY|FCONTROL|FSHIFT, VK_DELETE, IDM_DELETE_FOREVER});
@@ -77,6 +78,8 @@ void WODApplication::buildAccelerator()
 	_accelerators.push_back({FVIRTKEY, VK_H, IDM_BKMK_RETURN});
 	_accelerators.push_back({FVIRTKEY|FALT, VK_P, IDM_BKMK_DEL});
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_P, IDM_BKMK_DEL});
+
+	_accelerators.push_back({FVIRTKEY, VK_1, IDM_BKMK_RESTORE});
 
 	// seek
 	_accelerators.push_back({FVIRTKEY, VK_RIGHT, IDM_SEEK_FORE});

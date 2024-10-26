@@ -45,6 +45,10 @@ static void PRINTMSG(TCHAR* buff, const CHAR* name, int & printed_len)
 	func = (type)GetProcAddress(hMod, name);\
 	if(!func) PRINTMSG(PRINTBUFF, name, PRINTLEN);
 
+
+#define DEF_FUNC_TRIVAL(hMod, func, type, name)\
+	func = (type)GetProcAddress(hMod, name);
+
 #define DEF_FUNC_NOWARN(hMod, func, type, name)\
 	func = (type)GetProcAddress(hMod, name);
 
@@ -88,7 +92,7 @@ HMODULE ExternalPlayer::vwInit(int & error_code, const TCHAR* dllPath, bool blam
 			DEF_FUNC(hPlayer, vwSetVolume, VW_SETVOLUME, "vwSetVolume");
 			DEF_FUNC(hPlayer, vwSetRotation, VW_SETROTATION, "vwSetRotation");
 			DEF_FUNC(hPlayer, vwGetRotation, VW_GETROTATION, "vwGetRotation");
-			DEF_FUNC(hPlayer, vwSetPositionEx, VW_SETPOSITIONEX, "vwSetPositionEx");
+			DEF_FUNC_TRIVAL(hPlayer, vwSetPositionEx, VW_SETPOSITIONEX, "vwSetPositionEx");
 			if(PRINTLEN!=PRINTLEN_0)
 			{
 				PRINTBUFF[PRINTLEN]='\0';

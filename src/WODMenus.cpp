@@ -10,6 +10,10 @@ bool IsChecked(UINT id) {
     switch(id) {
         case IDM_FULLSCREEN: 
             return XPP->_isFullScreen;
+        case IDM_SINGLE_INSTANCE: 
+            return GetProfInt("sinst", 0);
+        case IDM_PLAY_FROM_MID: 
+            return GetProfInt("mid", 0);
         case IDM_MINI: 
             return !XPP->_isFullScreen && XPP->_isMini;
         case IDM_PIN: 
@@ -43,27 +47,29 @@ void initWodMenus(WODApplication * xpp)
 {
     MainMenus = new std::vector<MenuDefine>{
 		MenuDefine{L"file", L"文件", IDM_FILE, new std::vector<MenuDefine>{
-			MenuDefine{L"open", L"打开(&O)", IDM_FILE_OPEN}
-            , MenuDefine{L"audio", L"打开音轨(&A)", IDM_AUDIO_OPEN}
-            , MenuDefine{L"audio", L"音轨(&M)", IDM_FILE_AUDIO, new std::vector<MenuDefine>{
-                MenuDefine{L"audio_open", L"打开…", IDM_AUDIO_OPEN}
-                , MenuDefine{L"", L"sep1", 0}
-            }}
-            , MenuDefine{L"bkmk", L"书签", IDM_BKMK, new std::vector<MenuDefine>{
-                MenuDefine{L"bkmk_add", L"上一书签", IDM_BKMK_PRV}
-                , MenuDefine{L"bkmk_add", L"下一书签", IDM_BKMK_NXT}
+			    MenuDefine{L"sinst", L"全局单实例(&S)", IDM_SINGLE_INSTANCE, 0, true}
+			    , MenuDefine{L"mid", L"从中间开始(&M)", IDM_PLAY_FROM_MID, 0, true}
+                , MenuDefine{L"audio", L"打开音轨(&A)", IDM_AUDIO_OPEN}
+                , MenuDefine{L"audio", L"音轨(&M)", IDM_FILE_AUDIO, new std::vector<MenuDefine>{
+                    MenuDefine{L"audio_open", L"打开…", IDM_AUDIO_OPEN}
+                    , MenuDefine{L"", L"sep1", 0}
+                }}
+                , MenuDefine{L"open", L"打开(&O)", IDM_FILE_OPEN}
+                , MenuDefine{L"bkmk", L"书签", IDM_BKMK, new std::vector<MenuDefine>{
+                    MenuDefine{L"bkmk_add", L"上一书签", IDM_BKMK_PRV}
+                    , MenuDefine{L"bkmk_add", L"下一书签", IDM_BKMK_NXT}
+                    , MenuDefine{L"", L"", 0}
+                    , MenuDefine{L"bkmk_add", L"添加书签", IDM_BKMK_ADD}
+                    , MenuDefine{L"", L"", 0}
+                    , MenuDefine{L"bkmk_add", L"删除书签", IDM_BKMK_DEL}
+                }}
+			    , MenuDefine{L"recent", L"最近文件 asdasdasd", IDM_FILE_RECENT, new std::vector<MenuDefine>{
+                        MenuDefine{L"open", L"最近文件1", IDM_FILE_OPEN}
+                        , MenuDefine{L"open", L"最近文件2", IDM_FILE_CLOSE}
+                        , MenuDefine{L"open", L"最近文件3", IDM_FILE_CLOSE, }
+                }}
                 , MenuDefine{L"", L"", 0}
-                , MenuDefine{L"bkmk_add", L"添加书签", IDM_BKMK_ADD}
-                , MenuDefine{L"", L"", 0}
-                , MenuDefine{L"bkmk_add", L"删除书签", IDM_BKMK_DEL}
-            }}
-			, MenuDefine{L"recent", L"最近文件 asdasdasd", IDM_FILE_RECENT, new std::vector<MenuDefine>{
-                    MenuDefine{L"open", L"最近文件1", IDM_FILE_OPEN}
-                    , MenuDefine{L"open", L"最近文件2", IDM_FILE_CLOSE}
-                    , MenuDefine{L"open", L"最近文件3", IDM_FILE_CLOSE, }
-            }}
-            , MenuDefine{L"", L"", 0}
-            , MenuDefine{L"close", L"关闭(F4)", IDM_FILE_CLOSE}
+                , MenuDefine{L"close", L"关闭(F4)", IDM_FILE_CLOSE}
 		}}
         , MenuDefine{L"win", L"窗口", IDM_WIN, new std::vector<MenuDefine>{
            //MenuDefine{L"win1", L"迷你左分栏", IDM_WIN_L}

@@ -178,13 +178,19 @@ showshadow="false"
 			
 			<_t height="50" name="btns"/>
 			
-			<HBox  height="48"  static="true">
+			<HBox  height="48"  static="true"    >
 				<Button width="48" name="play" id="101" foreimage="play.png" />
 				<Button width="48" name="stop" id="102"  foreimage="stop.png"/>
 				<Button width="48" name="prev" id="103"  foreimage="prev.png"/>
 				<Button width="48" name="nxt" id="104" foreimage="nxt.png"/>
-				<Button width="48" name="folder" id="105" foreimage="folder.png"/>
-				<!--Control static="true" bkcolor="#FF050555"/-->
+        <Button width="48" name="nump"  text="1 / 4" style="btn_wnd" textcolor="#FF99ff99" width="-2" inset="10 0 0 10" borderinset="-10"/>
+        <PAD width="2"/>
+        <Button width="48" name="sel"  id="40052" text="未选中" style="btn_wnd" textcolor="#bbb" width="-2" inset="10" borderround="5" />
+				<!--<Button width="48" name="folder" id="105" foreimage="folder.png"/>-->
+        <PAD width="2"/>
+        <Button width="48" name="sing" id="41040" foreimage="sync.png"   inset="10,0,0,10" borderround="5"   />
+
+        <!--Control static="true" bkcolor="#FF050555"/-->
 			</HBox>
 			<!--btnlst height="-2"/-->
 		</VBox>

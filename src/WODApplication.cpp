@@ -37,6 +37,8 @@ extern WODApplication* XPP;
 
 extern int testSqlite();
 
+extern bool hasTrack;
+
 SeekBar* seekbar;
 
 void makeNoTopmost(HWND hwnd) {
@@ -168,6 +170,18 @@ void SetFloatHwndX(HWND hwnd)
 	//::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 100, 100, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
 }
 
+CControlUI* _numBtn;
+Button* _selBtn;
+Button* _singleBtn;
+bool _selected = false;
+bool _single = false;
+bool _playMid = false;
+
+long _bakTime=0;
+
+#define blueBG  0x2e008cff
+#define checkBG  0x34ffffff
+
 void WODApplication::InitWindow()
 {
 	ResetWndOpacity();
@@ -175,6 +189,9 @@ void WODApplication::InitWindow()
 
 	m_pm._bIsLayoutOnly = true;
 	_playBtn = m_pm.FindControl(_T("play"));
+	_numBtn = m_pm.FindControl(_T("nump"));
+	 _selBtn = static_cast<Button*>(m_pm.FindControl(_T("sel")));
+	 _singleBtn = static_cast<Button*>(m_pm.FindControl(_T("sing")));
 	_bottomBar = static_cast<WinFrame*>(m_pm.FindControl(_T("ch1")));
 	_titleBar = static_cast<WinFrame*>(m_pm.FindControl(_T("titleBar")));
 	_driveTag = static_cast<WinFrame*>(m_pm.FindControl(_T("drive")));
@@ -905,13 +922,24 @@ void Replay()
 	::SetTimer(XPP->GetHWND(), 10086, 100, 0);
 }
 
+void player_SetPosition(VideoPlayer* player, long pos)
+{
+	player->SetPosition(pos, true);
+	if(hasTrack) 
+	{
+		XPP->_audioPlayer.SetPosition(pos, true);
+	}
+}
+
 void SeekDelta(int delta, int level)
 {
 	auto & player = XPP->_mainPlayer._mMediaPlayer;
 	if (player)
 	{
 		fastForwardRate = 0;
-		int max=player->GetDuration();
+		long dur=XPP->_mainPlayer.GetDuration();
+		//lzzx(%ld %ld , dur, XPP->_mainPlayer._seekbar._max);
+		//long dur=XPP->_mainPlayer._seekbar._max;
 		float factor = 1;
 		if(level==1) {
 			factor = 5;
@@ -919,21 +947,20 @@ void SeekDelta(int delta, int level)
 		if(level==2) {
 			factor = 30;
 		}
-		//LogIs(2, "set= %d", delta*factor*1000);
-		delta = player->GetPosition()+delta*factor*1000;
+		//lzz(set = dd ff ff , delta, delta*factor*1000, 1.f);
+		long res = player->GetPosition()+delta*factor*1000;
 		bool set=0;
-		if(delta<0)  delta=0;
-		else if(delta>max) delta=max;
+		if(res<0)  res=0;
+		else if(res>dur) res=dur;
 		else set=1;
-		if(set || player->GetPosition()!=delta) {
-			player->SetPosition(delta, true);
+		if(set || player->GetPosition()!=res) {
+			player_SetPosition(player, res);
 		}
 		if(!XPP->_mainPlayer._isPlaying && !XPP->_mainPlayer._seekbar._isSeeking) {
-			XPP->_mainPlayer._seekbar.SetProgressAndMax(delta, player->GetDuration());
+			XPP->_mainPlayer._seekbar.SetProgressAndMax(res, XPP->_mainPlayer.GetDuration());
 		}
 	}
 }
-
 
 void SeekEx(int cmd)
 {
@@ -944,13 +971,14 @@ void SeekEx(int cmd)
 	}
 }
 
-void NavTimemark(int delta)
+int NavTimemark(int delta)
 {
 	auto & wod = XPP->_mainPlayer;
-	if(!wod._mMediaPlayer) return;
+	if(!wod._mMediaPlayer) return -1;
 	auto & player = wod._mMediaPlayer;
 	auto & bkmks = wod._bookmarks;
 	int pos = player->IsPlaying()?wod._seekbar._progress:player->GetPosition(); // todo
+	_bakTime = pos;
 	if(bkmks.size())
 	{
 		bool set = false;
@@ -996,6 +1024,7 @@ void NavTimemark(int delta)
 		//	, wod._selectedBookmark+1<bkmks.size()?bkmks[wod._selectedBookmark+1].pos:-1
 		//)
 		wod._seekbar.Invalidate();
+		return wod._selectedBookmark;
 	}
 }
 
@@ -1010,7 +1039,7 @@ void NavTime(int t)
 		:t==-2?wod.GetDuration()/2
 		:wod.GetDuration()-1;
 	player->SetLoop(false);
-	player->SetPosition(pos, true);
+	player_SetPosition(player, pos);
 	bool playing = wod._isPlaying;
 	if (!playing)
 	{
@@ -1022,6 +1051,49 @@ void NavTime(int t)
 	}, 100);
 }
 
+set<QkString> selMap; // of paths
+
+void setSelIndi() {
+	bool selected = selMap.find(XPP->_mainPlayer._currentPath)!=selMap.end();
+	if(_selected!=selected) {
+		_selBtn->SetText(selected?L"已选中":L"未选中");
+		_selBtn->SetTextColor(selected?0xffffffff:0xffbbbbbb); // 0xffff5555
+		_selBtn->SetBkColor(selected?checkBG:0); // 0x34ffffff 0xff333333
+		_selBtn->SetHotBkColor(selected?checkBG:0x34ffffff); // 0x34ffffff 0xff333333
+		_selected = selected;
+	}
+}
+
+void WODApplication::onNewVideo()
+{
+	auto & wod = XPP->_mainPlayer;
+	auto & player = wod._mMediaPlayer;
+	auto & lst = XPP->_playList;
+
+	const auto & current = wod._currentPath;
+	if(current.EndWith(L"video.mp4")) {
+
+		QkString path = current;
+		path.ReplaceEx(L"video.mp4", L"audio.flac");
+		XPP->_audioPlayer.PlayVideoFile(path);
+		//pzz(STR(path))
+	}
+
+
+	if(!_numBtn) 
+		return;
+	if(GetProfInt("mid", 0)) 
+		_playMid = true;
+	auto & text = _numBtn->GetText();
+	text.AsBuffer();
+	text.FormatEx(L"%d / %d", false, XPP->_playIdx+1, XPP->_playList.size());
+	_numBtn->SetText(text);
+	//_numBtn->SetFixedWidth(-2);
+	_numBtn->NeedParentUpdate();
+
+	// todo opt
+	setSelIndi();
+}
 
 void NavPlayList(int newIdx)
 {
@@ -1240,7 +1312,7 @@ LRESULT WODApplication::TimerProc()
 			_mainPlayer.SetPosition(_mainPlayer.nSkipStart, true);
 		}
 	}
-	if(!deleting) 
+	if(!deleting && !_single) 
 	{
 		if (_playList.size()>1)
 		{
@@ -1272,6 +1344,11 @@ LRESULT WODApplication::TimerProc()
 		}
 	} else {
 		_mainPlayer._mMediaPlayer->SetLoop(1);
+	}
+	if(_playMid && _mainPlayer._seekbar._progress<_mainPlayer._seekbar._max/8) 
+	{
+		_mainPlayer.SetPosition(_mainPlayer.GetDuration()/2, true);
+		_playMid = false;
 	}
 
 	long sub_duration = 5*60*1000;
@@ -1315,6 +1392,7 @@ LRESULT WODApplication::TimerProc()
 
 extern  BOOL iconized;
 extern  BOOL paused;
+BOOL resumePlay = false;
 
 void WODApplication::onPause(bool min) 
 {
@@ -1337,20 +1415,27 @@ void WODApplication::onPause(bool min)
 		}
 		//::ShowWindow(_hFscBtmbar, SW_HIDE);
 		//lxx(hide)
+		if(resumePlay=_mainPlayer._isPlaying)
+			_mainPlayer.Toggle();
 	}
 }
 
 void WODApplication::onResume(bool min) {
 	paused = false;
-	iconized = 0;
 	if(_bottomBar && _bottomBar->IsVisible()) {
-		if(min) {
+		if(min || iconized) {
 			if(_hFscBtmbar && _bottomBar->IsVisible()) {
 				::ShowWindow(_hFscBtmbar, SW_SHOWNOACTIVATE);
 			}
 		}
 		makeTopmost(_hFscBtmbar, 1);
 	}
+	if(min || iconized) {
+		if(resumePlay)
+			_mainPlayer.Toggle(true);
+		resumePlay = false;
+	}
+	iconized = 0;
 
 	//makeTopmost(GetHWND(),0);
 
@@ -1471,7 +1556,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//LogIs(2, "onResume");
 			onResume(1);
 		}
-	} 
+	} break;
 	case WM_ACTIVATEAPP:
 	{
 		if (wParam == TRUE) // if npp is about to be activated
@@ -1559,6 +1644,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//lxxz(ss dd, fileNamesW, args.size());
 			bool append = std::find(args.begin(), args.end(), L"-add")!= args.end();
 			if(!append) {
+				selMap.clear();
 				XPP->_mainPlayer.Stop();
 			}
 			bool stopped = XPP->_mainPlayer.bStopped;
@@ -1628,7 +1714,6 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			break;
 		case IDM_AUDIO_RELOAD: // reload track
 			//PickAudio();
-			extern bool hasTrack;
 			if(hasTrack) {
 				_audioPlayer.Stop();
 				if(_audioPlayer.PlayVideoFile(_audioPlayer._currentPath))
@@ -1637,7 +1722,6 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			break;
 		case IDM_AUDIO_COPY:
 			//PickAudio();
-			extern bool hasTrack;
 			if(hasTrack) {
 				SetTmpText(_audioPlayer._currentPath, _audioPlayer._currentPath.GetLength());
 			}
@@ -1765,19 +1849,30 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//keyPressed = true;
 			int ct = _playList.size();
 			std::wstring allPaths;
-			for (size_t i = 0; i < ct; i++)
-			{
-				allPaths += _playList[i];
-				if (i != ct - 1) // not the last item
+			int cc = selMap.size();
+			if(selMap.size()) { // copy selected  && !IsKeyDown(VK_SHIFT)
+				for (const auto& pair : selMap) 
 				{
-					allPaths += L"\r\n"; // use semicolon as separator
+					allPaths += pair;
+					if (--cc>0) // not the last item
+					{
+						allPaths += L"\r\n"; // use semicolon as separator
+					}
+				}
+			} else { // copy all
+				for (size_t i = 0; i < ct; i++)
+				{
+					allPaths += _playList[i];
+					if (i != ct - 1) // not the last item
+					{
+						allPaths += L"\r\n"; // use semicolon as separator
+					}
 				}
 			}
 			if (allPaths.empty())
 			{
 				allPaths += _mainPlayer._currentPath;
 			}
-
 			// convert allPaths to char * 
 			//  std::string narrowStr(allPaths.begin(), allPaths.end());
 			//std::string narrowStr = WStringToString(allPaths);
@@ -1843,13 +1938,14 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 		case IDM_BKMK_ADD:
 			//WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
-			_mainPlayer.AddBookmark();
-			return 1;
+			return _mainPlayer.AddBookmark();
 		case IDM_BKMK_DEL:
-			_mainPlayer.DelBookmark(_mainPlayer._selectedBookmark);
-			return 1;
+			return _mainPlayer.DelBookmark(_mainPlayer._selectedBookmark);
 		case IDM_BKMK_RETURN:
 			_mainPlayer.SelectBookMark(_mainPlayer._selectedBookmark);
+			return 1;
+		case IDM_BKMK_RESTORE:
+			_mainPlayer.SetPosition(_bakTime, true);
 			return 1;
 
 		case IDI_PLAY:
@@ -1864,7 +1960,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			break;
 
 		case IDM_WINDOW_MODE:{
+			UINT style = GetWindowLong(GetHWND(), GWL_STYLE);
 			int ret = 0;
+			if(style&WS_POPUP) ret |= 1<<3;
 			if(::IsMaximized(GetHWND())) ret |= 1<<2;
 			if(_isFullScreen) ret |= 1<<1;
 			if(_isMini) ret |= 1;
@@ -1881,8 +1979,67 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			}
 			break;
 		case IDM_SINGLE_INSTANCE:
-
-			break;
+		{
+			int sinst;
+			if(lParam!=110) {
+				sinst = (GetProfInt("sinst", 0)+1)%2;
+				PutProfInt("sinst", sinst);
+				closeMenus(true);
+				//if(sinst && !hMutexAll) {
+				//	hMutexAll = CreateMutex(NULL, TRUE, L"WODPL_SINST");
+				//}
+				//else if(!sinst && hMutexAll) {
+				//	ReleaseMutex(hMutexAll);
+				//	CloseHandle(hMutexAll);
+				//	hMutexAll = 0;
+				//}
+			} else {
+				sinst = (GetProfInt("sinst", 0))%2;
+			}
+			return sinst;
+		}
+		case IDM_SELECT_TOGGLE:
+		{
+			bool selected = selMap.find(XPP->_mainPlayer._currentPath)!=selMap.end();
+			if(selected) selMap.erase(selMap.find(XPP->_mainPlayer._currentPath));
+			else selMap.insert(XPP->_mainPlayer._currentPath);
+			setSelIndi();
+		} return selMap.size();
+		case IDM_SELECT_ALL_TOGGLE:
+		{
+			bool nselected = selMap.find(XPP->_mainPlayer._currentPath)==selMap.end();
+			if(nselected) {
+				for (size_t i = 0; i < XPP->_playList.size(); i++)
+				{
+					if(selMap.find(XPP->_playList[i])!=selMap.end()) {
+						nselected = false;
+						break;
+					}
+				}
+			}
+			if(!nselected) selMap.clear();
+			else {
+				for (size_t i = 0; i < XPP->_playList.size(); i++)
+				{
+					selMap.insert(XPP->_playList[i]);
+				}
+			}
+			setSelIndi();
+		} return selMap.size();
+		case IDM_PLAY_LOOP_ONE:
+			if(lParam!=110) {
+				_single = !_single;
+				//lzz(%xud, _singleBtn->GetHotBkColor())
+				_singleBtn->SetBkColor(_single?checkBG:0); // 0x34ffffff 0xff333333
+				_singleBtn->SetHotBkColor(_single?checkBG:blueBG); // 0x34ffffff 0xff333333
+			}
+			return _single;
+		case IDM_PLAY_FROM_MID:
+			if(lParam!=110) {
+				PutProfInt("mid", (GetProfInt("mid", 0)+1)%2);
+			}
+			closeMenus(true);
+			return GetProfInt("mid", 0);
 		case IDM_PLAY_TIME:
 			return _mainPlayer.GetPosition(0);
 		case IDM_PLAY_SEEK:
@@ -1917,8 +2074,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_SPEED_DOWN_FASTER:  _mainPlayer.SpeedDelta(-1); break;
 		case IDM_SPEED_RESET: _mainPlayer.SpeedDelta(0); break;
 
-		case IDM_BKMK_PRV: NavTimemark(-1); return 1;
-		case IDM_BKMK_NXT: NavTimemark(1); return 1;
+		case IDM_BKMK_PRV: return NavTimemark(-1);
+		case IDM_BKMK_NXT: return NavTimemark(1);
 
 		case IDM_PLAY_PRV:
 		case IDM_PLAY_NXT:
@@ -2031,7 +2188,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				int w = ::GetSystemMetrics(SM_CXSCREEN)/2;
 				int h = ::GetSystemMetrics(SM_CYSCREEN);
 				//_lastTopMost = GetWindowLong(hWnd, GWL_EXSTYLE)&WS_EX_TOPMOST;
-				::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, XPP->m_pm.GetRoot()->GetWidth(), h, 0);
+				RECT rc;
+				GetWindowRect(GetHWND(), &rc);
+				::SetWindowPos(hwnd, HWND_TOPMOST, rc.left, 0, XPP->m_pm.GetRoot()->GetWidth(), h, 0);
 			}
 			//SetWindowLong(GetHWND(), GWL_STYLE , style & ~dwNScStyle | WS_POPUP );
 			SetFocus(XPP->GetHWND());

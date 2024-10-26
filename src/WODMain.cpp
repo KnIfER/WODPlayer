@@ -22,6 +22,10 @@ struct DemoData
 	int image;
 };
 
+QkString qkGlobal;
+QkString qkGlobalTmp;
+
+
 WODApplication* XPP;
 
 int scheduleExitFsc = 0;
@@ -124,7 +128,7 @@ void hookLButtonDown(MSG & msg)
 	}
 }
 
-extern void NavTimemark(int delta);
+extern int NavTimemark(int delta);
 
 void hookMouseWheel(MSG & msg)
 {
@@ -246,22 +250,65 @@ BOOL prvInstance(_In_ LPWSTR lpCmdLine, BOOL add)
 	return FALSE;
 }
 
-TCHAR* ReadUTF16File(const TCHAR* filePath) {
+BOOL prvAllInstance(_In_ LPWSTR lpCmdLine, BOOL add, HWND pid)
+{
+	if (!IsKeyDown(VK_CONTROL))
+	{
+		// 已有实例在运行，将参数传递给已有实例
+		COPYDATASTRUCT cds;
+		cds.dwData = WOD_COPYDATA;
+		cds.cbData = 0;
+		QkString tmp;
+		if (_args.size()) {
+			if(add) {
+				tmp = lpCmdLine;
+				tmp.Append(L" -add   ");
+				cds.cbData = (tmp.GetLength()) * sizeof(WCHAR);
+				cds.lpData = lpCmdLine = (LPWSTR)STR(tmp);
+				lpCmdLine[tmp.GetLength()-1] = L'\0';
+			} else {
+				cds.cbData = (lstrlen(lpCmdLine)) * sizeof(WCHAR);
+				cds.lpData = lpCmdLine;
+				lpCmdLine[lstrlen(lpCmdLine)] = L'\0';
+			}
+		}
+		HWND hWnd = (HWND)pid;//FindWindow(L"WODPlayer", NULL);
+		if (IsWindow(hWnd))
+		{
+			SendMessage(hWnd, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
+			return TRUE; // 退出当前实例
+		}
+	}
+	return FALSE;
+}
+
+TCHAR* ReadUTF16File(const TCHAR* filePath, QkString & tmp) {
 	HANDLE hFile = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
 		// Handle file opening error
 		return NULL;
 	}
-
 	DWORD fileSize = GetFileSize(hFile, NULL);
-	TCHAR* buffer = new TCHAR[fileSize / sizeof(TCHAR) + 1];
+	tmp.EnsureCapacity(fileSize+1);
+	tmp.RecalcSize(fileSize);
+	TCHAR* buffer = (TCHAR*)STR(tmp);
 	DWORD bytesRead = 0;
 	ReadFile(hFile, buffer, fileSize, &bytesRead, NULL);
 	buffer[fileSize / sizeof(TCHAR)] = '\0';
-
 	CloseHandle(hFile); 
-
 	return buffer;
+}
+
+int WriteUTF16File(const TCHAR* filePath, const TCHAR* buffer, int len) {
+	HANDLE hFile = CreateFile(filePath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE) {
+		// Handle file opening error
+		return 0;
+	}
+	DWORD bytesRead = 0;
+	WriteFile(hFile, buffer, len, &bytesRead, NULL);
+	CloseHandle(hFile);
+	return bytesRead;
 }
 
 
@@ -282,7 +329,7 @@ void parseArgs(std::vector<std::wstring> & args)
 				if(StrCmpN(data, L"-loadArgs", 9)==0) {
 					QkString ln;
 					if(StrCmpN(data, L"-loadArgsW", 10)==0) {
-						TCHAR* all = ReadUTF16File(data+11)+1;
+						TCHAR* all = ReadUTF16File(data+11, qkGlobalTmp)+1;
 						TCHAR* current = all;
 						TCHAR* next = nullptr;
 						while ((next = _tcschr(current, _T('\n'))) != nullptr) {
@@ -387,6 +434,27 @@ void parseArgs(std::vector<std::wstring> & args)
 	}
 }
 
+HWND checkUniqueGlobalInst(bool inst) {
+	auto hMemtexAll = ReadUTF16File(qkGlobal, qkGlobalTmp);
+	if (hMemtexAll == NULL || qkGlobalTmp.GetLength()*sizeof(TCHAR)<sizeof(HWND)) {
+		//lxxz(Could not create hMemtexAll dd, GetLastError())
+		return 0;
+	}
+	HWND hwnd = *((HWND*)hMemtexAll);
+	//lxx(Check Another instance: dd dd, hwnd, IsWindow((HWND)hwnd))
+	// Check if another instance is running
+	if (hwnd != 0) {
+		if(::IsWindow((HWND)hwnd)) {
+			return (HWND)hwnd; // Exit
+		}
+	}
+	if(inst) {
+		// Write the current process ID to shared memory
+		return (HWND)0;
+	}
+	return 0;
+}
+
 int APIENTRY 
 wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -399,6 +467,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 	parseCommandLine(lpCmdLine, _args);
 
 	bool bNoWait = false;
+	bool bNewWnd = false;
 
 
 	bool append = std::find(_args.begin(), _args.end(), L"-add")!= _args.end();
@@ -410,6 +479,9 @@ wWinMain(_In_ HINSTANCE hInstance,
 			if(path[0]==L'-') {
 				if(StrCmpN(_args[i].c_str(), L"-nowait", 7)==0) {
 					bNoWait = true;
+				}
+				else if(StrCmpN(_args[i].c_str(), L"-new", 7)==0) {
+					bNewWnd = true;
 				}
 			}
 		}
@@ -426,22 +498,29 @@ wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 
-	// 单实例播放器
-	hMutexReady = CreateMutex(NULL, FALSE, L"WODPLTRDY");
-	if (GetLastError() == ERROR_ALREADY_EXISTS) // 检查互斥体是否已存在
-	{
+	DWORD lastErr = 0;
+	//if(!bNewWnd) {
+	//	hMutexAll = CreateMutex(NULL, TRUE, L"WODPL_SINST"); // wtf??
+	//	lastErr = GetLastError();
+	//}
+
+	if(!bNewWnd) {
+		// 单实例播放器
+		hMutexReady = CreateMutex(NULL, FALSE, L"WODPLTRDY");
+		if (GetLastError() == ERROR_ALREADY_EXISTS) // 检查互斥体是否已存在
+		{
+			if(hMutexReady) { // 释放互斥体
+				ReleaseMutex(hMutexReady);
+				CloseHandle(hMutexReady);
+				hMutexReady = 0;
+			}
+			if(prvInstance(lpCmdLine, FALSE)) return 0;
+		}
 		if(hMutexReady) { // 释放互斥体
 			ReleaseMutex(hMutexReady);
 			CloseHandle(hMutexReady);
-			hMutexReady = 0;
 		}
-		if(prvInstance(lpCmdLine, FALSE)) return 0;
 	}
-	if(hMutexReady) { // 释放互斥体
-		ReleaseMutex(hMutexReady);
-		CloseHandle(hMutexReady);
-	}
-
 
 	// 初始化公共空间
 	//INITCOMMONCONTROLSEX icc;
@@ -484,9 +563,44 @@ wWinMain(_In_ HINSTANCE hInstance,
 	::PathRemoveFileSpec(usrDir);
 	//::PathAppend();
 
-	ImmDisableIME(0);
-
 	loadProf(usrDir, configFileName);
+
+	qkGlobal.EnsureCapacity(MAX_PATH);
+	GetTempPath(MAX_PATH, (LPWSTR)qkGlobal.GetData());
+	qkGlobal.RecalcSize();
+	qkGlobal.Append(L"\\wodplayer.lck");
+
+	HWND pHAll = checkUniqueGlobalInst(GetProfInt("sinst", 0));
+	if(!bNewWnd && !IsKeyDown(VK_CONTROL)) {
+		if(pHAll) {
+			if(prvAllInstance(lpCmdLine, IsKeyDown(VK_SHIFT), pHAll)) 
+				return 0;
+		}
+	}
+
+	//if (lastErr == ERROR_ALREADY_EXISTS) // 检查互斥体是否已存在
+	//{
+	//	//lzz(全局单实例播放器)
+	//	//Sleep(550);
+	//	{
+	//		//lzz(释放互斥体)
+	//		if(hMutexAll) { // 释放互斥体
+	//			ReleaseMutex(hMutexAll);
+	//			CloseHandle(hMutexAll);
+	//			hMutexAll = 0;
+	//		}
+	//		if(prvAllInstance(lpCmdLine, IsKeyDown(VK_SHIFT))) 
+	//			return 0;
+	//	}
+	//}
+	//else if(!bNewWnd && !GetProfInt("sinst", 0) && hMutexAll) { // 释放互斥体
+	//	ReleaseMutex(hMutexAll);
+	//	CloseHandle(hMutexAll);
+	//	hMutexAll = 0;
+	//}
+
+
+	ImmDisableIME(0);
 
 	initX=GetProfInt("initX", -1);
 	initY=GetProfInt("initY", -1);
@@ -521,6 +635,10 @@ wWinMain(_In_ HINSTANCE hInstance,
 			if(initM&0x2) {
 				XPP->ToggleFullScreen();
 			}
+			if(initM&0x8) {
+				BOOL bbb;
+				XPP->HandleCustomMessage(WM_COMMAND, 46011/*IDM_PIN_TOP*/, 0, bbb);
+			}
 			//if(initM&0x2) {
 			//	XPP->SendMessage(WM_SYSCOMMAND, XPP->_isMaximized=SC_MAXIMIZE, 0);
 			//	XPP->m_pm._bStaticMovable = false; 
@@ -528,6 +646,13 @@ wWinMain(_In_ HINSTANCE hInstance,
 			//}
 			return false;
 		}, 250);
+	}
+
+	if(GetProfInt("sinst", 0) && !IsWindow(pHAll)) {
+		QkString pid;
+		*((HWND*)pid.GetData()) = XPP->GetHWND();
+		pid.RecalcSize(4);
+		WriteUTF16File(qkGlobal, pid, pid.GetLength());
 	}
 
 	MSG    msg;
