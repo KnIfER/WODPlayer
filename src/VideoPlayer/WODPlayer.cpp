@@ -455,7 +455,7 @@ static void decryptFileName(QkString & fileName) {
 
 
 set<QkString> touchedTags;
-
+bool titleKey = false;
 
 bool WODPlayer::PlayVideoFile(const TCHAR* path)
 {
@@ -474,15 +474,15 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		_currentPath = path;
 		isPng = _currentPath.EndWith(L".webp") || _currentPath.EndWith(L".jpg") || _currentPath.EndWith(L".jpeg") || _currentPath.EndWith(L".png");
 		fakePos = 0;
-		// touch time
+		// touch access time
 		int st = _currentPath.ReverseFind(L"\\");
 		int st1 = _currentPath.ReverseFind(L"/");
 		st = MAX(st, st1)+1;
 		int tagIdx = _currentPath.Find(L" - ", st);
 		if(tagIdx==-1) tagIdx = _currentPath.GetLength();
 		QkString tags = _currentPath.Mid(st, tagIdx-st);
-		if(touchedTags.find(tags)==touchedTags.end()) {
-			touchedTags.insert(tags);
+		if(touchedTags.find(tags)==touchedTags.end() || 1) {
+			//touchedTags.insert(tags);
 			HANDLE hFile = CreateFile(_currentPath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (hFile != INVALID_HANDLE_VALUE) {
 				FILETIME ft;
@@ -510,6 +510,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		//lxx(ss dd, _currentPath.Mid(seekStart+2, sep-seekStart-2).GetData(), (int)nSkipStart)
 		//lxxx('seekEndseekEnd dd dd ss ', (int)nSkipStart, (int)nSkipEnd, _currentPath.Mid(seekStart, seekEnd-seekStart).GetData(buffer));
 	}
+	bool titKey = false;
 	int endIdx = -1, idx;
 	QkString title;
 	title.Empty();
@@ -520,6 +521,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 			title = _currentPath.GetData()+endIdx+6;
 			title.MidFast(0, title.GetLength()-6);
 			save = true;
+			titKey = true;
 		}
 	}
 	//xpLogTo(_currentPath);
@@ -533,6 +535,8 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		hasTrack = true;
 		return true;
 	}
+
+	titleKey = titKey;
 
 	int ed, wenhao, b1=title.IsEmpty();
 	if(b1) {
@@ -605,7 +609,11 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		pathBuffer.EnsureCapacity(_currentPath.GetLength() + 30);
 		pathBuffer.AsBuffer();
 
-		if (DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath))
+		if (titKey) {
+			_timeMarked = _app->_db->GetBookMarks("http"
+				, _app->_titleBar->GetText().GetData(threadBuffer1), _bookmarks);
+		}
+		else if (DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath))
 		{
 			pathBuffer.RecalcSize();
 			if(pathBuffer.Find('\"')) {
@@ -699,7 +707,11 @@ int WODPlayer::AddBookmark()
 
 		int rowId = -1;
 
-		if (DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath))
+		if (titleKey) {
+			rowId = _app->_db->AddBookmark("http"
+				, _app->_titleBar->GetText().GetData(threadBuffer1), 0, _timeMarked, pos, duration, 0);
+		}
+		else if (DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath))
 		{
 			pathBuffer.RecalcSize();
 			if(pathBuffer.Find('\"')) {

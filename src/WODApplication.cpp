@@ -1782,7 +1782,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 					path.Trim();
 				}
 				if(_playList.size()>0 && path.Find(L"\\")<0 && path.Find(L"/")<0) {
-					if(_playList[_playList.size()-1].StartWith(L"http")) {
+					if(_playList[_playList.size()-1].StartWith(L"http")) { // name prev item
 						_playList[_playList.size()-1].Append(L"VODNAM");
 						_playList[_playList.size()-1].Append(path);
 						_playList[_playList.size()-1].Append(L"NAMVOD");
