@@ -359,7 +359,8 @@ long MPVPlayer::GetDuration()
 {
     double duration;
     int error = mpv_get_property(mpv, "duration", MPV_FORMAT_DOUBLE, &duration);
-    return duration*1000;
+    long ret = duration;
+    return ret*1000 + (duration-ret)*1000;
 }
 
 bool MPVPlayer::PlayVideoFile(const CHAR* path)
