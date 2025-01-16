@@ -143,8 +143,14 @@ void deleteFileProc(HWND hwnd, UINT, UINT_PTR, DWORD)
 }
 
 CControlUI* _timeLabel;
+CControlUI* _daytimeLabel;
 CControlUI* _durationLabel;
 BOOL _threadInit = FALSE;
+
+BOOL hasDayTime;
+int hourDay = 0;
+int minDay = 0;
+int secDay = 0;
 
 
 WinFrame* _osd;
@@ -202,6 +208,7 @@ void WODApplication::InitWindow()
 	_topBarFscH = static_cast<WinFrame*>(m_pm.FindControl(_T("topH")));
 
 	_timeLabel = static_cast<CControlUI*>(m_pm.FindControl(_T("time")));
+	_daytimeLabel = static_cast<CControlUI*>(m_pm.FindControl(_T("daytime")));
 	_durationLabel = static_cast<CControlUI*>(m_pm.FindControl(_T("duration")));
 
 	m_pm.GetShadow()->ShowShadow(true);
@@ -1064,6 +1071,59 @@ void setSelIndi() {
 	}
 }
 
+void parseTimeTag(QkString input) {
+	// Find the positions of the brackets
+	hourDay = 0;
+	minDay = 0;
+	secDay = 0;
+	int first = input.Find(L"监控");
+	if (first < 0) {
+		_daytimeLabel->GetText().Empty();
+		hasDayTime = false;
+		return;
+	}
+	int firstBracket = input.Find(L'[', first);
+	int secondBracket = firstBracket==-1?-1:input.Find(L']', firstBracket);
+	int thirdBracket = secondBracket == -1 ? -1 : input.Find(L'[', secondBracket);
+	int fourthBracket = thirdBracket == -1 ? -1 : input.Find(L']', thirdBracket);
+
+	if (firstBracket != -1 && secondBracket != -1) {
+		// Extract the date and time strings
+		QkString dateStr = input.Mid(firstBracket + 1, secondBracket - firstBracket - 1);
+		//QkString timeStr = input.Mid(thirdBracket + 1, fourthBracket - thirdBracket - 1);
+
+		//&& thirdBracket != -1 && fourthBracket != -1
+		// Parse the date components
+		
+		if (dateStr.GetLength()>=10) { // 2025-01-15 17:11:09
+			int year = ParseInt(dateStr.Mid(0, 4));
+			int month = ParseInt(dateStr.Mid(5, 2));
+			int day = ParseInt(dateStr.Mid(8, 2));
+			if (dateStr.GetLength() >= 17) {
+				dateStr.MidFast(10);
+				dateStr.Trim();
+				if (dateStr.GetLength() >= 6) { // 171109
+					hasDayTime = true;
+					hourDay = ParseInt(dateStr.Mid(0, 2));
+					minDay = ParseInt(dateStr.Mid(2, 2));
+					secDay = ParseInt(dateStr.Mid(4, 2));
+				}
+			}
+		}
+
+
+		//int millisecond = timeStr.length() > 6 ? timeStr.mid(6, 2).toInt() : 0;
+
+		//int hour = timeStr.Mid(0, 2).toInt();
+		//int minute = timeStr.Mid(2, 2).toInt();
+		//int second = timeStr.Mid(4, 2).toInt();
+
+	}
+	else {
+
+	}
+}
+
 void WODApplication::onNewVideo()
 {
 	auto & wod = XPP->_mainPlayer;
@@ -1079,6 +1139,7 @@ void WODApplication::onNewVideo()
 		//pzz(STR(path))
 	}
 
+	parseTimeTag(_titleBar->GetText());
 
 	if(!_numBtn) 
 		return;
@@ -1268,8 +1329,7 @@ LRESULT WODApplication::TimerProc()
 	int hour = minutes/60;
 	minutes %= 60;
 	sec %= 60;
-	_timeLabel->GetText().Empty();
-	_timeLabel->GetText().Format(L"%02d:%02d:%02d", hour, minutes, sec);
+	_timeLabel->GetText().FormatEx(L"%02d:%02d:%02d", false, hour, minutes, sec);
 	//_timeLabel->GetText().Format(L"%ld", duration);
 	_timeLabel->Invalidate();
 	//_timeLabel->GetText() += hour;
@@ -1277,6 +1337,16 @@ LRESULT WODApplication::TimerProc()
 	//_timeLabel->GetText() += minutes;
 	//_timeLabel->GetText() += L":";
 	//_timeLabel->GetText() += sec;
+
+	sec += secDay; if (sec > 60) { sec -= 60; minutes++; }
+	minutes += minDay; if (minutes > 60) { minutes -= 60; hour++; }
+	hour += hourDay;
+
+	if (hasDayTime) {
+		_daytimeLabel->GetText().FormatEx(L"%02d:%02d:%02d", false, hour, minutes, sec);
+		//_daytimeLabel->GetText().Format(L"%ld", duration);
+		_daytimeLabel->Invalidate();
+	}
 
 	sec = duration/1000;
 	minutes = sec/60;

@@ -190,6 +190,7 @@ showshadow="false"
         <PAD width="2"/>
         <Button width="48" name="sing" id="41040" foreimage="sync.png"   inset="10,0,0,10" borderround="5"   />
 
+        <Button width="48" name="daytime"  text="2025-01-15 17:11:09" style="btn_wnd"  width="-2" inset="10" borderround="5" />
         <!--Control static="true" bkcolor="#FF050555"/-->
 			</HBox>
 			<!--btnlst height="-2"/-->

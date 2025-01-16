@@ -518,6 +518,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	if(_currentPath.EndWith(L"NAMVOD")) {
 		endIdx = _currentPath.Find(L"VODNAM");
 		if(endIdx>0) {
+			((TCHAR*)path)[endIdx] = L'\0';
 			title = _currentPath.GetData()+endIdx+6;
 			title.MidFast(0, title.GetLength()-6);
 			save = true;
@@ -529,6 +530,10 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 	{
 		//_mMediaPlayer->setIni
 		ret = _mMediaPlayer->PlayVideoFile(path, _currentPath.GetData(buffer, 0, endIdx));
+	}
+
+	if (endIdx > 0) {
+		((TCHAR*)path)[endIdx] = L'V';
 	}
 
 	if(!isMain) {
