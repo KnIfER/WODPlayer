@@ -712,6 +712,16 @@ int WODPlayer::AddBookmark()
 
 		int rowId = -1;
 
+		int idx = -1;
+		for (size_t i = 0; i < _bookmarks.size(); i++)
+		{
+			if (_bookmarks[i].pos >= pos) {
+				if (_bookmarks[i].pos == pos) return false;
+				idx = i;
+				break;
+			}
+		}
+
 		if (titleKey) {
 			rowId = _app->_db->AddBookmark("http"
 				, _app->_titleBar->GetText().GetData(threadBuffer1), 0, _timeMarked, pos, duration, 0);
@@ -749,15 +759,6 @@ int WODPlayer::AddBookmark()
 			}
 		}
 
-		int idx = -1;
-		for (size_t i = 0; i < _bookmarks.size(); i++)
-		{
-			if(_bookmarks[i].pos>=pos) {
-				if(_bookmarks[i].pos==pos) return false;
-				idx = i;
-				break;
-			}
-		}
 		if(idx>=0)
 		{
 			_selectedBookmark = idx;

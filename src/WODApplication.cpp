@@ -117,7 +117,7 @@ float fastForwardRate = 0;
 BOOL fastForwardStill = False;
 DWORD ffTimer = 0;
 DWORD ffTimerID = 7;
-DWORD ffTimerInterval = 50;
+DWORD ffTimerInterval = 350;
 
 void ffTimerProc(HWND hwnd, UINT, UINT_PTR, DWORD)
 {
@@ -2006,9 +2006,18 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			Close();
 			break;
 
-		case IDM_BKMK_ADD:
+		case IDM_BKMK_ADD: {
 			//WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
-			return _mainPlayer.AddBookmark();
+			static int lastBkmkTm = 0;
+			int now = GetTickCount();
+			if (now - lastBkmkTm < 450) {
+				lastBkmkTm = now;
+				return -1;
+			}
+			auto ret = _mainPlayer.AddBookmark();
+			lastBkmkTm = now;
+			return ret;
+		}
 		case IDM_BKMK_DEL:
 			return _mainPlayer.DelBookmark(_mainPlayer._selectedBookmark);
 		case IDM_BKMK_RETURN:
@@ -2179,22 +2188,22 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_PLAY_END: NavTime(-3); return 1;
 
 		case IDM_PLAY_FASTBACKWARD:
-			toggleFastforward(-1);
+			toggleFastforward(-5);
 			break;
 		case IDM_PLAY_FASTFOREWARD:
-			toggleFastforward(1);
+			toggleFastforward(5);
 			break;
 		case IDM_PLAY_FASTFASTBACKWARD:
-			toggleFastforward(-2);
+			toggleFastforward(-15);
 			break;
 		case IDM_PLAY_FASTFASTFOREWARD:
-			toggleFastforward(2);
+			toggleFastforward(15);
 			break;
 		case IDM_PLAY_FASTFASTERBACKWARD:
-			toggleFastforward(-4);
+			toggleFastforward(-30);
 			break;
 		case IDM_PLAY_FASTFASTERFOREWARD:
-			toggleFastforward(4);
+			toggleFastforward(30);
 			break;
 
 		case IDM_PLAY_FASTFOREWARDOFF:

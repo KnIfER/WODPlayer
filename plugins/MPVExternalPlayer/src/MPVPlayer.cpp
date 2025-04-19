@@ -421,7 +421,7 @@ float MPVPlayer::SetRate(float value)
     //if(mpv) mpv_set_property_string(mpv, "rate", buffer);
     double v = value;
     mpv_set_property(mpv, "speed", MPV_FORMAT_DOUBLE, &v);
-    mpv_get_property(mpv, "speed", MPV_FORMAT_DOUBLE, &v);
+    //mpv_get_property(mpv, "speed", MPV_FORMAT_DOUBLE, &v);
     return v;
 }
 
