@@ -43,6 +43,7 @@ public:
 
     void Stop();
     void Release();
+    void CopyImage();
 
     float SpeedDelta(float delta);
     int SetVolume(int volume);

@@ -200,19 +200,19 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
 
     }
 
-    if (!mpv)
-    {
-        LogIs(2, "init err!");
-        return;
-    }
+    //if (hParent<=0)
+    //{
+    //    LogIs(2, "init err! %lxd", hParent);
+    //    return;
+    //}
+
 
     mpv_set_option(mpv, "wid", mpv_format::MPV_FORMAT_INT64, &hParent);
     mpv_set_option_string(mpv, "seekbarkeyframes", "yes");
     mpv_set_option_string(mpv, "loop", "inf");
     mpv_set_option_string(mpv, "keep-open", "yes");
 
-    if(hParent)
-    mpv_set_option_string(mpv, "force-window", "yes");
+    //if(hParent)  mpv_set_option_string(mpv, "force-window", "yes");
     mpv_set_option_string(mpv, "auto-window-resize", "no");
     //mpv_set_property_string(mpv, "af", "volume=10");
     mpv_set_property_string(mpv, "af", "lavfi=[pan=stereo|FL < 0.5*FC + 0.3*FLC + 0.3*FL + 0.3*BL + 0.3*SL + 0.5*LFE | FR < 0.5*FC + 0.3*FRC + 0.3*FR + 0.3*BR + 0.3*SR + 0.5*LFE],lavfi=[acompressor=10]");
@@ -478,4 +478,31 @@ int MPVPlayer::SetPositionEx(LONG WPARAM, LONG LPARAM)
         mpv_command(mpv, args);
     }
     return 0;
+}
+
+
+int MPVPlayer::CopyImage(const char* where)
+{
+    //mpv_get_property_string(mpv, "video-rotate", "45");
+    const char* cmd_screenshot[] = { "screenshot-to-file"
+        , where
+        , nullptr };
+
+    mpv_command(mpv, cmd_screenshot);
+    return 1;
+}
+
+LONG_PTR MPVPlayer::Command(LONG WPARAM, LONG LPARAM, va_list Args)
+{
+    if (WPARAM==1) { // osd
+        //mpv_set_option_string(mpv, "osd-level", "2");
+        //const char* cmd[] = { "osd-msg"
+        //    , "asdas"
+        //    , nullptr };
+
+        ////mpv_command(mpv, cmd);
+        //const char* cmd_osd[] = { "osd-msg", "消息内容", "持续时间(毫秒)", nullptr };
+        //mpv_command(mpv, cmd_osd);
+    }
+    return 1;
 }

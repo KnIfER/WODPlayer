@@ -141,3 +141,13 @@ extern "C" __declspec(dllexport) int64_t vwSetPositionEx(MPVPlayer* player, LONG
 }
 
 
+
+extern "C" __declspec(dllexport) int64_t vwCopyImage(MPVPlayer * player, const char* where)
+{
+	return player->CopyImage(where);
+}
+
+extern "C" __declspec(dllexport) LONG_PTR vwCommand(MPVPlayer * player, LONG wParam, LONG LPARAM, va_list Args)
+{
+	return player->Command(wParam, LPARAM, Args);
+}

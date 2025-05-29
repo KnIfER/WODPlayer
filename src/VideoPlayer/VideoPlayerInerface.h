@@ -43,6 +43,8 @@ public:
 	virtual void	SetRotation(int value) {}
 	virtual int	GetRotation() { return 0; }
 	virtual int	SetPositionEx(LONG wParam, LONG LPARAM) { return 0; }
+	virtual int	CopyImage(const char* where) { return 0; }
+	virtual LONG_PTR	Command(LONG wParam, LONG LPARAM,...) { return 0; }
 	//POINT _resolution; 
 	//unsigned int _resX; 
 	//unsigned int _resY; 

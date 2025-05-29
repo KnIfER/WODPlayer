@@ -78,6 +78,8 @@ public:
 	void		    SetRotation(int value);
 	int				GetRotation();
 	int				SetPositionEx(LONG WPARAM, LONG LPARAM);
+	int				CopyImage(const char* where);
+	LONG_PTR		Command(LONG WPARAM, LONG LPARAM, va_list Args);
 	mpv_handle *mpv = NULL;
 private:
 	LONG_PTR mMediaPlayer;

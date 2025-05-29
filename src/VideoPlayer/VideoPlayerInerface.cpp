@@ -122,3 +122,75 @@ VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName, bool is
 	//}
 	return 0;
 }
+
+
+
+bool copyimage(const wchar_t* filename)
+{
+	//initialize Gdiplus once:
+	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+	ULONG_PTR gdiplusToken;
+	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+
+	bool result = false;
+	Gdiplus::Bitmap* gdibmp = Gdiplus::Bitmap::FromFile(filename);
+	//LogIs(2, "succ= %d  ", gdibmp);
+	if (gdibmp)
+	{
+		HBITMAP hbitmap;
+		gdibmp->GetHBITMAP(0, &hbitmap);
+		if (OpenClipboard(NULL))
+		{
+			EmptyClipboard();
+			DIBSECTION ds;
+			if (GetObject(hbitmap, sizeof(DIBSECTION), &ds))
+			{
+				HDC hdc = GetDC(HWND_DESKTOP);
+				//create compatible bitmap (get DDB from DIB)
+				HBITMAP hbitmap_ddb = CreateDIBitmap(hdc, &ds.dsBmih, CBM_INIT,
+					ds.dsBm.bmBits, (BITMAPINFO*)&ds.dsBmih, DIB_RGB_COLORS);
+				ReleaseDC(HWND_DESKTOP, hdc);
+				SetClipboardData(CF_BITMAP, hbitmap_ddb);
+				DeleteObject(hbitmap_ddb);
+				result = true;
+			}
+			CloseClipboard();
+		}
+
+		//cleanup:
+		DeleteObject(hbitmap);
+		delete gdibmp;
+	}
+	return result;
+}
+
+bool copyimage(HBITMAP hbitmap)
+{
+	if (hbitmap && OpenClipboard(NULL)) {
+		EmptyClipboard();
+		SetClipboardData(CF_BITMAP, hbitmap);
+		CloseClipboard();
+		return 1;
+	}
+	return 0;
+}
+
+bool copyimage_1(HBITMAP hbitmap)
+{
+	if (hbitmap)
+	{
+		DIBSECTION ds;
+		if (GetObject(hbitmap, sizeof(DIBSECTION), &ds))
+		{
+			HDC hdc = GetDC(HWND_DESKTOP);
+			//create compatible bitmap (get DDB from DIB)
+			HBITMAP hbitmap_ddb = CreateDIBitmap(hdc, &ds.dsBmih, CBM_INIT,
+				ds.dsBm.bmBits, (BITMAPINFO*)&ds.dsBmih, DIB_RGB_COLORS);
+			ReleaseDC(HWND_DESKTOP, hdc);
+			copyimage(hbitmap_ddb);
+			DeleteObject(hbitmap_ddb);
+		}
+		return 1;
+	}
+	return 0;
+}

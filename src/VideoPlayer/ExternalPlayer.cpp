@@ -93,6 +93,8 @@ HMODULE ExternalPlayer::vwInit(int & error_code, const TCHAR* dllPath, bool blam
 			DEF_FUNC(hPlayer, vwSetRotation, VW_SETROTATION, "vwSetRotation");
 			DEF_FUNC(hPlayer, vwGetRotation, VW_GETROTATION, "vwGetRotation");
 			DEF_FUNC_TRIVAL(hPlayer, vwSetPositionEx, VW_SETPOSITIONEX, "vwSetPositionEx");
+			DEF_FUNC_TRIVAL(hPlayer, vwCopyImage, VW_COPYIMAGE, "vwCopyImage");
+			DEF_FUNC_TRIVAL(hPlayer, vwCommand, VW_COMMAND, "vwCommand");
 			if(PRINTLEN!=PRINTLEN_0)
 			{
 				PRINTBUFF[PRINTLEN]='\0';
@@ -232,6 +234,31 @@ int ExternalPlayer::GetRotation()
 }
 
 
+int ExternalPlayer::CopyImage(const CHAR* where)
+{
+	if(_player && vwCopyImage)
+	{
+		return vwCopyImage(_player, where);
+	}
+	return 0;
+}
+
+LONG_PTR ExternalPlayer::Command(LONG WPARAM, LONG LPARAM, ...)
+{
+	if(_player && vwCommand)
+	{
+		LONG_PTR nRet;
+		va_list Args;
+
+		va_start(Args, LPARAM);
+		nRet = vwCommand(_player, WPARAM, LPARAM, Args);
+		va_end(Args);
+		return nRet;
+	}
+	return 0;
+}
+
+
 
 int ExternalPlayer::SetPositionEx(LONG wParam, LONG LPARAM)
 {
@@ -333,7 +360,7 @@ LRESULT ExternalPlayer::RunProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l)
 	switch (msg)
 	{
 	case WM_SETFOCUS:
-		LogIs(2, "WM_SETFOCUS");
+		LogIs(2, "WM_SETFOCUS (exp RunProc)");
 		return TRUE;
 	default:
 		break;
