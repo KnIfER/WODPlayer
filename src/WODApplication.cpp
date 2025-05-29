@@ -223,14 +223,14 @@ void WODApplication::InitWindow()
 
 	//m_pm.GetRoot()->PostLambda(, 250);
 	string* player = GetProfString("player");
-	if(*player=="MPVExternalPlayer.dll") {
+	if(player  && *player=="MPVExternalPlayer.dll") {
 		_threadInit = TRUE;
 		if (_playList.size()>0)
 		{
 			_mainPlayer._currentPath = _playList[0];
 		}
 		auto th = std::thread([this]{ // async
-			//Sleep(250);
+			//Sleep(750);
 			auto file = GetProfString("file");
 			QkString path = file?file->c_str():"";
 			if (!_mainPlayer._currentPath.IsEmpty())
@@ -265,6 +265,9 @@ void WODApplication::InitWindow()
 		else if(!path.IsEmpty())
 			_mainPlayer.PlayVideoFile(STR(path));
 	}
+
+	_freeMove = GetProfInt("free_move", 0);
+	_pinBottom = GetProfInt("pin_bottom", 0);
 
 	//tg
 
@@ -589,9 +592,14 @@ void WODApplication::ToggleMini()
 		//}
 		//, 1000);
 		if(_lastTopMost) {
-			SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE)|WS_EX_TOPMOST);
-			::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
+			//SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE)|WS_EX_TOPMOST);
+			//::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
 		}
+
+		UINT style = GetWindowLong(GetHWND(), GWL_STYLE);
+		SetWindowLong(GetHWND(), GWL_STYLE, style & ~WS_POPUP | WS_THICKFRAME);
+		SetWindowLong(GetHWND(), GWL_EXSTYLE, GetWindowLong(GetHWND(), GWL_EXSTYLE) & ~WS_EX_TOPMOST);
+		::SetWindowPos(GetHWND(), HWND_NOTOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
 	}
 	resetInset();
 	/* 配合 POPUP 使用 */
@@ -1469,7 +1477,7 @@ void WODApplication::onPause(bool min)
 	paused = true;
 	if(min) {
 		iconized = 1;
-		if(_hFscBtmbar && _bottomBar->IsVisible()) {
+		if(_hFscBtmbar && _bottomBar->IsVisible() && !_pinBottom) {
 			_bottomBar->SetVisible(false);
 			//lxx(1)
 			//makeNoTopmost(_hFscBtmbar);
@@ -1544,6 +1552,13 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		//		return false;
 		//	}, 10);
 		//}
+		if (_pinBottom && _hFscBtmbar)
+			_mainPlayer.PostLambda([this]()
+			{
+				_bottomBar->SetVisible(1);
+				if (_hFscBtmbar) makeTopmost(_hFscBtmbar, 1);
+				return false;
+			}, 50);
 	} break;
 	case WM_KILLFOCUS:
 	{
@@ -1579,6 +1594,26 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			::OffsetRect(&rc, pRc.left, pRc.top);
 
 			SetWindowPos(_osd->GetHWND(), 0, rc.left, rc.top, 0, 0, SWP_NOSIZE);
+		}
+		if (_pinBottom && _hFscBtmbar) {
+			//_bottomBar->GetParent()->NeedUpdate();
+			//_bottomBar->SetVisible(true);
+			//_bottomBar->ParentNeedUpdate();
+
+
+			RECT rc = _bottomBar->GetPos();
+			RECT pRc;
+
+			GetWindowRect(_osd->GetManager()->GetRealManager()->GetPaintWindow(), &pRc);
+			::OffsetRect(&rc, pRc.left, pRc.top);
+
+			SetWindowPos(_hFscBtmbar, HWND_TOPMOST, rc.left, rc.top, 0, 0, SWP_NOSIZE);
+
+			//_mainPlayer.PostLambda([this]() {
+			//	_bottomBar->SetVisible(1);
+			//	if(_hFscBtmbar) makeTopmost(_hFscBtmbar, 1);
+			//	return false;
+			//}, 250);
 		}
 	} return 0;
 	
@@ -1820,6 +1855,11 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			MarkPlaying(false);
 			DeleteAllFile(true);
 		} break;
+		case IDM_COPY_IMAGE:
+		if(!keyPressed) {
+			//keyPressed = true;
+			_mainPlayer.CopyImage();
+		} break;
 		case IDM_PASTE_PLAYLIST: 
 		case IDM_APPEND_PLAYLIST: 
 		if(!keyPressed) {
@@ -1998,6 +2038,12 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//keyPressed = 1;
 			ToggleFullScreen();
 			ToggleFullScreen1();
+			if (_pinBottom && !_isFullScreen) 
+			{
+				_bottomBar->SetVisible(1);
+				::ShowWindow(_hFscBtmbar, SW_SHOW);
+				makeTopmost(XPP->_bottomBar->GetHWND(), 1);
+			}
 			break;
 		case IDM_SHUTDOWN:
 			Close();
@@ -2016,6 +2062,17 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			}
 			auto ret = _mainPlayer.AddBookmark();
 			lastBkmkTm = now;
+
+			if (1) {
+				auto bk = m_pm.GetRoot()->GetBkColor();
+				m_pm.GetRoot()->SetBkColor(0xffff0000);
+				_mainPlayer.PostLambda([this,bk]()
+					{
+						m_pm.GetRoot()->SetBkColor(bk);
+						return false;
+					}, 350);
+			}
+
 			return ret;
 		}
 		case IDM_BKMK_DEL:
@@ -2274,6 +2331,16 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//SetWindowLong(GetHWND(), GWL_STYLE , style & ~dwNScStyle | WS_POPUP );
 			SetFocus(XPP->GetHWND());
 		} break;
+		case IDM_FREEMOVE:
+			_freeMove = !_freeMove;
+			PutProfInt("free_move", _freeMove);
+			closeMenus(1);
+			break;
+		case IDM_PINBOTTOM:
+			_pinBottom = !_pinBottom;
+			PutProfInt("pin_bottom", _pinBottom);
+			closeMenus(1);
+			break;
 		case IDM_SKIN:
 			if(HIWORD(wParam) && HIWORD(wParam)<5)
 			{
@@ -2358,6 +2425,11 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		{
 		case PSN_HELP:
 		{
+			break;
+		}
+		case NM_RELEASEDCAPTURE:
+		{
+			lzz(1)
 			break;
 		}
 		}

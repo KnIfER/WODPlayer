@@ -74,8 +74,9 @@ void hookMouseMove(MSG & msg)
 	bool v = !XPP->_bottomBar->IsVisible();
 	if((!v) ^ (yPos >= rc.bottom - XPP->_bottomBar->GetHeight()))
 	{
-		if(!v && g_menuShown) toHide = (XPP->_bottomBar);
-		else XPP->_bottomBar->SetVisible(v);
+		bool vv = v || XPP->_pinBottom;
+		if(!vv && g_menuShown) toHide = (XPP->_bottomBar);
+		else XPP->_bottomBar->SetVisible(vv);
 		v = !v;
 	} 
 	if(!v && XPP->_hFscBtmbar) {
@@ -89,7 +90,7 @@ void hookMouseMove(MSG & msg)
 		else XPP->_topBarFscWnd->SetVisible(v);
 		v = !v;
 	}
-	if(!v && XPP->_hFscBtmbar) {
+	if(!(v) && XPP->_hFscBtmbar) {
 		makeTopmost(XPP->_topBarFscWnd->GetHWND(), 1);
 	}
 }
@@ -185,6 +186,15 @@ void hookMButtonClick(MSG & msg)
 		XPP->ToggleFullScreen();
 		SetFocus(XPP->GetHWND());
 		XPP->ToggleFullScreen1();
+
+
+		if (XPP->_pinBottom && !XPP->_isFullScreen)
+		{
+			XPP->_bottomBar->SetVisible(1);
+			::ShowWindow(XPP->_hFscBtmbar, SW_SHOW);
+			makeTopmost(XPP->_bottomBar->GetHWND(), 1);
+		}
+
 		return;
 	}
 }	
@@ -673,6 +683,19 @@ wWinMain(_In_ HINSTANCE hInstance,
 				case WM_LBUTTONDOWN:
 					hookLButtonDown(msg);
 					break;
+				//case WM_NCLBUTTONUP:
+				//case WM_LBUTTONUP:
+				//	lzz(123)
+				//	if (XPP->_pinBottom && XPP->_hFscBtmbar)
+				//	XPP->_mainPlayer.PostLambda([]() {
+				//		XPP->_bottomBar->SetVisible(1);
+				//		if (XPP->_hFscBtmbar) makeTopmost(XPP->_hFscBtmbar, 1);
+				//		return false;
+				//		}, 250);
+				//	break;
+				//case WM_CAPTURECHANGED:
+				//	lzz(1)
+				//	break;
 				case WM_MOUSEWHEEL:
 					hookMouseWheel(msg);
 					break;
@@ -699,7 +722,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 					if(msg.hwnd==XPP->_topBarFscWnd->GetHWND()) {
 						XPP->_topBarFscWnd->SetVisible(false);
 					}
-					if(msg.hwnd==XPP->_hFscBtmbar) {
+					if(msg.hwnd==XPP->_hFscBtmbar && !XPP->_pinBottom) {
 						XPP->_bottomBar->SetVisible(false);
 					}
 				} break;

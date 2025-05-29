@@ -8,6 +8,9 @@
 extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName, bool isMain);
 extern long _bakTime;
 
+std::string buffer;
+bool hasTrack = false;
+
 void volume_seekbar_change(SeekBar* bar, int pos) 
 {
 	WODPlayer* player = (WODPlayer*)bar->GetTag();
@@ -52,6 +55,25 @@ void WODPlayer::newVideoView()
 		_hPlayer = _mMediaPlayer->getHWND();
 	}
 }
+
+void WODPlayer::CopyImage()
+{
+	if(_mMediaPlayer) {
+		//_mMediaPlayer->Command(1,0,"截图");
+		QkString name = L"R:\\DY\\";
+		name.Append(_app->_titleBar->GetText());
+		name.Append(L"_screenshot ");
+		name.FormatEx(L"%d", true, _mMediaPlayer->GetPosition());
+		name.Append(L" .png");
+		int ret = _mMediaPlayer->CopyImage(name.GetData(buffer));
+		if (ret==1) {
+			extern bool copyimage(const wchar_t* filename);
+			copyimage(name.GetData());
+		}
+	}
+	bStopped = 1;
+}
+
 
 void WODPlayer::Stop()
 {
@@ -318,8 +340,6 @@ void TimeMarksFloatDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdipl
 	}
 }
 
-std::string buffer;
-bool hasTrack = false;
 
 void seekchange(SeekBar* bar, int pos) {
 	WODPlayer* player = (WODPlayer*)bar->GetTag();
@@ -978,7 +998,7 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 		} return 1;
 		case WM_LBUTTONDOWN:
 		{
-			if(_app->_isFullScreen || ::GetKeyState(VK_CONTROL) < 0)
+			if(_app->_isFullScreen || _app->_freeMove&&(::GetKeyState(VK_MENU) > 0)  || ::GetKeyState(VK_CONTROL) < 0 )
 			{
 				_moving = true;
 				POINT pt;
@@ -988,10 +1008,21 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 				::SetCapture(GetHWND());
 			}
 		} return 1;
+		//case WM_CAPTURECHANGED:
+		//	lzz(1)
+		//	break;
 		case WM_LBUTTONUP:
 		{
 			_moving = false;
 			::ReleaseCapture();
+
+			//if (_app->_pinBottom && _app->_hFscBtmbar)
+			//	_app->_mainPlayer.PostLambda([this]() {
+			//	_app->_bottomBar->SetVisible(1);
+			//	extern void makeTopmost(HWND hwnd, bool mayTop);
+			//	if (_app->_hFscBtmbar) makeTopmost(_app->_hFscBtmbar, 1);
+			//	return false;
+			//		}, 350);
 		} return 0;
 		case WM_MOUSEMOVE:
 		{
@@ -1007,6 +1038,7 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 				_moveLastY = Y;
 				NeedUpdate();
 			}
+			//else lxx(nit movasda)
 		} return 1;
 		//case WM_ERASEBKGND:
 		//{
@@ -1088,7 +1120,7 @@ void WODPlayer::DoEvent(TEventUI& event)
 	}
 	if (event.Type == UIEVENT_SCROLLWHEEL)
 	{
-		if(_app->_isFullScreen || ::GetKeyState(VK_CONTROL) < 0)
+		if(_app->_isFullScreen || _app->_freeMove && (::GetKeyState(VK_MENU) > 0) || ::GetKeyState(VK_CONTROL) < 0)
 		{
 			float delta = 0.25;
 			//if(_scale==0)_scale = 1;

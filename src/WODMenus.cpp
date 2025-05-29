@@ -26,6 +26,11 @@ bool IsChecked(UINT id) {
             }
         }    return false;
 
+        case IDM_FREEMOVE:
+            return XPP->_freeMove;
+        case IDM_PINBOTTOM:
+            return XPP->_pinBottom;
+
         case IDM_PLUGIN_MF: 
             player = GetProfString("player");
             return player && *player=="MFExternalPlayer.dll";
@@ -81,6 +86,9 @@ void initWodMenus(WODApplication * xpp)
            , MenuDefine{L"pin", L"置顶", IDM_PIN, 0, true}
             , MenuDefine{L"pin1", L"置顶（高覆盖任务栏）", IDM_PIN_TOP, 0, true}
             , MenuDefine{L"", L"", 0}
+            , MenuDefine{L"fit", L"自由移动画面", IDM_FREEMOVE, 0, true}
+            , MenuDefine{L"fit", L"始终显示底栏", IDM_PINBOTTOM, 0, true}
+            , MenuDefine{L"win_nrm", L"复制图像", IDM_WIN_L}
             , MenuDefine{L"fit", L"适应视频大小", IDM_FIT}
             , MenuDefine{L"fit1", L"适应视频大小（自动）", IDM_FIT_AUTO, 0, true}
            //, MenuDefine{L"bkmk_add", L"右分屏", IDM_SPLIT}
@@ -91,6 +99,22 @@ void initWodMenus(WODApplication * xpp)
             //, MenuDefine{L"", L"", 0}
 
             , MenuDefine{L"", L"", 0}
+
+                , MenuDefine{L"skin", L"皮肤", IDM_SKIN, new std::vector<MenuDefine>{
+                    MenuDefine{L"skin_norm", L"普通皮肤", IDM_SKIN_NORM}
+                    , MenuDefine{L"skin_hollow", L"镂空", IDM_SKIN_HOLLOW}
+                    , MenuDefine{L"skin_alpha_10s", L"透明度 100%", IDM_SKIN_ALPHA_10}
+                    , MenuDefine{L"skin_alpha_9", L"透明度 90%",    IDM_SKIN_ALPHA_9}
+                    , MenuDefine{L"skin_alpha_8", L"透明度 80%",    IDM_SKIN_ALPHA_8}
+                    , MenuDefine{L"skin_alpha_7", L"透明度 70%",    IDM_SKIN_ALPHA_7}
+                    , MenuDefine{L"skin_alpha_6", L"透明度 60%",    IDM_SKIN_ALPHA_6}
+                    , MenuDefine{L"skin_alpha_5", L"透明度 50%",    IDM_SKIN_ALPHA_5}
+                    , MenuDefine{L"skin_alpha_4", L"透明度 40%",    IDM_SKIN_ALPHA_4}
+                    , MenuDefine{L"skin_alpha_3", L"透明度 30%",    IDM_SKIN_ALPHA_3}
+                    , MenuDefine{L"skin_alpha_2", L"透明度 20%",    IDM_SKIN_ALPHA_2}
+                    , MenuDefine{L"skin_alpha_1", L"透明度 10%",    IDM_SKIN_ALPHA_1}
+                }}
+
                 , MenuDefine{L"win_nrm", L"正常窗口", IDM_RESTORE}
                 , MenuDefine{L"win_full", L"全屏", IDM_FULLSCREEN,0,1}
                 , MenuDefine{L"win_max", L"最大化", IDM_MAXMISE}
@@ -100,20 +124,6 @@ void initWodMenus(WODApplication * xpp)
             , MenuDefine{L"bkmk_add", L"Δ VLCPlayer", IDM_PLUGIN_VLC, 0, 1}
             , MenuDefine{L"bkmk_add", L"Δ 迅雷播放组件", IDM_PLUGIN_XL, 0, 1}
             , MenuDefine{L"bkmk_add", L"Δ MVP", IDM_PLUGIN_MPV, 0, 1}
-        }}
-        , MenuDefine{L"skin", L"皮肤", IDM_SKIN, new std::vector<MenuDefine>{
-            MenuDefine{L"skin_norm", L"普通皮肤", IDM_SKIN_NORM}
-            , MenuDefine{L"skin_hollow", L"镂空", IDM_SKIN_HOLLOW}
-            , MenuDefine{L"skin_alpha_10s", L"透明度 100%", IDM_SKIN_ALPHA_10}
-            , MenuDefine{L"skin_alpha_9", L"透明度 90%",    IDM_SKIN_ALPHA_9}
-            , MenuDefine{L"skin_alpha_8", L"透明度 80%",    IDM_SKIN_ALPHA_8}
-            , MenuDefine{L"skin_alpha_7", L"透明度 70%",    IDM_SKIN_ALPHA_7}
-            , MenuDefine{L"skin_alpha_6", L"透明度 60%",    IDM_SKIN_ALPHA_6}
-            , MenuDefine{L"skin_alpha_5", L"透明度 50%",    IDM_SKIN_ALPHA_5}
-            , MenuDefine{L"skin_alpha_4", L"透明度 40%",    IDM_SKIN_ALPHA_4}
-            , MenuDefine{L"skin_alpha_3", L"透明度 30%",    IDM_SKIN_ALPHA_3}
-            , MenuDefine{L"skin_alpha_2", L"透明度 20%",    IDM_SKIN_ALPHA_2}
-            , MenuDefine{L"skin_alpha_1", L"透明度 10%",    IDM_SKIN_ALPHA_1}
         }}
 	};
 

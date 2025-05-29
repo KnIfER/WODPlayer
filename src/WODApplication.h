@@ -106,6 +106,8 @@ public:
 
     WNDPROC _SysWndProc=NULL;
     bool _isFullScreen=false;
+    bool _freeMove=false;
+    bool _pinBottom=false;
     bool _isMini=false;
     int _isMaximized;
 

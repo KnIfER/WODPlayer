@@ -138,3 +138,7 @@
 #define IDM_FIT IDM_WIN + 12
 #define IDM_FIT_AUTO IDM_WIN + 13
 #define IDM_MINI IDM_WIN + 14
+
+#define IDM_COPY_IMAGE        IDM_WIN + 15
+#define IDM_FREEMOVE IDM_WIN + 16
+#define IDM_PINBOTTOM IDM_WIN + 17
