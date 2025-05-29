@@ -1455,6 +1455,12 @@ LRESULT WODApplication::TimerProc()
 
 	int x = (int)roundf((lunhui * sub_duration)*1.f/duration*maxRange);
 	if(x+range>maxRange) x = maxRange-range;
+	if (x + _mainPlayer._seekfloat.GetWidth() > _mainPlayer._seekfloat.GetParent()->GetWidth()) {
+		x = _mainPlayer._seekfloat.GetParent()->GetWidth() - _mainPlayer._seekfloat.GetWidth();
+	}
+	if (x < 0)
+		x = 0;
+	//lxx(dd dd dd dd, x + _mainPlayer._seekfloat.GetWidth(), x, _mainPlayer._seekfloat.GetWidth(), _mainPlayer._seekfloat.GetParent()->GetWidth())
 	_mainPlayer._seekfloat.SetFixedXY({x,0});
 
 	int W = _mainPlayer._srcWidth, H=_mainPlayer._srcHeight;
