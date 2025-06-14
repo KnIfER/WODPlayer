@@ -74,7 +74,7 @@ void hookMouseMove(MSG & msg)
 	bool v = !XPP->_bottomBar->IsVisible();
 	if((!v) ^ (yPos >= rc.bottom - XPP->_bottomBar->GetHeight()))
 	{
-		bool vv = v || XPP->_pinBottom;
+		bool vv = v || XPP->_pinBottom && XPP->_hFscBtmbar && !XPP->_isFullScreen;
 		if(!vv && g_menuShown) toHide = (XPP->_bottomBar);
 		else XPP->_bottomBar->SetVisible(vv);
 		v = !v;

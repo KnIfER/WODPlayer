@@ -49,7 +49,7 @@ typedef bool (__cdecl* VW_CLOSE)(LONG_PTR);
 typedef void (__cdecl* VW_SYNCSIZE)(LONG_PTR, unsigned int*, unsigned int*);
 typedef void (__cdecl* VW_INTERFACE)();
 typedef float (__cdecl* VW_SETRATE)(LONG_PTR, float);
-typedef int (__cdecl* VW_SETVOLUME)(LONG_PTR, int);
+typedef int (__cdecl* VW_SETVOLUME)(LONG_PTR, int, int);
 typedef void (__cdecl* VW_SETROTATION)(LONG_PTR, int);
 typedef int (__cdecl* VW_GETROTATION)(LONG_PTR);
 typedef int (__cdecl* VW_SETPOSITIONEX)(LONG_PTR, LONG, LONG);
@@ -82,7 +82,7 @@ public:
 	void			Release() EXP_MV_API;
 	void			syncResolution(unsigned int & _resX, unsigned int & _resY) EXP_MV_API;
 	float			SetRate(float rate) EXP_MV_API;
-	int				SetVolume(int volume) EXP_MV_API;
+	int				SetVolume(int volume, int volumer) EXP_MV_API;
 	void		    SetRotation(int value) EXP_MV_API;
 	int			GetRotation() EXP_MV_API;
 	int			CopyImage(const CHAR* where) EXP_MV_API;

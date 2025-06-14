@@ -105,7 +105,7 @@ extern "C" __declspec(dllexport) float vwSetRate(MFPlayer2* player, float rate)
 	return player->SetRate(rate);
 }
 
-extern "C" __declspec(dllexport) int vwSetVolume(MFPlayer2* player, int value) 
+extern "C" __declspec(dllexport) int vwSetVolume(MFPlayer2* player, int value, int volumer)
 {
 	float ret = value*1.f/100;
 	if(value>=0)

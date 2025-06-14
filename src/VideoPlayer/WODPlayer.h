@@ -46,7 +46,7 @@ public:
     void CopyImage();
 
     float SpeedDelta(float delta);
-    int SetVolume(int volume);
+    int SetVolume(int volume, int volumer);
     void SetRotate(int delta);
 
 
@@ -97,6 +97,7 @@ public:
 
     long fakePos;
     bool isPng;
+    bool isFakePng;
     bool isMain;
 
     long lastDuration;

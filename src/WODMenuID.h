@@ -142,3 +142,12 @@
 #define IDM_COPY_IMAGE        IDM_WIN + 15
 #define IDM_FREEMOVE IDM_WIN + 16
 #define IDM_PINBOTTOM IDM_WIN + 17
+
+
+// 声音
+#define IDM_VOICE IDM + 7000
+#define IDM_MUTE IDM_VOICE + 0
+#define IDM_UNMUTE IDM_VOICE + 1
+#define IDM_MUTE_L IDM_VOICE + 2
+#define IDM_MUTE_R IDM_VOICE + 3
+#define IDM_VOICE_ENHANCE IDM_VOICE + 4

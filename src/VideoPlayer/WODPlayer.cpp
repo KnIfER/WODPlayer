@@ -10,11 +10,13 @@ extern long _bakTime;
 
 std::string buffer;
 bool hasTrack = false;
+int volume = 100;
 
 void volume_seekbar_change(SeekBar* bar, int pos) 
 {
 	WODPlayer* player = (WODPlayer*)bar->GetTag();
-	int val = player->SetVolume(pos);
+	volume = pos;
+	int val = player->SetVolume(player->_app->_muteL?0:pos, player->_app->_muteR?0:pos);
 	//LogIs(2, "val = %d %d", val, pos);
 }
 
@@ -130,9 +132,9 @@ float WODPlayer::SpeedDelta(float delta)
 	return speed;
 }
 
-int WODPlayer::SetVolume(int volume)
+int WODPlayer::SetVolume(int volume, int volumer)
 {
-	return _mMediaPlayer->SetVolume(volume);
+	return _mMediaPlayer->SetVolume(volume, volumer);
 }
 
 void WODPlayer::SetRotate(int delta)
@@ -157,7 +159,7 @@ public:
 	long GetDuration(){return 999;}
 	bool PlayVideoFile(const TCHAR* path, const CHAR* path1){return 0;}
 	float SetRate(float rate){return 1;};
-	int SetVolume(int volume){return 999;};
+	int SetVolume(int volume, int volumer){return 999;};
 };
 
 void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::SolidBrush & brush, RECT & rc)
@@ -493,6 +495,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		_durationCache = 0;
 		_currentPath = path;
 		isPng = _currentPath.EndWith(L".webp") || _currentPath.EndWith(L".jpg") || _currentPath.EndWith(L".jpeg") || _currentPath.EndWith(L".png");
+		isFakePng = 0;
 		fakePos = 0;
 		// touch access time
 		int st = _currentPath.ReverseFind(L"\\");
@@ -684,7 +687,10 @@ long WODPlayer::GetDuration()
 {
 	long duration = _mMediaPlayer->GetDuration();
 	if(duration==0) {
-		isPng = 1;
+		if (!isPng) {
+			isFakePng = 1;
+			isPng = 1;
+		}
 		duration = 2.3*1000; // 3 秒
 	}
 	lastDuration=MAX(lastDuration, duration);
@@ -700,8 +706,12 @@ int WODPlayer::GetPosition(bool tick)
 	//lxxx(GetPosition dd dd, tick, _playing)
 	int pos = _mMediaPlayer->GetPosition();
 	if(isPng) {
-		if(tick && _playing) fakePos += 200;
-		pos = fakePos;
+		if (isFakePng && _mMediaPlayer->GetDuration() != 0) {
+			isFakePng = false;
+		} else {
+			if (tick && _playing) fakePos += 200;
+				pos = fakePos;
+		}
 	}
 	return pos;
 }
@@ -998,7 +1008,7 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 		} return 1;
 		case WM_LBUTTONDOWN:
 		{
-			if(_app->_isFullScreen || _app->_freeMove&&(::GetKeyState(VK_MENU) > 0)  || ::GetKeyState(VK_CONTROL) < 0 )
+			if(_app->_isFullScreen || _app->_freeMove&& _app->_isMini  &&(::GetKeyState(VK_MENU) > 0)  || ::GetKeyState(VK_CONTROL) < 0 )
 			{
 				_moving = true;
 				POINT pt;
@@ -1120,7 +1130,7 @@ void WODPlayer::DoEvent(TEventUI& event)
 	}
 	if (event.Type == UIEVENT_SCROLLWHEEL)
 	{
-		if(_app->_isFullScreen || _app->_freeMove && (::GetKeyState(VK_MENU) > 0) || ::GetKeyState(VK_CONTROL) < 0)
+		if(_app->_isFullScreen || _app->_freeMove && _app->_isMini && (::GetKeyState(VK_MENU) > 0) || ::GetKeyState(VK_CONTROL) < 0)
 		{
 			float delta = 0.25;
 			//if(_scale==0)_scale = 1;

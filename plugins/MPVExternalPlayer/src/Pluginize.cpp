@@ -116,9 +116,9 @@ extern "C" __declspec(dllexport) float vwSetRate(MPVPlayer* player, float rate)
 	return player->SetRate(rate);
 }
 
-extern "C" __declspec(dllexport) int vwSetVolume(MPVPlayer* player, int value) 
+extern "C" __declspec(dllexport) int vwSetVolume(MPVPlayer* player, int value, int volumer)
 {
-	return player->SetVolume(value);
+	return player->SetVolume(value, volumer);
 }
 
 

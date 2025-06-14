@@ -425,10 +425,21 @@ float MPVPlayer::SetRate(float value)
     return v;
 }
 
-float MPVPlayer::SetVolume(int value)
+float MPVPlayer::SetVolume(int value, int volumer)
 {
-    _itoa(value, buffer, 10);
-    if(mpv) mpv_set_property_string(mpv, "volume", buffer);
+    int v = max(value, volumer);
+    _itoa(v, buffer, 10);
+    if (mpv) {
+        mpv_set_property_string(mpv, "volume", buffer);
+        if (volumer != value) {
+            if (volumer == 0) {
+                mpv_set_property_string(mpv, "af", "lavfi=[pan=stereo|FL < 0.5*FC + 0.3*FLC + 0.3*FL + 0.3*BL + 0.3*SL + 0.5*LFE | FR < 0.5*FC + 0.3*FRC + 0.*FR + 0.3*BR + 0.3*SR + 0.5*LFE],lavfi=[acompressor=10]");
+            }
+            else {
+                mpv_set_property_string(mpv, "af", "lavfi=[pan=stereo|FL < 0.5*FC + 0.3*FLC + 0.*FL + 0.3*BL + 0.3*SL + 0.5*LFE | FR < 0.5*FC + 0.3*FRC + 0.3*FR + 0.3*BR + 0.3*SR + 0.5*LFE],lavfi=[acompressor=10]");
+            }
+        }
+    }
     return 1;
 }
 

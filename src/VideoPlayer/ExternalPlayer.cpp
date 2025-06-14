@@ -205,11 +205,11 @@ float ExternalPlayer::SetRate(float rate)
 	return rate;
 }
 
-int ExternalPlayer::SetVolume(int volume)
+int ExternalPlayer::SetVolume(int volume, int volumer)
 {
 	if(_player && vwSetVolume) 
 	{
-		return vwSetVolume(_player, volume);
+		return vwSetVolume(_player, volume, volumer);
 	}
 	return volume;
 }
@@ -226,7 +226,7 @@ void ExternalPlayer::SetRotation(int value)
 
 int ExternalPlayer::GetRotation()
 {
-	if(_player && vwSetVolume) 
+	if(_player && vwGetRotation) 
 	{
 		return vwGetRotation(_player);
 	}

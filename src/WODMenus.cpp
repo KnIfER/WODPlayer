@@ -43,6 +43,10 @@ bool IsChecked(UINT id) {
         case IDM_PLUGIN_MPV: 
             player = GetProfString("player");
             return player && *player=="MPVExternalPlayer.dll";
+        case IDM_MUTE_L:
+            return XPP->_muteL;
+        case IDM_MUTE_R:
+            return XPP->_muteR;
     }
     return false;
 }
@@ -124,6 +128,10 @@ void initWodMenus(WODApplication * xpp)
             , MenuDefine{L"bkmk_add", L"Δ VLCPlayer", IDM_PLUGIN_VLC, 0, 1}
             , MenuDefine{L"bkmk_add", L"Δ 迅雷播放组件", IDM_PLUGIN_XL, 0, 1}
             , MenuDefine{L"bkmk_add", L"Δ MVP", IDM_PLUGIN_MPV, 0, 1}
+        }}
+        , MenuDefine{L"voice", L"声音", IDM_PLUGIN, new std::vector<MenuDefine>{
+            MenuDefine{L"mute_l", L"静音左声道", IDM_MUTE_L, 0, 1}
+            , MenuDefine{L"mute_r", L"静音右声道", IDM_MUTE_R, 0, 1}
         }}
 	};
 

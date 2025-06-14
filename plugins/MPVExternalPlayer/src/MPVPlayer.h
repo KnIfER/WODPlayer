@@ -74,7 +74,7 @@ public:
 	void			takeSnapShot(const char *psz_filepath);
 	void			SyncSize(unsigned int * x, unsigned int * y) ;
 	float  			SetRate(float rate);
-	float		    SetVolume(int rate);
+	float		    SetVolume(int rate, int volumer);
 	void		    SetRotation(int value);
 	int				GetRotation();
 	int				SetPositionEx(LONG WPARAM, LONG LPARAM);

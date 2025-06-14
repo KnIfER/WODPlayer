@@ -111,6 +111,9 @@ public:
     bool _isMini=false;
     int _isMaximized;
 
+    bool _muteL = false;
+    bool _muteR = false;
+
     int _WndOp;
 
     HACCEL _hAccTable;

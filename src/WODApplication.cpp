@@ -1312,7 +1312,7 @@ void toggleFastforward(float rate) {
 	}
 }
 
-LRESULT WODApplication::TimerProc() 
+LRESULT WODApplication::TimerProc()  // ontiemchange
 {
 	//if(_osd) {
 	//	makeTopmost(_osd->GetHWND(), 0);
@@ -1502,6 +1502,7 @@ void WODApplication::onPause(bool min)
 		if(resumePlay=_mainPlayer._isPlaying)
 			_mainPlayer.Toggle();
 	}
+	m_pm.GetRoot()->SetBkColor(0xff555555);
 }
 
 void WODApplication::onResume(bool min) {
@@ -1520,6 +1521,8 @@ void WODApplication::onResume(bool min) {
 		resumePlay = false;
 	}
 	iconized = 0;
+	auto bk = 0xFF0078d7;
+	m_pm.GetRoot()->SetBkColor(bk);
 
 	//makeTopmost(GetHWND(),0);
 
@@ -1527,6 +1530,12 @@ void WODApplication::onResume(bool min) {
 	//	::SendMessage(GetHWND(), WM_SYSCOMMAND, SC_RESTORE, 0);
 	//teSetForegroundWindow(GetHWND());
 	//SetForegroundWindow(GetHWND()); // 会导致mini底栏首次聚焦无法点击
+}
+
+void AdjustVoice() {
+	extern int volume;
+	XPP->_mainPlayer.SetVolume(XPP->_muteL ? 0 : volume, XPP->_muteR ? 0 : volume);
+
 }
 
 LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
@@ -1558,7 +1567,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		//		return false;
 		//	}, 10);
 		//}
-		if (_pinBottom && _hFscBtmbar)
+		if (_pinBottom && _hFscBtmbar && !_isFullScreen)
 			_mainPlayer.PostLambda([this]()
 			{
 				_bottomBar->SetVisible(1);
@@ -1601,7 +1610,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			SetWindowPos(_osd->GetHWND(), 0, rc.left, rc.top, 0, 0, SWP_NOSIZE);
 		}
-		if (_pinBottom && _hFscBtmbar) {
+		if (_pinBottom && _hFscBtmbar && !_isFullScreen) {
 			//_bottomBar->GetParent()->NeedUpdate();
 			//_bottomBar->SetVisible(true);
 			//_bottomBar->ParentNeedUpdate();
@@ -2070,7 +2079,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			lastBkmkTm = now;
 
 			if (1) {
-				auto bk = m_pm.GetRoot()->GetBkColor();
+				auto bk = 0xFF0078d7;
 				m_pm.GetRoot()->SetBkColor(0xffff0000);
 				_mainPlayer.PostLambda([this,bk]()
 					{
@@ -2399,6 +2408,17 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 		case IDM_SKIN_SEEKBAR_MAGNIFIER:
 			_mainPlayer._seekfloat.SetVisible(!_mainPlayer._seekfloat.IsVisible());
+			return 1;
+			
+		case IDM_MUTE_L:
+			_muteL = !_muteL;
+			if (_muteL && !IsKeyDown(VK_CONTROL)) _muteR = false;
+			AdjustVoice();
+			return 1;
+		case IDM_MUTE_R:
+			_muteR = !_muteR;
+			if (_muteR && !IsKeyDown(VK_CONTROL)) _muteL = false;
+			AdjustVoice();
 			return 1;
 
 		case IDM_SKIN_NORM:
