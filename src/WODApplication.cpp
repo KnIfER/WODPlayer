@@ -1458,6 +1458,9 @@ LRESULT WODApplication::TimerProc()  // ontiemchange
 	if (x + _mainPlayer._seekfloat.GetWidth() > _mainPlayer._seekfloat.GetParent()->GetWidth()) {
 		x = _mainPlayer._seekfloat.GetParent()->GetWidth() - _mainPlayer._seekfloat.GetWidth();
 	}
+	int mag_width = min(_mainPlayer._seekbar.GetWidth(), 250);
+	if(_mainPlayer._seekfloat.GetWidth()!= mag_width)
+		_mainPlayer._seekfloat.SetFixedWidth(mag_width);
 	if (x < 0)
 		x = 0;
 	//lxx(dd dd dd dd, x + _mainPlayer._seekfloat.GetWidth(), x, _mainPlayer._seekfloat.GetWidth(), _mainPlayer._seekfloat.GetParent()->GetWidth())
