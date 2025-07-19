@@ -553,6 +553,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		isFakePng = 0;
 		fakePos = 0;
 		_seekbar._isSeeking = false;
+		_seekfloat._isSeeking = false;
 		// touch access time
 		int st = _currentPath.ReverseFind(L"\\");
 		int st1 = _currentPath.ReverseFind(L"/");
