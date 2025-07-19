@@ -113,6 +113,9 @@ public:
 
     bool _muteL = false;
     bool _muteR = false;
+    bool _safe_mode = false;
+    int _bkmk_add_layer = 0;
+    int _mag_type = 0;
 
     int _WndOp;
 

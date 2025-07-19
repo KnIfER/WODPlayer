@@ -161,7 +161,7 @@ showshadow="false"
 
         <Box width="0"  >
           <_s inset="0,10,0,10" minwidth="100" width="0" name="seekbar" barInset="10"/>
-          <_s name="seekfloat" inset="0,10,0,10" width="250" 
+          <_s name="seekfloat" inset="0,10,0,10" width="550" 
               barInset="10" 
               bkcolor="cf333333"
               bordercolor="#bfffffff"

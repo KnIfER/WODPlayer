@@ -81,8 +81,9 @@ public:
 	int _zoomedInBy;
 	LONG _zoomedInAt;
 	int zoomInWeight = 80;
-private:
+//private:
 	int dragDownPos;
+	int dragDownX;
 	int dragDownLeft;
 	int dragDownWidth;
 };

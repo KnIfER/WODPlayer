@@ -162,6 +162,7 @@ public:
 	int SetVolume(int volume, int volumer){return 999;};
 };
 
+// draw bkk 
 void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::SolidBrush & brush, RECT & rc)
 {
 	brush.SetColor(0xffffffff);
@@ -189,6 +190,7 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 	WODPlayer* player = (WODPlayer*)pControl->GetTag();
 
 	int splitter_idx = 0;
+	int splitter_idx_1 = 0;
 
 	//BOOL zoomedIn = true;
 	//int zoomedInBy = 15*60*1000/2;
@@ -200,6 +202,9 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 		auto & bkmk = player->_bookmarks.at(i);
 		auto when = bkmk.pos;
 		int left = rc.left+when*1.0/max*W - w;
+		if (bkmk.color) {
+			brush.SetColor(bkmk.color);
+		}
 
 		if(bkmk.layer==0)
 		{
@@ -227,11 +232,35 @@ void TimeMarksDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdiplus::S
 				//graph.DrawLine(&pen, left+w, top, left+width+w+w+100, top);
 			}
 		}
+		else if(bkmk.layer==2) // mute
+		{
+			
+			brush.SetColor(0xabffffff);
+			graph.FillRectangle(&brush, left, top
+				, width
+				, height);
+			if (((splitter_idx_1++)%2)==0)
+			{
+				graph.FillRectangle(&brush, left+w, top
+					, width+w
+					, 2);
+			}
+			else
+			{
+				graph.FillRectangle(&brush, left-width, top
+					, width+w
+					, 2);
+			}
+			brush.SetColor(0xffffffff);
+		}
 		else
 		{
 			graph.FillRectangle(&brush, left, top_1
 				, width
 				, height_1);
+		}
+		if (bkmk.color) {
+			brush.SetColor(0xffffffff);
 		}
 	}
 }
@@ -291,6 +320,7 @@ void TimeMarksFloatDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdipl
 
 
 	int splitter_idx = 0;
+	int splitter_idx_1 = 0;
 
 	//BOOL zoomedIn = true;
 	//int zoomedInBy = 15*60*1000/2;
@@ -301,6 +331,9 @@ void TimeMarksFloatDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdipl
 	{
 		auto & bkmk = player->_bookmarks.at(i);
 		auto when = bkmk.pos;
+		if (bkmk.color) {
+			brush.SetColor(bkmk.color);
+		}
 		if(when>=timeRangeMin && when<=timeRangeMax) {
 			when = (when-timeRangeMin);
 			int left = rc.left+when*1.0/max*W - w;
@@ -330,6 +363,27 @@ void TimeMarksFloatDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdipl
 					//graph.DrawLine(&pen, left+w, top, left+width+w+w+100, top);
 				}
 			}
+			else if (bkmk.layer == 2) // mute
+			{
+
+				brush.SetColor(0xabffffff);
+				graph.FillRectangle(&brush, left, top
+					, width
+					, height);
+				if (((splitter_idx_1++) % 2) == 0)
+				{
+					graph.FillRectangle(&brush, left + w, top
+						, width + w
+						, 2);
+				}
+				else
+				{
+					graph.FillRectangle(&brush, left - width, top
+						, width + w
+						, 2);
+				}
+				brush.SetColor(0xffffffff);
+			}
 			else
 			{
 				graph.FillRectangle(&brush, left, top_1
@@ -339,6 +393,11 @@ void TimeMarksFloatDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdipl
 		}
 		else if(bkmk.layer==0)
 			splitter_idx++;
+		else if(bkmk.layer==2)
+			splitter_idx_1++;
+		if (bkmk.color) {
+			brush.SetColor(0xffffffff);
+		}
 	}
 }
 
@@ -346,10 +405,6 @@ void TimeMarksFloatDecorator(SeekBar* pControl, Gdiplus::Graphics & graph, Gdipl
 void seekchange(SeekBar* bar, int pos) {
 	WODPlayer* player = (WODPlayer*)bar->GetTag();
 	player->SetPosition(pos, true);
-	if(player->isMain && hasTrack) 
-	{
-		player->_app->_audioPlayer.SetPosition(pos, true);
-	}
 }
 
 void seekchangefloat(SeekBar* bar, int posf) {
@@ -497,6 +552,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		isPng = _currentPath.EndWith(L".webp") || _currentPath.EndWith(L".jpg") || _currentPath.EndWith(L".jpeg") || _currentPath.EndWith(L".png");
 		isFakePng = 0;
 		fakePos = 0;
+		_seekbar._isSeeking = false;
 		// touch access time
 		int st = _currentPath.ReverseFind(L"\\");
 		int st1 = _currentPath.ReverseFind(L"/");
@@ -626,7 +682,7 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		_seekfloat._decorator = (SeekBarTrackDecorator)TimeMarksFloatDecorator;
 		_seekfloat._callback = (SeekBarTrackCallback)seekchangefloat;
 	}
-	// 获取书签
+	// 获取书签 bkk 
 	//if (ret)
 	{
 		QkString tmp;
@@ -692,10 +748,13 @@ long WODPlayer::GetDuration()
 			isPng = 1;
 		}
 		duration = 2.3*1000; // 3 秒
+	} else if(isPng){
+		isFakePng = 0;
+		isPng = 0;
 	}
-	lastDuration=MAX(lastDuration, duration);
-	lastDuration=MAX(lastDuration, 10);
-	return lastDuration;
+	//lastDuration=MAX(lastDuration, duration);
+	//lastDuration=MAX(lastDuration, 10);
+	return duration;
 }
 
 extern bool _playing;
@@ -725,20 +784,77 @@ void WODPlayer::SetPosition(long pos, bool fastSeek)
 	if(isPng) {
 		fakePos = pos;
 	}
+	if (isMain && hasTrack)
+	{
+		_app->_audioPlayer.SetPosition(pos, true);
+	}
 }
+
+static int bmAddCount = 0;
+
+
+#include <functional>
+#include <optional>
+
+// 协程函数类型
+using CoroutineFunc = std::function<void(std::function<void()>)>;
+
+// 协程状态
+enum class CoroutineState {
+	READY,
+	RUNNING,
+	SUSPENDED,
+	COMPLETED
+};
+
+// 协程实现
+struct Coroutine {
+	CoroutineFunc func;
+	CoroutineState state = CoroutineState::READY;
+	std::function<void()> resumeCallback;
+	std::function<void()> yieldFunction;
+	static Coroutine create(CoroutineFunc func) {
+		Coroutine coroutine;
+		coroutine.func = func;
+		coroutine.yieldFunction = [&coroutine]() {
+			coroutine.state = CoroutineState::SUSPENDED;
+			if (coroutine.resumeCallback) {
+				coroutine.resumeCallback();
+			}
+		};
+		return coroutine;
+	}
+	void resume() {
+		if (state == CoroutineState::READY || state == CoroutineState::SUSPENDED) {
+			state = CoroutineState::RUNNING;
+			if (state == CoroutineState::READY) {
+				func(yieldFunction);
+				state = CoroutineState::COMPLETED;
+			}
+		}
+	}
+	bool isCompleted() const {
+		return state == CoroutineState::COMPLETED;
+	}
+};
+
+#include "ThreadPool.hpp"
+
+
+std::atomic<__int64> tmp_del_Id;
+std::vector<__int64> tmp_del_Ids;  // 原子时间ID数组
+std::mutex ids_mutex;  // 用于扩容时的互斥锁
 
 
 int WODPlayer::AddBookmark()
 {
 	if(_mMediaPlayer) { // todo use binary insert
+		if (1 && ++bmAddCount > 99) {
+			_app->_safe_mode = 1;
+		}
 		int pos = _mMediaPlayer->GetPosition();
 		int duration = GetDuration();
 		//LogIs(2, L"%s", (LPCWSTR)_currentPath);
-
-
-		QkString pathBuffer;
-		pathBuffer.EnsureCapacity(_currentPath.GetLength() + 30);
-		pathBuffer.AsBuffer();
 
 		int rowId = -1;
 
@@ -752,54 +868,105 @@ int WODPlayer::AddBookmark()
 			}
 		}
 
-		if (titleKey) {
-			rowId = _app->_db->AddBookmark("http"
-				, _app->_titleBar->GetText().GetData(threadBuffer1), 0, _timeMarked, pos, duration, 0);
-		}
-		else if (DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath))
-		{
-			pathBuffer.RecalcSize();
-			if(pathBuffer.Find('\"')) {
-				pathBuffer.Replace(L"\"", L"\"\"");
-			}
-			auto idx = pathBuffer.Find('?');
-			if(idx>0) {
-				pathBuffer.MidFast(0, idx);
-			}
-			int fullPathLen = pathBuffer.GetLength();
-			if (DuiLib::PathRemoveFileSpecW((LPWSTR)pathBuffer.GetData()))
-			{
-				pathBuffer.RecalcSize();
-				size_t basePathLen = pathBuffer.GetLength();
-				//if(basePathLen>0 && pathBuffer[basePathLen-1]=='\\')
-				//{ // todo optimize
-				//    basePathLen--;
-				//	DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath);
-				//	pathBuffer.SetAt(basePathLen, '\0');
-				//	pathBuffer.RecalcSize();
-				//}
-
-				QkString fileName = pathBuffer.GetData()+basePathLen+1;//pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1);
-				if(fileName.EndWith(".enc")) {
-					decryptFileName(fileName);
-				}
-
-				rowId = _app->_db->AddBookmark(pathBuffer.GetData(threadBuffer1)
-					, fileName.GetData(threadBuffer), 0, _timeMarked, pos, duration, 0);
-			}
-		}
-
-		if(idx>=0)
+		if (idx >= 0)
 		{
 			_selectedBookmark = idx;
-			_bookmarks.insert(_bookmarks.begin()+idx, {pos, rowId});
+			_bookmarks.insert(_bookmarks.begin() + idx, { pos, rowId });
 		}
 		else
 		{
 			idx = _bookmarks.size();
 			_selectedBookmark = _bookmarks.size();
-			_bookmarks.push_back({pos, rowId});
+			_bookmarks.push_back({ pos, rowId });
 		}
+
+		auto layer = _app->_bkmk_add_layer;
+		auto tmpId = GetTickCount64();
+		auto mod_plc = _bookmarks.begin() + idx;
+		_bookmarks[idx].timeId = tmpId;
+		_bookmarks[idx].layer = layer;
+
+
+		//lxx(创建一个协程)
+		auto job = [this, pos, duration, &mod_plc, tmpId, layer]() {
+			//lzz(协程 dd, tmpId)
+			QkString pathBuffer;
+			pathBuffer.EnsureCapacity(_currentPath.GetLength() + 30);
+			pathBuffer.AsBuffer();
+			int rowId = -1;
+			if (titleKey) {
+				rowId = _app->_db->AddBookmark("http"
+					, _app->_titleBar->GetText().GetData(threadBuffer1), 0, _timeMarked, pos, duration, 0, layer);
+			}
+			else if (DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath))
+			{
+				pathBuffer.RecalcSize();
+				if (pathBuffer.Find('\"')) {
+					pathBuffer.Replace(L"\"", L"\"\"");
+				}
+				auto idx = pathBuffer.Find('?');
+				if (idx > 0) {
+					pathBuffer.MidFast(0, idx);
+				}
+				int fullPathLen = pathBuffer.GetLength();
+				if (DuiLib::PathRemoveFileSpecW((LPWSTR)pathBuffer.GetData()))
+				{
+					pathBuffer.RecalcSize();
+					size_t basePathLen = pathBuffer.GetLength();
+					//if(basePathLen>0 && pathBuffer[basePathLen-1]=='\\')
+					//{ // todo optimize
+					//    basePathLen--;
+					//	DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath);
+					//	pathBuffer.SetAt(basePathLen, '\0');
+					//	pathBuffer.RecalcSize();
+					//}
+
+					QkString fileName = pathBuffer.GetData() + basePathLen + 1;//pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1);
+					if (fileName.EndWith(".enc")) {
+						decryptFileName(fileName);
+					}
+
+					rowId = _app->_db->AddBookmark(pathBuffer.GetData(threadBuffer1)
+						, fileName.GetData(threadBuffer), 0, _timeMarked, pos, duration, 0, layer);
+				}
+				//std::this_thread::sleep_for(std::chrono::seconds(2));
+
+				//lzz(to del::dd now=dd, (int)tmpId, (int )tmp_del_Id)
+
+				std::lock_guard<std::mutex> lock(ids_mutex);
+				if (tmp_del_Id == tmpId) {
+					_app->_db->DelBookmark(rowId);
+					rowId = -1;
+				}
+				else for (auto& id : tmp_del_Ids) {
+					if (id == tmpId) {
+						_app->_db->DelBookmark(rowId);
+						rowId = -1;
+					}
+				}
+				if(rowId!=-1)
+				for (size_t i = 0; i < _bookmarks.size(); i++)
+				{
+					if (_bookmarks[i].timeId == tmpId) {
+						auto& mod_plc = _bookmarks[i];
+						mod_plc.rowID = rowId; // todo check sanity
+						if (tmpId != mod_plc.timeId) {
+							lzz(123);
+						}
+						break;
+					}
+				}
+			}
+		};
+
+
+		auto taskId1 = LambdaTaskManager::getInstance().postLambda(job);
+		
+		//auto taskId1 = LambdaTaskManager::getInstance().postLambda([]() {
+		//	//lxx(Task执行)
+		//	//std::this_thread::sleep_for(std::chrono::seconds(1));
+
+		//	});
 		_seekbar.Invalidate();
 		return idx;
 	}
@@ -810,11 +977,12 @@ void WODPlayer::SelectBookMark(int index)
 {
 	if (index>=0 && index<_bookmarks.size())
 	{
-		SetPosition(_bookmarks[index].pos, false);
+		int pos = _bookmarks[index].pos;
+		SetPosition(pos, false);
 		_selectedBookmark = index;
 		if (!_isPlaying)
 		{
-			_seekbar.SetProgress(_bookmarks[index].pos);
+			_seekbar.SetProgress(pos);
 		}
 	}
 }
@@ -823,8 +991,27 @@ int WODPlayer::DelBookmark(int index)
 {
 	if (index>=0 && index<_bookmarks.size())
 	{
-		const auto & bkmk =  _bookmarks[index];
-		_app->_db->DelBookmark(bkmk.rowID);
+		const auto& bkmk = _bookmarks[index];
+		std::lock_guard<std::mutex> lock(ids_mutex);
+		__int64 del_id = bkmk.rowID;
+		__int64 tmp_id = bkmk.timeId;
+		if (del_id == -1) {
+			tmp_del_Ids.push_back(del_id);
+			tmp_del_Id = tmp_id;
+		}
+		else {
+			_app->_db->DelBookmark(del_id);
+		}
+		//auto job = [this, del_id, tmp_id]() {
+		//	if (del_id == -1) {
+		//		tmp_del_Ids.push_back(del_id);
+		//		tmp_del_Id = tmp_id;
+		//	}
+		//	else {
+		//		_app->_db->DelBookmark(del_id);
+		//	}
+		//};
+		//auto taskId1 = LambdaTaskManager::getInstance().postLambda(job);
 		_bakTime = bkmk.pos;
 		_bookmarks.erase(_bookmarks.begin()+index);
 		_seekbar.Invalidate();

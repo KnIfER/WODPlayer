@@ -983,6 +983,10 @@ void SeekEx(int cmd)
 	if (player)
 	{
 		player->SetPositionEx(cmd, (LONG)NULL);
+		if (XPP->_mainPlayer.isMain && hasTrack)
+		{
+			XPP->_audioPlayer.SetPosition(player->GetPosition(), true);
+		}
 	}
 }
 
@@ -1312,6 +1316,9 @@ void toggleFastforward(float rate) {
 	}
 }
 
+
+int lastLun = 0;
+
 LRESULT WODApplication::TimerProc()  // ontiemchange
 {
 	//if(_osd) {
@@ -1429,19 +1436,34 @@ LRESULT WODApplication::TimerProc()  // ontiemchange
 		_playMid = false;
 	}
 
+	int mag_width = min(_mainPlayer._seekbar.GetWidth(), 350);
+
 	long sub_duration = 5*60*1000;
-	if(duration<=sub_duration/5) { // 1 分钟以下
-		sub_duration = 30*1000;
+	int range = mag_width;
+	int maxRange = _mainPlayer._seekbar.GetWidth();
+	if (_mag_type == 0) {
+		if (duration <= sub_duration / 5) { // 1 分钟以下
+			sub_duration = 30 * 1000;
+		}
+		else if (duration <= sub_duration * 2) { // 10 分钟以下
+			sub_duration /= 5;
+		}
+		else if (duration <= sub_duration * 6) { // 30 分钟以下
+			sub_duration /= 2;
+		}
+		sub_duration = min(sub_duration, range * 1.f / 2 / maxRange * duration);
 	}
-	else if(duration<=sub_duration*2) { // 10 分钟以下
-		sub_duration /= 5;
+	else {
+		mag_width = _mainPlayer._seekbar.GetWidth();
+		sub_duration = min(1.25 * 60 * 60 * 1000, duration);
+		sub_duration = min(30 * 60 * 1000, duration);
+		if (duration <= sub_duration + 5 * 60 * 1000) {
+			sub_duration /= 2;
+		}
 	}
-	else if(duration<=sub_duration*6) { // 30 分钟以下
-		sub_duration /= 2;
-	}
-	int range = _mainPlayer._seekfloat.GetWidth();
-	int maxRange  = _mainPlayer._seekbar.GetWidth();
-	sub_duration = min(sub_duration, range*1.f/2/maxRange*duration);
+	if (_mainPlayer._seekfloat.GetWidth() != mag_width)
+		_mainPlayer._seekfloat.SetFixedWidth(mag_width);
+
 	if(sub_duration==0)
 		sub_duration = 1000;
 
@@ -1454,16 +1476,23 @@ LRESULT WODApplication::TimerProc()  // ontiemchange
 	//_seekfloat->NeedParentUpdate();
 
 	int x = (int)roundf((lunhui * sub_duration)*1.f/duration*maxRange);
+	if (lastLun != x) {
+		//_mainPlayer._seekfloat._isSeeking = false;
+		_mainPlayer._seekfloat.dragDownLeft = _mainPlayer._seekfloat.dragDownX;
+		lastLun = x;
+	}
 	if(x+range>maxRange) x = maxRange-range;
 	if (x + _mainPlayer._seekfloat.GetWidth() > _mainPlayer._seekfloat.GetParent()->GetWidth()) {
 		x = _mainPlayer._seekfloat.GetParent()->GetWidth() - _mainPlayer._seekfloat.GetWidth();
 	}
-	int mag_width = min(_mainPlayer._seekbar.GetWidth(), 250);
-	if(_mainPlayer._seekfloat.GetWidth()!= mag_width)
-		_mainPlayer._seekfloat.SetFixedWidth(mag_width);
+	//int mag_width = min(_mainPlayer._seekbar.GetWidth(), 550);
+	//mag_width = _mainPlayer._seekbar.GetWidth();
+	//if(_mainPlayer._seekfloat.GetWidth()!= mag_width)
+	//	_mainPlayer._seekfloat.SetFixedWidth(mag_width);
 	if (x < 0)
 		x = 0;
 	//lxx(dd dd dd dd, x + _mainPlayer._seekfloat.GetWidth(), x, _mainPlayer._seekfloat.GetWidth(), _mainPlayer._seekfloat.GetParent()->GetWidth())
+
 	_mainPlayer._seekfloat.SetFixedXY({x,0});
 
 	int W = _mainPlayer._srcWidth, H=_mainPlayer._srcHeight;
@@ -1832,6 +1861,20 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_OPEN:
 			PickFile();
 			break;
+		case IDM_NO_DELELTE_TOGGLE:
+			_safe_mode = !_safe_mode;
+			closeMenus(true);
+			break;
+		case IDM_BKMK_MUTE_TRACK:
+			if (_bkmk_add_layer == 2) _bkmk_add_layer = 0;
+			else _bkmk_add_layer = 2;
+			closeMenus(true);
+			break;
+		case IDM_BKMK_SEP_TRACK:
+			if (_bkmk_add_layer == 1) _bkmk_add_layer = 0;
+			else _bkmk_add_layer = 1;
+			closeMenus(true);
+			break;
 		case IDM_AUDIO_OPEN:
 			PickAudio();
 			break;
@@ -2078,8 +2121,11 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				lastBkmkTm = now;
 				return -1;
 			}
-			auto ret = _mainPlayer.AddBookmark();
 			lastBkmkTm = now;
+
+
+
+			auto ret = _mainPlayer.AddBookmark();
 
 			if (1) {
 				auto bk = 0xFF0078d7;
@@ -2102,6 +2148,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			_mainPlayer.SetPosition(_bakTime, true);
 			return 1;
 
+		case IDM_GET_PLAY:
+			return _mainPlayer._isPlaying;
 		case IDI_PLAY:
 		case IDM_TOGGLE_PLAY:
 			_mainPlayer.Toggle();
@@ -2410,7 +2458,14 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			return 1;
 
 		case IDM_SKIN_SEEKBAR_MAGNIFIER:
-			_mainPlayer._seekfloat.SetVisible(!_mainPlayer._seekfloat.IsVisible());
+			if (_mag_type == 0) _mainPlayer._seekfloat.SetVisible(!_mainPlayer._seekfloat.IsVisible());
+			else _mainPlayer._seekfloat.SetVisible(1);
+			if (_mainPlayer._seekfloat.IsVisible()) _mag_type = 0;
+			return 1;
+		case IDM_SKIN_SEEKBAR_MAGNIFIER_BIG:
+			if (_mag_type == 1) _mainPlayer._seekfloat.SetVisible(!_mainPlayer._seekfloat.IsVisible());
+			else _mainPlayer._seekfloat.SetVisible(1);
+			if (_mainPlayer._seekfloat.IsVisible()) _mag_type = 1;
 			return 1;
 			
 		case IDM_MUTE_L:
@@ -2421,6 +2476,11 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_MUTE_R:
 			_muteR = !_muteR;
 			if (_muteR && !IsKeyDown(VK_CONTROL)) _muteL = false;
+			AdjustVoice();
+			return 1;
+		case IDM_MUTE_N:
+			_muteR = 0;
+			_muteL = 0;
 			AdjustVoice();
 			return 1;
 
@@ -2500,6 +2560,8 @@ void WODApplication::ResetWndOpacity()
 
 void WODApplication::DeleteCurrentFile(BOOL permanent)
 {
+	if (_safe_mode)
+		return;
 	BOOL bDelOK = 0;
 	deleting = TRUE;
 	if(permanent)
@@ -2551,6 +2613,8 @@ void WODApplication::DeleteCurrentFile(BOOL permanent)
 
 void WODApplication::DeleteAllFile(BOOL permanent)
 {
+	if (_safe_mode) 
+		return;
 	auto & wod = XPP->_mainPlayer;
 	auto & player = wod._mMediaPlayer;
 	auto & lst = XPP->_playList;

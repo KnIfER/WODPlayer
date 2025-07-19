@@ -47,6 +47,12 @@ bool IsChecked(UINT id) {
             return XPP->_muteL;
         case IDM_MUTE_R:
             return XPP->_muteR;
+        case IDM_NO_DELELTE_TOGGLE:
+            return XPP->_safe_mode;
+        case IDM_BKMK_MUTE_TRACK:
+            return XPP->_bkmk_add_layer==2;
+        case IDM_BKMK_SEP_TRACK:
+            return XPP->_bkmk_add_layer == 1;
     }
     return false;
 }
@@ -56,14 +62,15 @@ void initWodMenus(WODApplication * xpp)
 {
     MainMenus = new std::vector<MenuDefine>{
 		MenuDefine{L"file", L"文件", IDM_FILE, new std::vector<MenuDefine>{
-			    MenuDefine{L"sinst", L"全局单实例(&S)", IDM_SINGLE_INSTANCE, 0, true}
+                 MenuDefine{L"nodel", L"禁止删除", IDM_NO_DELELTE_TOGGLE, 0, true}
+               , MenuDefine{L"open", L"打开(&O)", IDM_FILE_OPEN}
+                 , MenuDefine{L"sinst", L"全局单实例(&S)", IDM_SINGLE_INSTANCE, 0, true}
 			    , MenuDefine{L"mid", L"从中间开始(&M)", IDM_PLAY_FROM_MID, 0, true}
                 , MenuDefine{L"audio", L"打开音轨(&A)", IDM_AUDIO_OPEN}
                 , MenuDefine{L"audio", L"音轨(&M)", IDM_FILE_AUDIO, new std::vector<MenuDefine>{
                     MenuDefine{L"audio_open", L"打开…", IDM_AUDIO_OPEN}
                     , MenuDefine{L"", L"sep1", 0}
                 }}
-                , MenuDefine{L"open", L"打开(&O)", IDM_FILE_OPEN}
                 , MenuDefine{L"bkmk", L"书签", IDM_BKMK, new std::vector<MenuDefine>{
                     MenuDefine{L"bkmk_add", L"上一书签", IDM_BKMK_PRV}
                     , MenuDefine{L"bkmk_add", L"下一书签", IDM_BKMK_NXT}
@@ -72,13 +79,13 @@ void initWodMenus(WODApplication * xpp)
                     , MenuDefine{L"", L"", 0}
                     , MenuDefine{L"bkmk_add", L"删除书签", IDM_BKMK_DEL}
                 }}
+                , MenuDefine{L"", L"", 0}
 			    , MenuDefine{L"recent", L"最近文件 asdasdasd", IDM_FILE_RECENT, new std::vector<MenuDefine>{
                         MenuDefine{L"open", L"最近文件1", IDM_FILE_OPEN}
                         , MenuDefine{L"open", L"最近文件2", IDM_FILE_CLOSE}
                         , MenuDefine{L"open", L"最近文件3", IDM_FILE_CLOSE, }
                 }}
-                , MenuDefine{L"", L"", 0}
-                , MenuDefine{L"close", L"关闭(F4)", IDM_FILE_CLOSE}
+                //, MenuDefine{L"close", L"关闭(F4)", IDM_FILE_CLOSE}
 		}}
         , MenuDefine{L"win", L"窗口", IDM_WIN, new std::vector<MenuDefine>{
            //MenuDefine{L"win1", L"迷你左分栏", IDM_WIN_L}
@@ -124,14 +131,19 @@ void initWodMenus(WODApplication * xpp)
                 , MenuDefine{L"win_max", L"最大化", IDM_MAXMISE}
         }}
         , MenuDefine{L"plugin", L"插件", IDM_PLUGIN, new std::vector<MenuDefine>{
-            MenuDefine{L"bkmk_add", L"Δ 原生MFPlayer", IDM_PLUGIN_MF, 0, 1}
-            , MenuDefine{L"bkmk_add", L"Δ VLCPlayer", IDM_PLUGIN_VLC, 0, 1}
+            MenuDefine{L"bkmk_add", L"Δ MVP", IDM_PLUGIN_MPV, 0, 1}
             , MenuDefine{L"bkmk_add", L"Δ 迅雷播放组件", IDM_PLUGIN_XL, 0, 1}
-            , MenuDefine{L"bkmk_add", L"Δ MVP", IDM_PLUGIN_MPV, 0, 1}
+            , MenuDefine{L"bkmk_add", L"Δ VLCPlayer", IDM_PLUGIN_VLC, 0, 1}
+            , MenuDefine{L"bkmk_add", L"Δ 原生MFPlayer", IDM_PLUGIN_MF, 0, 1}
         }}
         , MenuDefine{L"voice", L"声音", IDM_PLUGIN, new std::vector<MenuDefine>{
             MenuDefine{L"mute_l", L"静音左声道", IDM_MUTE_L, 0, 1}
             , MenuDefine{L"mute_r", L"静音右声道", IDM_MUTE_R, 0, 1}
+            , MenuDefine{L"mute_r", L"不静音", IDM_MUTE_N, 0, 0}
+            , MenuDefine{L"", L"", 0}
+            , MenuDefine{L"mute_bkmk", L"静音书签", IDM_BKMK_MUTE_TRACK, 0, 1}
+            , MenuDefine{L"mute_bkmk", L"章节书签", IDM_BKMK_SEP_TRACK, 0, 1}
+
         }}
 	};
 

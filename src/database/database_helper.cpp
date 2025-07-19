@@ -72,7 +72,7 @@ id INTEGER PRIMARY KEY AUTOINCREMENT\
     return 0;
 }
 
-int WODBase::AddBookmark(const char* folder, const char* filename, char* markName, __int64 & folderId, int pos, int duration, int flag)
+int WODBase::AddBookmark(const char* folder, const char* filename, char* markName, __int64 & folderId, int pos, int duration, int flag, int layer)
 {
     //LogIs(2, "AddBookmark %s %ld", fullpath, folderId);
     sqlite3_exec(db, "begin", NULL, NULL, NULL);
@@ -111,7 +111,8 @@ int WODBase::AddBookmark(const char* folder, const char* filename, char* markNam
             sqlite3_bind_int(stmt1, num++, 0); // pos
             sqlite3_bind_int(stmt1, num++, duration); // duration
             sqlite3_bind_int(stmt1, num++, 1); // folder
-            sqlite3_bind_int(stmt1, num++, 0); // creation_time
+            sqlite3_bind_int(stmt1, num++, GetTickCount64()); // creation_time
+            //sqlite3_bind_int(stmt1, num++, layer); // layer
 
             succ = sqlite3_step(stmt1);
             if (succ != SQLITE_DONE) {
@@ -124,7 +125,7 @@ int WODBase::AddBookmark(const char* folder, const char* filename, char* markNam
         }
     }
     if(folderId!=-1) {
-        const char *sql = "INSERT INTO timemarks(vid, name, pos, duration, creation_time) VALUES(?, ?, ?, ?, ?)";
+        const char *sql = "INSERT INTO timemarks(vid, name, pos, layer, duration, creation_time) VALUES(?, ?, ?, ?, ?, ?)";
         int succ = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
         if (succ != SQLITE_OK) {
             LogIs("2, sql prepare error:  %d %s ", succ, sql);
@@ -135,8 +136,9 @@ int WODBase::AddBookmark(const char* folder, const char* filename, char* markNam
             sqlite3_bind_int(stmt, num++, folderId); // vid
             sqlite3_bind_text(stmt, num++, markName, -1, NULL); // 书签名
             sqlite3_bind_int(stmt,  num++, pos);
+            sqlite3_bind_int(stmt, num++, layer); // layer
             sqlite3_bind_int(stmt,  num++, duration);
-            sqlite3_bind_int(stmt,  num++, 0);
+            sqlite3_bind_int64(stmt,  num++, GetTickCount64());
             succ = sqlite3_step(stmt);
             if (succ != SQLITE_DONE) {
                 LogIs(2, "insert error. res = %d\n", succ);
@@ -174,7 +176,9 @@ int exec_callback1(void *para, int columenCount, char **columnValue, char **colu
 // todo atoi 精确度
 int exec_callback2(void *para, int columenCount, char **columnValue, char **columnName)
 {
-    ((std::vector<BookMark>*)para)->push_back(BookMark{atoi(columnValue[0]), atoi(columnValue[1]), atoi(columnValue[2])});
+    //((std::vector<BookMark>*)para)->push_back(BookMark{atoi(columnValue[0]), atoi(columnValue[1]), atoi(columnValue[2]), (int)4278190335 });
+    ((std::vector<BookMark>*)para)->push_back(BookMark{atoi(columnValue[0]), atoi(columnValue[1]), atoi(columnValue[2]), (int)std::stoul(columnValue[3])});
+    //((std::vector<BookMark>*)para)->push_back(BookMark{atoi(columnValue[0]), atoi(columnValue[1]), atoi(columnValue[2]), atoi(columnValue[3])});
     return 0;
 }
 
@@ -212,7 +216,7 @@ __int64 WODBase::GetBookMarks(const char* folder, const char* filename, std::vec
 
     if(folderVid>=0)
     {
-        localBuffer = "select pos,id,layer from timemarks where vid=";
+        localBuffer = "select pos,id,layer,color from timemarks where vid=";
         localBuffer += std::to_string(folderVid);
         localBuffer += " and folder!=1";
         localBuffer += " order by pos asc, creation_time asc, id asc";

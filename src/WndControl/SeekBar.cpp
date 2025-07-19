@@ -235,6 +235,7 @@ void SeekBar::DoEvent(TEventUI& event)
 			Invalidate();
 		}
 		if(event.Type==UIEVENT_MOUSEMOVE) {
+			dragDownX = event.ptMouse.x;
 			SetProgress((event.ptMouse.x-dragDownLeft)*1.0/dragDownWidth * _max, true);
 		}
 	}
