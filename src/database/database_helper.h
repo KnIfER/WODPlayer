@@ -15,6 +15,7 @@ public:
 	
 	int AddBookmark(const char* folder, const char* filename, char* markName, __int64 & folderId, int pos, int duration, int flag, int layer);
 	int DelBookmark(__int64 rowId);
+	int SetBookmarkColor(__int64 rowId, int color);
 	
 	__int64 GetBookMarks(const char* folder, const char* filename, std::vector<BookMark> & _bookmarks);
 

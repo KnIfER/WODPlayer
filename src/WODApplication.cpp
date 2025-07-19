@@ -2141,6 +2141,14 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		}
 		case IDM_BKMK_DEL:
 			return _mainPlayer.DelBookmark(_mainPlayer._selectedBookmark);
+		case IDM_BKMK_COLOR_RED:
+			return _mainPlayer.SetBookmarkColor(_mainPlayer._selectedBookmark, 0xffff0000);
+		case IDM_BKMK_COLOR_GRE:
+			return _mainPlayer.SetBookmarkColor(_mainPlayer._selectedBookmark, 0xff00ff00);
+		case IDM_BKMK_COLOR_BLU:
+			return _mainPlayer.SetBookmarkColor(_mainPlayer._selectedBookmark, 0xff0000ff);
+		case IDM_BKMK_COLOR_WHI:
+			return _mainPlayer.SetBookmarkColor(_mainPlayer._selectedBookmark, 0xffffffff);
 		case IDM_BKMK_RETURN:
 			_mainPlayer.SelectBookMark(_mainPlayer._selectedBookmark);
 			return 1;

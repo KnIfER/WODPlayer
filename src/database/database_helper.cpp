@@ -163,6 +163,16 @@ int WODBase::DelBookmark(__int64 rowId)
     return 0;
 }
 
+int WODBase::SetBookmarkColor(__int64 rowId, int color)
+{
+    std::string localBuffer = "UPDATE timemarks set color=";
+    localBuffer += std::to_string(color);
+    localBuffer += " where id=";
+    localBuffer += std::to_string(rowId);
+    sqlite3_exec(db, localBuffer.c_str(), NULL, NULL, NULL);
+    return 0;
+}
+
 int exec_callback1(void *para, int columenCount, char **columnValue, char **columnName)
 {
     int i;

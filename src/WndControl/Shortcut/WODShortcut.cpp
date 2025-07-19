@@ -84,6 +84,11 @@ void WODApplication::buildAccelerator()
 
 	_accelerators.push_back({FVIRTKEY, VK_1, IDM_BKMK_RESTORE});
 
+	_accelerators.push_back({FVIRTKEY, VK_9, IDM_BKMK_COLOR_RED });
+	_accelerators.push_back({FVIRTKEY, VK_8, IDM_BKMK_COLOR_GRE });
+	_accelerators.push_back({FVIRTKEY, VK_7, IDM_BKMK_COLOR_BLU });
+	_accelerators.push_back({FVIRTKEY, VK_0, IDM_BKMK_COLOR_WHI });
+
 	// seek
 	_accelerators.push_back({FVIRTKEY, VK_RIGHT, IDM_SEEK_FORE});
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_RIGHT, IDM_SEEK_FORE_FAST});

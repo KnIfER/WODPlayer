@@ -1022,6 +1022,30 @@ int WODPlayer::DelBookmark(int index)
 	return -1;
 }
 
+
+int WODPlayer::SetBookmarkColor(int index, int color)
+{
+	if (index>=0 && index<_bookmarks.size())
+	{
+		auto& bkmk = _bookmarks[index];
+		std::lock_guard<std::mutex> lock(ids_mutex);
+		__int64 set_id = bkmk.rowID;
+		__int64 tmp_id = bkmk.timeId;
+		bkmk.color = color;
+		if (set_id == -1) {
+			//tmp_del_Ids.push_back(del_id);
+			//tmp_del_Id = tmp_id;
+		}
+		else {
+			_app->_db->SetBookmarkColor(set_id, color);
+		}
+		_seekbar.Invalidate();
+		_seekfloat.Invalidate();
+		return index;
+	}
+	return -1;
+}
+
 void WODPlayer::SetPos(RECT rc, bool bNeedInvalidate)
 {
 	__super::SetPos(rc, bNeedInvalidate);

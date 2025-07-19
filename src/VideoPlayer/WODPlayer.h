@@ -38,6 +38,7 @@ public:
     void SetPosition(long pos, bool fastSeek);
     void SelectBookMark(int index);
     int DelBookmark(int index);
+    int SetBookmarkColor(int index, int color);
 
     void newVideoView();
 
