@@ -116,8 +116,8 @@ void WODApplication::buildAccelerator()
 	_accelerators.push_back({FVIRTKEY, VK_UP, IDM_VOLUME_UP});
 	_accelerators.push_back({FVIRTKEY, VK_DOWN, IDM_VOLUME_DOWN});
 
-	_accelerators.push_back({FVIRTKEY, VK_M, IDM_SKIN_SEEKBAR_MAGNIFIER});
-	_accelerators.push_back({FVIRTKEY, VK_N, IDM_SKIN_SEEKBAR_MAGNIFIER_BIG});
+	_accelerators.push_back({FVIRTKEY, VK_M, IDM_SKIN_SEEKBAR_MAGNIFIER_BIG });
+	_accelerators.push_back({FVIRTKEY, VK_N, IDM_SKIN_SEEKBAR_MAGNIFIER});
 
 	_hAccTable = ::CreateAcceleratorTable(_accelerators.data(), _accelerators.size());
 

@@ -3,7 +3,6 @@
 #include "resource.h"
 #include "database/database_helper.h"
 #include "utils/PathUtils.h"
-//#include "VideoPlayer/VLCPlayer.h"
 
 extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName, bool isMain);
 extern long _bakTime;
@@ -1368,7 +1367,7 @@ void WODPlayer::DoEvent(TEventUI& event)
 					_bFit = false;
 				}
 			}
-			lxxx(scale ff dd, _scale, zDelta);
+			lxxx(scale:: ff dd dd dd, _scale, zDelta, _srcWidth, _srcHeight);
 			//NeedUpdate();
 			//::LockWindowUpdate(_hPlayer);
 			//::SendMessage(GetHWND(), WM_SETREDRAW , FALSE, 0);
@@ -1381,6 +1380,7 @@ void WODPlayer::DoEvent(TEventUI& event)
 			int h = _srcHeight*ratio;
 			if (_mMediaPlayer)
 			{
+				lxxx(wh::dd x dd, w, h);
 				::SetWindowPos(_mMediaPlayer->getHWND(), 0, 
 					_exRect.left,  _exRect.top, 
 					w,  h, 

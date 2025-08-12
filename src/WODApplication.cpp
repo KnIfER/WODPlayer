@@ -389,7 +389,8 @@ void WODApplication::Notify( TNotifyUI &msg )
 
 		if (msg.pSender==_timeLabel)
 		{
-			_mainPlayer._seekfloat.SetVisible(!_mainPlayer._seekfloat.IsVisible());
+			//_mainPlayer._seekfloat.SetVisible(!_mainPlayer._seekfloat.IsVisible());
+			::SendMessage(GetHWND(), WM_COMMAND, IDM_SKIN_SEEKBAR_MAGNIFIER_BIG, 0);
 		}
 
 		if( msg.sType == _T("itemclick") ) 
@@ -1136,6 +1137,8 @@ void parseTimeTag(QkString input) {
 	}
 }
 
+extern int py_main(QkString path);
+
 void WODApplication::onNewVideo()
 {
 	auto & wod = XPP->_mainPlayer;
@@ -1143,6 +1146,16 @@ void WODApplication::onNewVideo()
 	auto & lst = XPP->_playList;
 
 	const auto & current = wod._currentPath;
+
+
+	subsCnt = 0;
+	resetOSD();
+
+	auto tm = GetTickCount();
+	py_main(current);
+	lxx(time::dd, GetTickCount() - tm)
+
+
 	if(current.EndWith(L"video.mp4")) {
 
 		QkString path = current;
@@ -1372,7 +1385,7 @@ LRESULT WODApplication::TimerProc()  // ontiemchange
 	_durationLabel->GetText().Format(L"%02d:%02d:%02d", hour, minutes, sec);
 	_durationLabel->Invalidate();
 
-	if(!_mainPlayer._hPlayer) {
+	if(!IsWindow(_mainPlayer._hPlayer)) { // todo opt
 		_mainPlayer._hPlayer = ::GetFirstChild(_mainPlayer.GetHWND());
 		_mainPlayer._mMediaPlayer->setHWND(_mainPlayer._hPlayer);
 	}
@@ -2117,7 +2130,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
 			static int lastBkmkTm = 0;
 			int now = GetTickCount();
-			if (now - lastBkmkTm < 450) {
+			if (now - lastBkmkTm < 350) {
 				lastBkmkTm = now;
 				return -1;
 			}

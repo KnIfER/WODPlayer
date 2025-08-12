@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\database\database_helper.cpp" />
+    <ClCompile Include="src\PythonExtension.cpp" />
     <ClCompile Include="src\Utils\FileUtils.cpp" />
     <ClCompile Include="src\Utils\ImageUtils.cpp" />
     <ClCompile Include="src\Utils\ProfileStd.cpp" />
@@ -33,6 +34,7 @@
     <ClCompile Include="src\WODMenus.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\WODPlayer\quickjs.hpp" />
     <ClInclude Include="src\database\bookmark.h" />
     <ClInclude Include="src\database\database_helper.h" />
     <ClInclude Include="src\database\sqlite3.h" />
@@ -151,7 +153,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>UILIB_STATIC;_WINDOWS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;$(direct_includes);./richedit20;$(VLC_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;I:\Softwares\Python37\include;$(direct_includes);./richedit20;$(VLC_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -162,7 +164,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(ProjectDir)bin/$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(VLC_LIPA);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VLC_LIPA);%(AdditionalLibraryDirectories);I:\Softwares\Python37\libs</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -180,7 +182,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>UILIB_STATIC;_WINDOWS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;$(direct_path);./richedit20;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;I:\Softwares\Python37\include;$(direct_path);./richedit20;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -193,7 +195,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(ProjectDir)bin/$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(VLC_LIPA);;%(AdditionalLibraryDirectories);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VLC_LIPA);;%(AdditionalLibraryDirectories);%(AdditionalLibraryDirectories);I:\Softwares\Python37\libs</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -202,7 +204,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>UILIB_STATIC;_WINDOWS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;$(direct_includes);./richedit20;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;I:\Softwares\Python37\include;$(direct_includes);./richedit20;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -211,7 +213,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>bin/$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(VLC_LIPA_64)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VLC_LIPA_64);I:\Softwares\Python37\libs</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -222,7 +224,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>UILIB_STATIC;_WINDOWS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;$(direct_includes);./richedit20;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../;./;./src;./src/WndControl;./src/VideoPlayer;I:\Softwares\Python37\include;$(direct_includes);./richedit20;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -233,7 +235,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>UxTheme.lib;Comctl32.lib;$(ProjectDir)bin/sqlite_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>bin/$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(VLC_LIPA_64)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VLC_LIPA_64);I:\Softwares\Python37\libs</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

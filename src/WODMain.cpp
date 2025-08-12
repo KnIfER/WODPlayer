@@ -465,6 +465,8 @@ HWND checkUniqueGlobalInst(bool inst) {
 	return 0;
 }
 
+QkString bin_path;
+
 int APIENTRY 
 wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -571,6 +573,7 @@ wWinMain(_In_ HINSTANCE hInstance,
 	TCHAR usrDir[MAX_PATH];
 	::GetModuleFileName(NULL, usrDir, MAX_PATH);
 	::PathRemoveFileSpec(usrDir);
+	bin_path = usrDir;
 	//::PathAppend();
 
 	loadProf(usrDir, configFileName);
@@ -585,6 +588,15 @@ wWinMain(_In_ HINSTANCE hInstance,
 		if(pHAll) {
 			if(prvAllInstance(lpCmdLine, IsKeyDown(VK_SHIFT), pHAll)) 
 				return 0;
+		}
+	}
+
+	if (GetProfInt("dev", 0)) {
+		if (AllocConsole())
+		{
+			FILE* fi = 0;
+			freopen_s(&fi, "CONOUT$", "w", stdout);
+			freopen_s(&fi, "CONOUT$", "w", stderr);
 		}
 	}
 
