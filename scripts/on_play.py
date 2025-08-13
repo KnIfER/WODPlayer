@@ -7,18 +7,14 @@ import  time
 # import sys
 # sys.path.insert(0, '.')
 
-from  opt import opt
-# print('opt::', opt.cmd)
-
-try:
-	import cppmodule
-except:
-	opt.cmd=1
+from  opt import *
+print('play opt::', opt.app)
 	
+
 def compare_strings(len_a, len_h, mid, a, b):
 	len_b = len(b)
-	# print('len_b', len_b, len_a-len_h,len_a+len_h )
-	if len_b<len_a-len_h or len_b>len_a+len_h:
+	print('len_b', len_b, len_a-len_h,len_a+len_h )
+	if len_b<len_a-len_h: #  or len_b>len_a+len_h
 		opt.err = -2
 		return
 	if b.find(mid)<0:
@@ -157,7 +153,7 @@ def find_srt(file_path, auxiliary = None, items = None):
 	len_h = max(len_h, 10)
 	mid = mid_pattern(len_a, ref_name)
 	
-	# print('mid', mid)
+	print('mid', mid)
 	
 	if not mid:
 		return None
@@ -228,7 +224,8 @@ def onPlay(path):
 	
 	if(found):
 		print("attachSubtitle")
-		if not opt.cmd:
+		if opt.app:
+			import cppmodule
 			cppmodule.attachSubtitle(found)
 	
 	print ("时间::", int(time.time()-opt.start)*1000)
@@ -236,5 +233,5 @@ def onPlay(path):
 
 
 if __name__ == "__main__":
-	if opt.cmd:
+	if not opt.app:
 		onPlay(r"R:\DY\Aircraft Control Surfaces Explained  Ailerons, flaps, elevator, rudder and more.mp4")

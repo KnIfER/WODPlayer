@@ -5,10 +5,11 @@ import sys
 from pathlib import Path
 
 
-import scripts
-import scripts.opt as option
+# import scripts
+# import scripts.opt as option
+# from scripts.opt import *
 
-opt = scripts.opt.opt
+# opt = scripts.opt.opt
 
 import sys
 sys.path.insert(0, '.')
@@ -22,70 +23,66 @@ sys.path.insert(0, '.')
 # opt = scripts.opt
 # from  scripts import opt
 
-try:
-	import cppmodule
-except:
-	opt.cmd=1
+# opt.init()
 
 
-print('opt?', opt.cmd)
+# 获取当前文件夹路径，添加到模块搜索路径
+current_dir = Path(Path(os.path.abspath(__file__)).parent, "scripts").as_posix()
+sys.path.append(current_dir)
 
-# import scripts.on_play as player
+opt = None
 
-print(123)
-# 日志文件路径
-LOG_FILE_PATH = r"R:\cache\wodpy.log"
+if not opt:
+	opt = importlib.import_module("opt").opt
 
-class LogRedirector:
-	def __init__(self, original_stream):
-		self.original_stream = original_stream
-		os.makedirs(os.path.dirname(LOG_FILE_PATH), exist_ok=True)
-		self.log_file = open(LOG_FILE_PATH, 'a', encoding='utf-8')
+	opt.init=1
+	opt.app=not sys.executable.endswith("python.exe")
 
-	def write(self, message):
-		self.log_file.write(message)
-		# self.log_file.flush()
-		# self.original_stream.write(message)
+	# import scripts.on_play as player
 
-	def flush(self):
-		self.log_file.flush()
-		# self.original_stream.flush()
+	# 日志文件路径
+	LOG_FILE_PATH = r"R:\cache\wodpy.log"
 
-	def close(self):
-		if not self.log_file.closed:
-			self.log_file.close()
-		pass
+	class LogRedirector:
+		def __init__(self, original_stream):
+			self.original_stream = original_stream
+			os.makedirs(os.path.dirname(LOG_FILE_PATH), exist_ok=True)
+			self.log_file = open(LOG_FILE_PATH, 'a', encoding='utf-8')
 
+		def write(self, message):
+			self.log_file.write(message)
+			# self.log_file.flush()
+			# self.original_stream.write(message)
 
-print(123)
+		def flush(self):
+			self.log_file.flush()
+			# self.original_stream.flush()
 
-if not opt.cmd:
-	original_stdout = sys.stdout
-	original_stderr = sys.stderr
-	sys.stdout = LogRedirector(original_stdout)
-	sys.stderr = LogRedirector(original_stderr)
+		def close(self):
+			if not self.log_file.closed:
+				self.log_file.close()
+			pass
+
+	if opt.app:
+		original_stdout = sys.stdout
+		original_stderr = sys.stderr
+		sys.stdout = LogRedirector(original_stdout)
+		sys.stderr = LogRedirector(original_stderr)
+
+	print('init opt?', opt.app)
 
 
 def onPlay(path):
-	# 获取当前文件夹路径
-	current_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scripts")
-	# 将当前文件夹添加到模块搜索路径
-	sys.path.append(current_dir)
-	
 	# 获取当前文件夹下所有.py文件
 	for file in os.listdir(current_dir):
-		# 排除当前脚本和__init__.py
 		if file.endswith('.py') and file not in ['__init__.py', os.path.basename(__file__), "opt.py"]:
-			# 获取模块名（不含.py扩展名）
 			print("run file ===========>", file)
 			
 			module_name = Path(file).stem
 			
 			try:
-				# 导入模块
 				module = importlib.import_module(module_name)
 				
-				# 检查模块是否有onPlay函数
 				if hasattr(module, 'onPlay') and callable(module.onPlay):
 					print(f"运行 {module_name}.onPlay()...")
 					# 调用onPlay函数
@@ -96,6 +93,8 @@ def onPlay(path):
 					
 			except Exception as e:
 				print(f"导入或运行模块 {module_name} 时出错: {str(e)}\n")
+			
+
 	
 
 if __name__ == "__main__":
