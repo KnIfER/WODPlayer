@@ -140,6 +140,7 @@ void initWodMenus(WODApplication * xpp)
             MenuDefine{L"mute_l", L"静音左声道", IDM_MUTE_L, 0, 1}
             , MenuDefine{L"mute_r", L"静音右声道", IDM_MUTE_R, 0, 1}
             , MenuDefine{L"mute_r", L"不静音", IDM_MUTE_N, 0, 0}
+            , MenuDefine{L"music", L"仅播放声音", IDM_MUSIC, 0, 0}
             , MenuDefine{L"", L"", 0}
             , MenuDefine{L"mute_bkmk", L"静音书签", IDM_BKMK_MUTE_TRACK, 0, 1}
             , MenuDefine{L"mute_bkmk", L"章节书签", IDM_BKMK_SEP_TRACK, 0, 1}
@@ -173,7 +174,7 @@ void initWodMenus(WODApplication * xpp)
 
     MainMenuActor = (MenuActor)[](MenuDefine * item , int cmd, int pos)
     {
-        if(!item->id.IsEmpty()) {
+        if(item && !item->id.IsEmpty()) {
             if(cmd==0)
                 return (int)IsChecked(item->cmd);
         }

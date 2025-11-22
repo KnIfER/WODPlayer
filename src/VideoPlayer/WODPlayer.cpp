@@ -61,7 +61,7 @@ void WODPlayer::CopyImage()
 {
 	if(_mMediaPlayer) {
 		//_mMediaPlayer->Command(1,0,"截图");
-		QkString name = L"R:\\DY\\";
+		QkString name = L"R:\\life\\";
 		name.Append(_app->_titleBar->GetText());
 		name.Append(L"_screenshot ");
 		name.FormatEx(L"%d", true, _mMediaPlayer->GetPosition());
@@ -533,6 +533,7 @@ static void decryptFileName(QkString & fileName) {
 set<QkString> touchedTags;
 bool titleKey = false;
 
+extern int py_guess_play(QkString& path);
 bool WODPlayer::PlayVideoFile(const TCHAR* path)
 {
 	bStopped = 0;
@@ -548,6 +549,11 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		lastDuration = 0;
 		_durationCache = 0;
 		_currentPath = path;
+		int scheameIdx = _currentPath.Find(L":");
+		if (scheameIdx<0 || scheameIdx>7 || _currentPath.ReverseFind(L" ", scheameIdx)>=0) {
+			py_guess_play(_currentPath);
+		}
+
 		isPng = _currentPath.EndWith(L".webp") || _currentPath.EndWith(L".jpg") || _currentPath.EndWith(L".jpeg") || _currentPath.EndWith(L".png");
 		isFakePng = 0;
 		fakePos = 0;
@@ -683,61 +689,67 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		_seekfloat._callback = (SeekBarTrackCallback)seekchangefloat;
 	}
 	// 获取书签 bkk 
+	_titKey = titKey;
 	//if (ret)
-	{
-		QkString tmp;
+	LoadBookmarks();
 
-		_timeMarked = -1;
-
-		QkString pathBuffer;
-		pathBuffer.EnsureCapacity(_currentPath.GetLength() + 30);
-		pathBuffer.AsBuffer();
-
-		if (titKey) {
-			_timeMarked = _app->_db->GetBookMarks("http"
-				, _app->_titleBar->GetText().GetData(threadBuffer1), _bookmarks);
-		}
-		else if (DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath))
-		{
-			pathBuffer.RecalcSize();
-			if(pathBuffer.Find('\"')) {
-				pathBuffer.Replace(L"\"", L"\"\"");
-			}
-			auto idx = pathBuffer.Find('?');
-			if(idx>0) {
-				pathBuffer.MidFast(0, idx);
-			}
-			int fullPathLen = pathBuffer.GetLength();
-			if (DuiLib::PathRemoveFileSpecW((LPWSTR)pathBuffer.GetData()))
-			{
-				pathBuffer.RecalcSize();
-				size_t basePathLen = pathBuffer.GetLength();
-				QkString fileName = pathBuffer.GetData()+basePathLen+1;//pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1);
-				if(fileName.EndWith(".enc")) {
-					decryptFileName(fileName);
-				}
-				//lxx(,STR(fileName))
-				//lxx(,STR(pathBuffer)+basePathLen+1)
-				//LogIs(2, pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1));
-				_timeMarked = _app->_db->GetBookMarks(pathBuffer.GetData(threadBuffer1)
-					, fileName.GetData(threadBuffer), _bookmarks);
-			}
-		}
-
-		MarkPlaying();
-		if(!_mMediaPlayer) {
-			_mMediaPlayer = new DummyPlayer();
-		}
-		if (_mMediaPlayer->IsPaused())
-		{
-			_mMediaPlayer->Play();
-		}
-		return true;
+	MarkPlaying();
+	if (!_mMediaPlayer) {
+		_mMediaPlayer = new DummyPlayer();
 	}
+	if (_mMediaPlayer->IsPaused())
+	{
+		_mMediaPlayer->Play();
+	}
+
+	return true;
+
 	return false;
 }
 
 
+
+void WODPlayer::LoadBookmarks() 
+{
+	QkString tmp;
+
+	_timeMarked = -1;
+
+	QkString pathBuffer;
+	pathBuffer.EnsureCapacity(_currentPath.GetLength() + 30);
+	pathBuffer.AsBuffer();
+
+	if (_titKey) {
+		_timeMarked = _app->_db->GetBookMarks("http"
+			, _app->_titleBar->GetText().GetData(threadBuffer1), _bookmarks);
+	}
+	else if (DuiLib::PathCanonicalizeW((LPWSTR)pathBuffer.GetData(), _currentPath))
+	{
+		pathBuffer.RecalcSize();
+		if (pathBuffer.Find('\"')) {
+			pathBuffer.Replace(L"\"", L"\"\"");
+		}
+		auto idx = pathBuffer.Find('?');
+		if (idx > 0) {
+			pathBuffer.MidFast(0, idx);
+		}
+		int fullPathLen = pathBuffer.GetLength();
+		if (DuiLib::PathRemoveFileSpecW((LPWSTR)pathBuffer.GetData()))
+		{
+			pathBuffer.RecalcSize();
+			size_t basePathLen = pathBuffer.GetLength();
+			QkString fileName = pathBuffer.GetData() + basePathLen + 1;//pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1);
+			if (fileName.EndWith(".enc")) {
+				decryptFileName(fileName);
+			}
+			//lxx(,STR(fileName))
+			//lxx(,STR(pathBuffer)+basePathLen+1)
+			//LogIs(2, pathBuffer.GetData(threadBuffer, basePathLen+1, fullPathLen-basePathLen-1));
+			_timeMarked = _app->_db->GetBookMarks(pathBuffer.GetData(threadBuffer1)
+				, fileName.GetData(threadBuffer), _bookmarks);
+		}
+	}
+}
 
 long WODPlayer::GetDuration() 
 {
@@ -845,6 +857,8 @@ std::atomic<__int64> tmp_del_Id;
 std::vector<__int64> tmp_del_Ids;  // 原子时间ID数组
 std::mutex ids_mutex;  // 用于扩容时的互斥锁
 
+extern ULONGLONG _lastSeekHome;
+extern ULONGLONG _lastSeekEnd;
 
 int WODPlayer::AddBookmark()
 {
@@ -853,6 +867,14 @@ int WODPlayer::AddBookmark()
 			_app->_safe_mode = 1;
 		}
 		int pos = _mMediaPlayer->GetPosition();
+		if (_lastSeekHome) {
+			if (GetTickCount64() - _lastSeekHome < 700) pos = 0;
+			else _lastSeekHome = 0;
+		}
+		if (_lastSeekEnd) {
+			if (GetTickCount64() - _lastSeekEnd < 700) pos = GetDuration();
+			else _lastSeekEnd = 0;
+		}
 		int duration = GetDuration();
 		//LogIs(2, L"%s", (LPCWSTR)_currentPath);
 

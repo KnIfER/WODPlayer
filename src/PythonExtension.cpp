@@ -149,3 +149,91 @@ int py_main(QkString path) {
 
 	return 0;
 }
+
+
+
+
+int py_guess_play(QkString & path) 
+{
+	try {
+		std::cout << "C++: 调用Python的onPlay方法，视频路径: ";
+		lxx(C++: 调用Python的onPlay方法，视频路径)
+			// 1. 指定Python安装目录
+			std::string pythonDir = "C:/python37";
+
+
+		//setPythonPath("I:\\Explore\\quickjscpp\\example\\Release", "I:\\Explore\\quickjscpp\\example\\Release\\python");
+		//setPythonPath("I:\\Explore\\quickjscpp\\example\\Release\\python");
+		//setPythonPath(pythonDir);
+
+		// 2. 在初始化前向Python注册我们的模块
+		PyImport_AppendInittab("cppmodule", &PyInit_cppmodule);
+
+
+		// 4. 初始化Python解释器
+		Py_Initialize();
+
+		if (!Py_IsInitialized()) {
+			throw std::runtime_error("Python初始化失败");
+		}
+
+		// 5. 导入并运行同目录下的test.py
+		//QkString scritps_path = bin_path;
+		//scritps_path.Append(L"\\scripts");
+		//PySys_SetPath(scritps_path);
+		//PySys_SetPath(L"D:\\Code\\WODPlayer\\bin;D:\\Code\\WODPlayer\\bin\\scripts");
+		PyObject* pModule = PyImport_ImportModule("main");
+		lxx("onPlay::pModule dd", pModule)
+			if (!pModule) {
+				PyErr_Print();
+				throw std::runtime_error("无法导入test.py模块");
+			}
+
+		// 6. 获取test.py中的onPlay函数
+		PyObject* pFunc = PyObject_GetAttrString(pModule, "guessPlay");
+		lxx("onPlay::dd", pFunc)
+			if (!pFunc || !PyCallable_Check(pFunc)) {
+				if (PyErr_Occurred()) PyErr_Print();
+				throw std::runtime_error("无法找到可调用的onPlay函数");
+			}
+
+		// 7. 准备调用参数（视频路径）
+		std::string videoPath = "sample.mp4";
+		path.GetData(videoPath);
+		PyObject* pArgs = PyTuple_New(1);
+		PyTuple_SetItem(pArgs, 0, PyUnicode_FromString(videoPath.c_str()));
+
+		// 8. 调用Python的onPlay函数
+		std::cout << "C++: 调用Python的onPlay方法，视频路径: " << videoPath << std::endl;
+		PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
+
+		// 9. 处理返回结果
+		if (pResult) {
+			const  char* resultStr = PyUnicode_AsUTF8(pResult);
+			if (resultStr) {
+				std::cout << "C++: Python返回结果: " << resultStr << std::endl;
+				path = resultStr;
+				//lxx(ss, resultStr)
+			}
+			Py_DECREF(pResult);
+		}
+		else {
+			PyErr_Print();
+			throw std::runtime_error("调用onPlay函数失败");
+		}
+
+		// 10. 清理资源
+		Py_DECREF(pArgs);
+		Py_DECREF(pFunc);
+		Py_DECREF(pModule);
+		Py_Finalize();
+	}
+	catch (const std::exception& e) {
+		lxxx(错误:  ss, e.what())
+			std::cerr << "错误: " << e.what() << std::endl;
+		Py_Finalize();
+		return 1;
+	}
+
+	return 0;
+}

@@ -189,8 +189,11 @@ static void wakeup(void *ctx){
     //}
 }
 
+HWND hParen_t;
+
 MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND hParent)
 {
+    hParen_t = hParent;
     error_code=1;
     init(hPlugin, hParent);
     //testVlc(hParent,0);
@@ -214,10 +217,6 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
 
     //if(hParent)  mpv_set_option_string(mpv, "force-window", "yes");
     mpv_set_option_string(mpv, "auto-window-resize", "no");
-    //mpv_set_property_string(mpv, "af", "volume=10");
-    mpv_set_property_string(mpv, "af", "lavfi=[pan=stereo|FL < 0.5*FC + 0.3*FLC + 0.3*FL + 0.3*BL + 0.3*SL + 0.5*LFE | FR < 0.5*FC + 0.3*FRC + 0.3*FR + 0.3*BR + 0.3*SR + 0.5*LFE],lavfi=[acompressor=10]");
-    //mpv_set_property_string(mpv, "af", "dynaudnorm=f=200:g=7");
-    //mpv_set_property_string(mpv, "af", "lavfi=[dynaudnorm=f=100:g=3]");
 
     mpv_set_property_string(mpv, "window-dragging", "no");
     mpv_set_property_string(mpv, "no-window-dragging", "yes");
@@ -226,6 +225,8 @@ MPVPlayer::MPVPlayer(int & error_code, HINSTANCE hPlugin, HINSTANCE hHost, HWND 
 
     mpv_set_property_string(mpv, "sub-auto", "no");
     mpv_set_property_string(mpv, "autoload-files", "no");
+
+    //Command(2, 1, 0);
 
     mpv_set_property_string(mpv, "no-config", "yes");
     mpv_set_option(mpv, "no-config", mpv_format::MPV_FORMAT_NONE, 0);
@@ -514,6 +515,27 @@ LONG_PTR MPVPlayer::Command(LONG WPARAM, LONG LPARAM, va_list Args)
         ////mpv_command(mpv, cmd);
         //const char* cmd_osd[] = { "osd-msg", "消息内容", "持续时间(毫秒)", nullptr };
         //mpv_command(mpv, cmd_osd);
+    }
+    if (WPARAM==2) { // volume rase
+        if (LPARAM) {
+            //mpv_set_property_string(mpv, "af", "volume=10");
+            mpv_set_property_string(mpv, "af", "lavfi=[pan=stereo|FL < 0.5*FC + 0.3*FLC + 0.3*FL + 0.3*BL + 0.3*SL + 0.5*LFE | FR < 0.5*FC + 0.3*FRC + 0.3*FR + 0.3*BR + 0.3*SR + 0.5*LFE],lavfi=[acompressor=10]");
+            //mpv_set_property_string(mpv, "af", "dynaudnorm=f=200:g=7");
+            //mpv_set_property_string(mpv, "af", "lavfi=[dynaudnorm=f=100:g=3]");
+        }
+        else {
+            mpv_set_property_string(mpv, "af", "");
+        }
+    }
+    if (WPARAM==20250910) { // video only
+        if (LPARAM) {
+            //mpv_set_option_string(mpv, "no-video", "yes");
+            mpv_set_option_string(mpv, "video", "no");
+        }
+        else {
+            //mpv_set_option_string(mpv, "no-video", "no");
+            mpv_set_option_string(mpv, "video", "yes");
+        }
     }
     return 1;
 }

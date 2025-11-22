@@ -27,7 +27,7 @@ void WODApplication::buildAccelerator()
 	_accelerators.push_back({FVIRTKEY, VK_SPACE, IDM_TOGGLE_PLAY});
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_SPACE, IDM_PLAY_LOOP_ONE});
 
-	_accelerators.push_back({FVIRTKEY|FSHIFT, VK_DELETE, IDM_DELETE});
+	//_accelerators.push_back({FVIRTKEY|FSHIFT, VK_DELETE, IDM_DELETE});
 	_accelerators.push_back({FVIRTKEY|FCONTROL|FSHIFT, VK_DELETE, IDM_DELETE_FOREVER});
 	_accelerators.push_back({FVIRTKEY|FCONTROL|FSHIFT|FALT, VK_DELETE, IDM_DELETE_ALL_FOREVER});
 

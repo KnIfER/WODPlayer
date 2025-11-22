@@ -77,12 +77,9 @@ def onPlay(path):
 	for file in os.listdir(current_dir):
 		if file.endswith('.py') and file not in ['__init__.py', os.path.basename(__file__), "opt.py"]:
 			print("run file ===========>", file)
-			
 			module_name = Path(file).stem
-			
 			try:
 				module = importlib.import_module(module_name)
-				
 				if hasattr(module, 'onPlay') and callable(module.onPlay):
 					print(f"运行 {module_name}.onPlay()...")
 					# 调用onPlay函数
@@ -95,6 +92,27 @@ def onPlay(path):
 				print(f"导入或运行模块 {module_name} 时出错: {str(e)}\n")
 			
 
+def guessPlay(path):
+	print('guessPlay', path)
+	for file in os.listdir(current_dir):
+		if file.endswith('.py') and file not in ['__init__.py', os.path.basename(__file__), "opt.py"]:
+			print("\n\nrun file ===========>", file)
+			module_name = Path(file).stem
+			try:
+				module = importlib.import_module(module_name)
+				if hasattr(module, 'guessPlay') and callable(module.guessPlay):
+					print(f"运行 {module_name}.guessPlay()...")
+					# 调用onPlay函数
+					ret =  module.guessPlay(path)
+					print(f"{module_name}.guessPlay() 执行完成={ret} n")
+					if ret:
+						return ret
+				else:
+					print(f"模块 {module_name} 中未定义可调用的 guessPlay() 函数，跳过\n")
+					
+			except Exception as e:
+				print(f"导入或运行模块 {module_name} 时出错: {str(e)}\n")
+	return ""
 	
 
 if __name__ == "__main__":

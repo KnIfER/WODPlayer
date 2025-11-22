@@ -1,4 +1,3 @@
-# 导入C++注册的模块
 import  os
 import  sys
 import  time
@@ -21,7 +20,9 @@ def compare_strings(len_a, len_h, mid, a, b):
 		opt.err = -1
 		return
 	
+	max_length_1 = 0 
 	max_length = 0 
+	grade = 0 
 	current_length = 0 
 	offset_start_a = 0 
 	offset_start_b = 0 
@@ -38,6 +39,8 @@ def compare_strings(len_a, len_h, mid, a, b):
 				# 更新最长片段长度
 				if current_length > 3:
 					if current_length > max_length:
+						if max_length: # yeah
+							max_length_1 = max_length
 						max_length = current_length
 						offset_start_a = i
 						offset_start_b = j
@@ -49,8 +52,8 @@ def compare_strings(len_a, len_h, mid, a, b):
 	# return (max_length, max_length/len_b, a[offset_start:offset_start+max_length])
 	# return (max_length, max_length/len_b, len_a*0.65)
 	# return (max_length, max_length/len_b, max_length/min(len_a, len_b))
-	max_length_1 = 0 
 	if max_length>len_a*0.3 or max_length/min(len_a, len_b)>0.3:
+		print('max_length ===>', max_length, a[offset_start_a:offset_start_a+max_length])
 		# second pass
 		current_length_1 = 0 
 		offset_start_a_1 = 0 
@@ -71,14 +74,13 @@ def compare_strings(len_a, len_h, mid, a, b):
 					i = x - 1
 					break
 		
-		# return (max_length, max_length/len_b, a[offset_start_a:offset_start_a+max_length], a[offset_start_a_1:offset_start_a_1+max_length_1], max_length_1)
+		# return (-max_length, max_length/len_b, a[offset_start_a:offset_start_a+max_length], a[offset_start_a_1:offset_start_a_1+max_length_1], max_length_1)
 		max_length += max_length_1
 		grade = max_length/min(len_a, len_b)
 		if max_length>len_a*0.7 or grade>0.7:
 			return (max_length, max_length/len_b, grade)
-		pass
 	# opt.err = -3
-	return (-3, max_length, max_length_1)
+	# return (-3, max_length, max_length_1, len_a*0.7, grade)
 
 # 优化：如果  mid:mid+mid_ln 中含有标点符号，依次前后偏移 mid，直到没有标点符号
 # def mid_pattern(len_a, a):

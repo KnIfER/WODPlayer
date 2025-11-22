@@ -33,6 +33,7 @@ public:
 
     bool PlayVideoFile(const TCHAR* path);
     int AddBookmark();
+    void LoadBookmarks();
     long GetDuration();
     int GetPosition(bool tick);
     void SetPosition(long pos, bool fastSeek);
@@ -62,6 +63,7 @@ public:
     SeekBar _volumebar;
     VideoPlayer* _mMediaPlayer;
     QkString _currentPath;
+    bool _titKey;
     long _durationCache=0;
 //private:
     bool _isPlaying;

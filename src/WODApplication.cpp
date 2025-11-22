@@ -146,6 +146,8 @@ CControlUI* _timeLabel;
 CControlUI* _daytimeLabel;
 CControlUI* _durationLabel;
 BOOL _threadInit = FALSE;
+ULONGLONG _lastSeekHome = 0;
+ULONGLONG _lastSeekEnd = 0;
 
 BOOL hasDayTime;
 int hourDay = 0;
@@ -984,9 +986,11 @@ void SeekEx(int cmd)
 	if (player)
 	{
 		player->SetPositionEx(cmd, (LONG)NULL);
+		if(cmd<3 && _playing) XPP->_mainPlayer.Toggle(0);
 		if (XPP->_mainPlayer.isMain && hasTrack)
 		{
 			XPP->_audioPlayer.SetPosition(player->GetPosition(), true);
+			if (cmd < 3 && _playing) XPP->_audioPlayer.Toggle(0);
 		}
 	}
 }
@@ -1153,11 +1157,13 @@ void WODApplication::onNewVideo()
 
 	auto tm = GetTickCount();
 	py_main(current);
-	lxx(time::dd, GetTickCount() - tm)
+	lxx(time::dd, GetTickCount() - tm);
+
+	player->Command(2, !subsCnt);
+	//player->Command(2, 1);
 
 
 	if(current.EndWith(L"video.mp4")) {
-
 		QkString path = current;
 		path.ReplaceEx(L"video.mp4", L"audio.flac");
 		XPP->_audioPlayer.PlayVideoFile(path);
@@ -1546,6 +1552,7 @@ void WODApplication::onPause(bool min)
 		//lxx(hide)
 		if(resumePlay=_mainPlayer._isPlaying)
 			_mainPlayer.Toggle();
+		//_mainPlayer._mMediaPlayer->Command(20250910,1); // music
 	}
 	m_pm.GetRoot()->SetBkColor(0xff555555);
 }
@@ -1563,6 +1570,7 @@ void WODApplication::onResume(bool min) {
 	if(min || iconized) {
 		if(resumePlay)
 			_mainPlayer.Toggle(true);
+		//_mainPlayer._mMediaPlayer->Command(20250910, 0);
 		resumePlay = false;
 	}
 	iconized = 0;
@@ -1573,7 +1581,7 @@ void WODApplication::onResume(bool min) {
 
 	//if (IsIconic(GetHWND()))
 	//	::SendMessage(GetHWND(), WM_SYSCOMMAND, SC_RESTORE, 0);
-	//teSetForegroundWindow(GetHWND());
+	//VU::SetForegroundWindowEx(GetHWND());
 	//SetForegroundWindow(GetHWND()); // 会导致mini底栏首次聚焦无法点击
 }
 
@@ -2130,7 +2138,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			//WOD_IMG_UTILS("screenshotie", _mainPlayer._mMediaPlayer->getHWND());
 			static int lastBkmkTm = 0;
 			int now = GetTickCount();
-			if (now - lastBkmkTm < 350) {
+			if (now - lastBkmkTm < 50) {
 				lastBkmkTm = now;
 				return -1;
 			}
@@ -2168,6 +2176,41 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_BKMK_RESTORE:
 			_mainPlayer.SetPosition(_bakTime, true);
 			return 1;
+		case IDM_BKMK_RELOAD:
+			_mainPlayer.LoadBookmarks();
+			_mainPlayer._seekbar.Invalidate();
+			return 1;
+		case IDM_BKMK_VID: {
+			//tmp.Format(L"%lld", LLONG_MAX-10);
+			if (lParam==1) {
+				QkString tmp;
+				tmp.Format(L"%lld", _mainPlayer._timeMarked);
+				SetTmpText(tmp);
+			}
+			return _mainPlayer._timeMarked;
+		}
+		case IDM_BKMK_EXPORT: {
+			//tmp.Format(L"%lld", LLONG_MAX-10);
+			auto& bkmks = _mainPlayer._bookmarks;
+			QkString all_Str = L"";
+			int cc = 0;
+			for (size_t i = 0, size = bkmks.size(); i < size; i++)
+			{
+				auto& item = bkmks[i];
+				if (lParam == 1 && item.layer!=0) {
+					continue;
+				}
+				if(!all_Str.IsEmpty())
+					all_Str += L"\n";
+				all_Str.FormatEx(L"%d;%d;%d", true, item.pos, item.layer, item.color);
+				cc++;
+			}
+			if (lParam == 1) {
+				wofstream("R:\\cache\\wod_bm_export.txt") << STR(all_Str);
+			}
+			SetTmpText(all_Str);
+			return cc;
+		}
 
 		case IDM_GET_PLAY:
 			return _mainPlayer._isPlaying;
@@ -2327,9 +2370,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				MarkPlaying(true);
 			}
 			return 1;
-		case IDM_PLAY_START: NavTime(-1); return 1;
+		case IDM_PLAY_START: _lastSeekHome = GetTickCount64();  NavTime(-1); return 1;
 		case IDM_PLAY_MID: NavTime(-2); return 1;
-		case IDM_PLAY_END: NavTime(-3); return 1;
+		case IDM_PLAY_END: _lastSeekEnd = GetTickCount64();  NavTime(-3); return 1;
 
 		case IDM_PLAY_FASTBACKWARD:
 			toggleFastforward(-5);
@@ -2503,6 +2546,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			_muteR = 0;
 			_muteL = 0;
 			AdjustVoice();
+			return 1;
+		case IDM_MUSIC:
+			_mainPlayer._mMediaPlayer->Command(20250910, 1); // music
 			return 1;
 
 		case IDM_SKIN_NORM:
