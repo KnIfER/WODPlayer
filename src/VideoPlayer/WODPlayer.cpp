@@ -78,6 +78,9 @@ void WODPlayer::CopyImage()
 
 void WODPlayer::Stop()
 {
+	if(!bStopped) {
+		_durationCache = GetDuration();
+	}
 	if(_mMediaPlayer) {
 		_mMediaPlayer->Stop();
 	}
@@ -753,6 +756,9 @@ void WODPlayer::LoadBookmarks()
 
 long WODPlayer::GetDuration() 
 {
+	if (bStopped) {
+		return _durationCache;
+	}
 	long duration = _mMediaPlayer->GetDuration();
 	if(duration==0) {
 		if (!isPng) {
@@ -775,6 +781,9 @@ extern bool _playing;
 int WODPlayer::GetPosition(bool tick) 
 {
 	//lxxx(GetPosition dd dd, tick, _playing)
+	if (bStopped) {
+		return _seekbar._progress;
+	}
 	int pos = _mMediaPlayer->GetPosition();
 	if(isPng) {
 		if (isFakePng && _mMediaPlayer->GetDuration() != 0) {

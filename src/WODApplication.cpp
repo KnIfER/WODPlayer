@@ -2410,6 +2410,7 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				break;
 			}
 		case IDM_MINI:
+			if (_isFullScreen) break;
 			if(_isFullScreen) ToggleFullScreen();
 			ToggleMini();
 			break;
