@@ -57,6 +57,7 @@ public:
 
 
     void DoEvent(TEventUI& event) override;
+    void startMove();
 
     SeekBar _seekbar;
     SeekBar _seekfloat;
@@ -104,5 +105,6 @@ public:
     bool isMain;
 
     long lastDuration;
+    bool _skipMoving;
 };
 

@@ -105,6 +105,11 @@ public:
     Button* m_pSearch;
 
     WNDPROC _SysWndProc=NULL;
+
+    bool _dragVirgin = false; // 突破
+    bool _bgPlay = false; // 突破
+
+
     bool _isFullScreen=false;
     bool _freeMove=false;
     bool _pinBottom=false;

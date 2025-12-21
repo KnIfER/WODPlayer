@@ -57,6 +57,8 @@ bool IsChecked(UINT id) {
             return XPP->_bkmk_add_layer==2;
         case IDM_BKMK_SEP_TRACK:
             return XPP->_bkmk_add_layer == 1;
+        case IDM_BG_PLAY:
+            return XPP->_bgPlay;
     }
     return false;
 }
@@ -145,6 +147,7 @@ void initWodMenus(WODApplication * xpp)
             , MenuDefine{L"mute_r", L"静音右声道", IDM_MUTE_R, 0, 1}
             , MenuDefine{L"mute_r", L"不静音", IDM_MUTE_N, 0, 0}
             , MenuDefine{L"music", L"仅播放声音", IDM_MUSIC, 0, 0}
+            , MenuDefine{L"bg", L"后台播放", IDM_BG_PLAY, 0, 1}
             , MenuDefine{L"", L"", 0}
             , MenuDefine{L"mute_bkmk", L"静音书签", IDM_BKMK_MUTE_TRACK, 0, 1}
             , MenuDefine{L"mute_bkmk", L"章节书签", IDM_BKMK_SEP_TRACK, 0, 1}

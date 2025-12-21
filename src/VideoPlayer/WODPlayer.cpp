@@ -1251,18 +1251,15 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 		} return 1;
 		case WM_LBUTTONDOWN:
 		{
-			if(_app->_isFullScreen 
-				|| _app->_isMini /*&& GET_Y_LPARAM(lParam)>200 */&& (::IsMaximized(_app->GetHWND())/* || _manager->GetRoot()->GetHeight()>=getDesktopHeight()-10*/)
-				|| _app->_freeMove && _app->_isMini && (::GetKeyState(VK_MENU) > 0)  
-				|| ::GetKeyState(VK_CONTROL) < 0 )
+			_app->_dragVirgin = false;
+			if (_app->_isFullScreen
+				|| _app->_isMini /*&& GET_Y_LPARAM(lParam)>200 */ && (::IsMaximized(_app->GetHWND())/* || _manager->GetRoot()->GetHeight()>=getDesktopHeight()-10*/)
+				|| _app->_freeMove && _app->_isMini && (::GetKeyState(VK_MENU) > 0)
+				|| ::GetKeyState(VK_CONTROL) < 0)
 			{
-				_moving = true;
-				POINT pt;
-				::GetCursorPos(&pt);
-				_moveLastX = pt.x;
-				_moveLastY = pt.y;
-				::SetCapture(GetHWND());
+				startMove();
 			}
+			else _skipMoving = true;
 		} return 1;
 		//case WM_CAPTURECHANGED:
 		//	lzz(1)
@@ -1270,6 +1267,7 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 		case WM_LBUTTONUP:
 		{
 			_moving = false;
+			_skipMoving = false;
 			::ReleaseCapture();
 
 			//if (_app->_pinBottom && _app->_hFscBtmbar)
@@ -1365,6 +1363,16 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 	return 0;
 }
 
+void WODPlayer::startMove()
+{
+	_moving = true;
+	POINT pt;
+	::GetCursorPos(&pt);
+	_moveLastX = pt.x;
+	_moveLastY = pt.y;
+	::SetCapture(GetHWND());
+}
+
 void WODPlayer::DoEvent(TEventUI& event)
 {
 	if (event.Type == UIEVENT_TIMER)
@@ -1377,6 +1385,7 @@ void WODPlayer::DoEvent(TEventUI& event)
 	if (event.Type == UIEVENT_SCROLLWHEEL)
 	{
 		if(_app->_isFullScreen 
+			|| _app->_dragVirgin
 			|| _app->_isMini  && (::IsMaximized(_app->GetHWND())/* || _manager->GetRoot()->GetHeight()>=getDesktopHeight()-10*/)
 			|| _app->_freeMove && _app->_isMini && (::GetKeyState(VK_MENU) > 0)
 			|| ::GetKeyState(VK_CONTROL) < 0)
@@ -1429,6 +1438,12 @@ void WODPlayer::DoEvent(TEventUI& event)
 			SetPos(m_rcItem);
 			//::SendMessage(GetHWND(), WM_SETREDRAW , TRUE, 0);
 			//::LockWindowUpdate(NULL);
+		}
+		else if (!_app->_dragVirgin) {
+			_app->_dragVirgin = ::GetKeyState(VK_LBUTTON) > 0;
+			if (_app->_dragVirgin) {
+
+			}
 		}
 		return;
 	}

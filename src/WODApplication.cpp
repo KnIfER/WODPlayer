@@ -1583,7 +1583,7 @@ void WODApplication::onPause(bool min)
 		}
 		//::ShowWindow(_hFscBtmbar, SW_HIDE);
 		//lxx(hide)
-		if(resumePlay=_mainPlayer._isPlaying)
+		if(resumePlay=_mainPlayer._isPlaying && !_bgPlay)
 			_mainPlayer.Toggle();
 		//_mainPlayer._mMediaPlayer->Command(20250910,1); // music
 	}
@@ -2585,6 +2585,18 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_MUSIC:
 			_mainPlayer._mMediaPlayer->Command(20250910, 1); // music
 			return 1;
+		case IDM_BG_PLAY:
+			XPP->_bgPlay = !XPP->_bgPlay; // music
+			if(XPP->_bgPlay) SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0);
+			closeMenus();
+			return 1;
+		case IDM_DRAG_VIRGIN:
+			if (XPP->_mainPlayer._skipMoving && !XPP->_dragVirgin) {
+				XPP->_dragVirgin = 1;
+				XPP->_mainPlayer.startMove();
+				return 1;
+			}
+			return 0;
 
 		case IDM_SKIN_NORM:
 		case IDM_SKIN_HOLLOW:
