@@ -16,8 +16,8 @@ bool IsChecked(UINT id) {
             return GetProfInt("mid", 0);
         case IDM_MINI: 
             return !XPP->_isFullScreen && XPP->_isMini;
-        case IDM_PIN: 
-        case IDM_PIN_TOP: {
+        //case IDM_PIN_TOP:
+        case IDM_PIN:  {
             bool pin = GetWindowLong(XPP->GetHWND(), GWL_EXSTYLE)&WS_EX_TOPMOST;
             if(pin) {
                 bool pin1 = GetWindowLong(XPP->GetHWND(), GWL_STYLE)&WS_POPUP;
@@ -25,6 +25,10 @@ bool IsChecked(UINT id) {
                 else return pin1;
             }
         }    return false;
+        case IDM_PIN_TOP: {
+            int h = ::GetSystemMetrics(SM_CYSCREEN);
+            return XPP->m_pm.GetRoot()->GetHeight() >= h - 10;
+        }    
 
         case IDM_FREEMOVE:
             return XPP->_freeMove;

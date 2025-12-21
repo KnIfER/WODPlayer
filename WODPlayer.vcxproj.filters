@@ -134,6 +134,9 @@
     <ClInclude Include="..\..\..\..\..\WODPlayer\quickjs.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Utils\ViewUtils.hpp">
+      <Filter>Source Files\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\demo\res\icons.bmp">

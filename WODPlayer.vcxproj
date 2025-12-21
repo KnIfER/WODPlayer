@@ -41,6 +41,7 @@
     <ClInclude Include="src\parameters.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Utils\ProfileStd.h" />
+    <ClInclude Include="src\Utils\ViewUtils.hpp" />
     <ClInclude Include="src\Utils\WindowUtils.h" />
     <ClInclude Include="src\VideoPlayer\ExternalPlayer.h" />
     <ClInclude Include="src\VideoPlayer\WODPlayer.h" />

@@ -366,6 +366,10 @@ long MPVPlayer::GetDuration()
 
 bool MPVPlayer::PlayVideoFile(const CHAR* path)
 {
+    //mpv_set_property_string(mpv, "video-zoom", "0.0");   // 0.0 = 100% zoom (1.0 = 200%)
+    //mpv_set_property_string(mpv, "video-pan-x", "0.25"); // -0.5 shifts the view to the left half
+    //mpv_set_property_string(mpv, "vf", "crop=iw/2:ih:0:0");
+
     const char** args = new const char*[] {
         "loadfile"
             , path

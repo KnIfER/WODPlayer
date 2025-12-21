@@ -3,6 +3,7 @@
 #include "resource.h"
 #include "database/database_helper.h"
 #include "utils/PathUtils.h"
+#include "utils/ViewUtils.hpp"
 
 extern VideoPlayer* initVidePlayerImpl(WODPlayer* xpp, const TCHAR* pluginName, bool isMain);
 extern long _bakTime;
@@ -1250,7 +1251,10 @@ bool WODPlayer::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRE
 		} return 1;
 		case WM_LBUTTONDOWN:
 		{
-			if(_app->_isFullScreen || _app->_freeMove&& _app->_isMini  &&(::GetKeyState(VK_MENU) > 0)  || ::GetKeyState(VK_CONTROL) < 0 )
+			if(_app->_isFullScreen 
+				|| _app->_isMini /*&& GET_Y_LPARAM(lParam)>200 */&& (::IsMaximized(_app->GetHWND())/* || _manager->GetRoot()->GetHeight()>=getDesktopHeight()-10*/)
+				|| _app->_freeMove && _app->_isMini && (::GetKeyState(VK_MENU) > 0)  
+				|| ::GetKeyState(VK_CONTROL) < 0 )
 			{
 				_moving = true;
 				POINT pt;
@@ -1372,7 +1376,10 @@ void WODPlayer::DoEvent(TEventUI& event)
 	}
 	if (event.Type == UIEVENT_SCROLLWHEEL)
 	{
-		if(_app->_isFullScreen || _app->_freeMove && _app->_isMini && (::GetKeyState(VK_MENU) > 0) || ::GetKeyState(VK_CONTROL) < 0)
+		if(_app->_isFullScreen 
+			|| _app->_isMini  && (::IsMaximized(_app->GetHWND())/* || _manager->GetRoot()->GetHeight()>=getDesktopHeight()-10*/)
+			|| _app->_freeMove && _app->_isMini && (::GetKeyState(VK_MENU) > 0)
+			|| ::GetKeyState(VK_CONTROL) < 0)
 		{
 			float delta = 0.25;
 			//if(_scale==0)_scale = 1;

@@ -557,8 +557,14 @@ void WODApplication::setMini()
 	resetInset();
 }
 
+void fix_pin_top();
+
 void WODApplication::ToggleMini()
 {
+	int h = ::GetSystemMetrics(SM_CYSCREEN);
+	bool pin_top = XPP->m_pm.GetRoot()->GetHeight()>=h - 10;
+
+
 	HWND hWnd = m_hWnd;
 	DWORD style = GetWindowLong(hWnd, GWL_STYLE);
 	if (!_isMini)
@@ -580,8 +586,10 @@ void WODApplication::ToggleMini()
 		if(bUseSameMiniRc) {
 			GetWindowRect(hWnd, &rcNScPos);
 		}
-		::SetWindowPos(hWnd, NULL, rcNScPos.left, rcNScPos.top
-			, rcNScPos.right-rcNScPos.left, rcNScPos.bottom-rcNScPos.top, 0);
+		if (!pin_top) {
+			::SetWindowPos(hWnd, NULL, rcNScPos.left, rcNScPos.top
+				, rcNScPos.right - rcNScPos.left, rcNScPos.bottom - rcNScPos.top, 0);
+		}
 
 		_topBar->GetParent()->Remove(_topBar);
 		m_pm.GetRoot()->AddAt(_topBar, 0);
@@ -599,15 +607,19 @@ void WODApplication::ToggleMini()
 			//::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
 		}
 
-		UINT style = GetWindowLong(GetHWND(), GWL_STYLE);
-		SetWindowLong(GetHWND(), GWL_STYLE, style & ~WS_POPUP | WS_THICKFRAME);
-		SetWindowLong(GetHWND(), GWL_EXSTYLE, GetWindowLong(GetHWND(), GWL_EXSTYLE) & ~WS_EX_TOPMOST);
-		::SetWindowPos(GetHWND(), HWND_NOTOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+		if (!pin_top) {
+			UINT style = GetWindowLong(GetHWND(), GWL_STYLE);
+			SetWindowLong(GetHWND(), GWL_STYLE, style & ~WS_POPUP | WS_THICKFRAME);
+			SetWindowLong(GetHWND(), GWL_EXSTYLE, GetWindowLong(GetHWND(), GWL_EXSTYLE) & ~WS_EX_TOPMOST);
+			::SetWindowPos(GetHWND(), HWND_NOTOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+		}
 	}
 	resetInset();
 	/* 配合 POPUP 使用 */
 	//_frameLess = 1;
-
+	if (pin_top) { // fix 覆盖高度栏 issue#1
+		fix_pin_top();
+	}
 }
 
 
@@ -654,6 +666,23 @@ void WODApplication::resetInset()
 	}
 }
 
+bool pinned_top;
+
+void fix_pin_top() {
+	int h = ::GetSystemMetrics(SM_CYSCREEN);
+	HWND hWnd = XPP->GetHWND();
+	DWORD style = GetWindowLong(hWnd, GWL_STYLE);
+	SetWindowLong(hWnd, GWL_STYLE, style & ~WS_THICKFRAME | WS_POPUP);
+	SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_TOPMOST);
+	::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+	int w = ::GetSystemMetrics(SM_CXSCREEN) / 2;
+	//_lastTopMost = GetWindowLong(hWnd, GWL_EXSTYLE)&WS_EX_TOPMOST;
+	RECT rc;
+	GetWindowRect(hWnd, &rc);
+	::SetWindowPos(hWnd, HWND_TOPMOST, rc.left, 0, rc.right - rc.left, h, 0);
+}
+
+
 void WODApplication::ToggleFullScreen()
 {
 	HWND hWnd = m_hWnd;
@@ -664,6 +693,8 @@ void WODApplication::ToggleFullScreen()
 		dwNCSty = dwNScStyle1;
 	if (!_isFullScreen)
 	{
+		pinned_top = XPP->m_pm.GetRoot()->GetHeight() >= ::GetSystemMetrics(SM_CYSCREEN) - 10;
+
 		HWND _hFullScreenBtmbar = _bottomBar->GetHWND();
 		_bottomBar->SetFloat(true);
 
@@ -793,7 +824,9 @@ void WODApplication::ToggleFullScreen()
 			//m_pm.GetRoot()->Add(inner);
 			delete old;
 		}
-
+		if (pinned_top) {
+			fix_pin_top();
+		}
 	}
 	resetInset();
 }
@@ -2100,8 +2133,8 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 				ToggleFullScreen();
 			if(_isMini) 
 				ToggleMini();
-			if(::IsMaximized(GetHWND()))
-				SendMessage(WM_SYSCOMMAND, _isMaximized=SC_RESTORE, 0); 
+			//if(::IsMaximized(GetHWND()))
+			//	SendMessage(WM_SYSCOMMAND, _isMaximized=SC_RESTORE, 0); 
 			break;
 		case IDM_MAX:
 			if(keyPressed) break;
@@ -2439,7 +2472,9 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 		case IDM_PIN_TOP:
 		{
 			UINT style = GetWindowLong(GetHWND(), GWL_STYLE);
-			if(style&WS_POPUP) {
+			int h = ::GetSystemMetrics(SM_CYSCREEN);
+			if(XPP->m_pm.GetRoot()->GetHeight()>=h-10) {
+			//if(style&WS_POPUP) {
 				SetWindowLong(GetHWND(), GWL_STYLE , style & ~WS_POPUP  | WS_THICKFRAME );
 
 				SetWindowLong(GetHWND(), GWL_EXSTYLE , GetWindowLong(GetHWND(), GWL_EXSTYLE) & ~WS_EX_TOPMOST );
@@ -2453,7 +2488,6 @@ LRESULT WODApplication::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 
 
 				int w = ::GetSystemMetrics(SM_CXSCREEN)/2;
-				int h = ::GetSystemMetrics(SM_CYSCREEN);
 				//_lastTopMost = GetWindowLong(hWnd, GWL_EXSTYLE)&WS_EX_TOPMOST;
 				RECT rc;
 				GetWindowRect(GetHWND(), &rc);

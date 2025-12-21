@@ -24,6 +24,7 @@ void WODApplication::buildAccelerator()
 	//_accelerators.push_back({FVIRTKEY, VK_RETURN, IDM_FULLSCREEN});
 	_accelerators.push_back({FVIRTKEY, VK_RETURN, IDM_MINI});
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_RETURN, IDM_FULLSCREEN});
+	_accelerators.push_back({FVIRTKEY| FCONTROL|FSHIFT, VK_RETURN, IDM_PIN_TOP});
 	_accelerators.push_back({FVIRTKEY, VK_SPACE, IDM_TOGGLE_PLAY});
 	_accelerators.push_back({FVIRTKEY|FCONTROL, VK_SPACE, IDM_PLAY_LOOP_ONE});
 
