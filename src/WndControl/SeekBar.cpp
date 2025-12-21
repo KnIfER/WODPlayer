@@ -212,6 +212,14 @@ void SeekBar::PaintStatusImage(HDC hDC)
 
 void SeekBar::DoEvent(TEventUI& event)
 {
+	if (event.Type == UIEVENT_SCROLLWHEEL) {
+		float delta = 0.05;
+		//if(_scale==0)_scale = 1;
+		int zDelta = (int)(short)HIWORD(event.wParam);
+		if (zDelta > 0) _ratio -= delta;
+		else _ratio += delta;
+		if (_ratioValid) Invalidate();
+	}
 	if(event.Type==UIEVENT_BUTTONDOWN) {
 		//LogIs(2, "UIEVENT_BUTTONDOWN!!!");
 		_isSeeking = true;

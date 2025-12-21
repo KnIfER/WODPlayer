@@ -86,6 +86,9 @@ public:
 	int dragDownX;
 	int dragDownLeft;
 	int dragDownWidth;
+
+	float _ratio = 1;
+	bool _ratioValid;
 };
 
 

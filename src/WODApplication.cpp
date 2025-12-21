@@ -1513,6 +1513,13 @@ LRESULT WODApplication::TimerProc()  // ontiemchange
 			sub_duration /= 2;
 		}
 	}
+	int sw = ::GetSystemMetrics(SM_CXSCREEN);
+	float ratio = XPP->m_pm.GetRoot()->GetWidth() * 1.0 / sw;
+	if(_mainPlayer._seekfloat._ratio==1) ratio = ratio * ratio;
+	sub_duration *= ratio;
+	_mainPlayer._seekfloat._ratioValid = true;
+	sub_duration *= _mainPlayer._seekfloat._ratio;
+
 	if (_mainPlayer._seekfloat.GetWidth() != mag_width)
 		_mainPlayer._seekfloat.SetFixedWidth(mag_width);
 
