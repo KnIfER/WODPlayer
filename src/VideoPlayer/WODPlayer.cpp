@@ -554,9 +554,8 @@ bool WODPlayer::PlayVideoFile(const TCHAR* path)
 		_durationCache = 0;
 		_currentPath = path;
 		int scheameIdx = _currentPath.Find(L":");
-		if (scheameIdx<0 || scheameIdx>7 || _currentPath.ReverseFind(L" ", scheameIdx)>=0) {
-			py_guess_play(_currentPath);
-		}
+		if (scheameIdx<0 || scheameIdx>7 || _currentPath.ReverseFind(L" ", scheameIdx)>=0)
+		py_guess_play(_currentPath);
 
 		isPng = _currentPath.EndWith(L".webp") || _currentPath.EndWith(L".jpg") || _currentPath.EndWith(L".jpeg") || _currentPath.EndWith(L".png");
 		isFakePng = 0;

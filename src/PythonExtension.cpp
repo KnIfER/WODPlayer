@@ -8,6 +8,8 @@
 // 声明C++函数，将被Python调用
 void attachSubtitle(const std::string& path);
 
+extern void pushTimeTag(int hourDay, int minDay, int secDay);
+
 // Python调用C++函数时的包装器
 static PyObject* cppmodule_attachSubtitle(PyObject* self, PyObject* args) {
 	const char* path;
@@ -24,6 +26,22 @@ static PyObject* cppmodule_attachSubtitle(PyObject* self, PyObject* args) {
 	Py_RETURN_NONE;
 }
 
+// Python调用C++函数时的包装器
+static PyObject* cppmodule_pushTimeTag(PyObject* self, PyObject* args) {
+	int a,b,c;
+
+	// 解析Python传递的参数
+	if (!PyArg_ParseTuple(args, "iii", &a, &b, &c)) {
+		return nullptr; // 参数解析失败
+	}
+
+	// 调用实际的C++函数
+	pushTimeTag(a,b,c);
+
+	// 返回None给Python
+	Py_RETURN_NONE;
+}
+
 // 方法映射表：Python可调用的C++函数列表
 static PyMethodDef CppMethods[] = {
 	{
@@ -31,6 +49,12 @@ static PyMethodDef CppMethods[] = {
 		cppmodule_attachSubtitle,  // 对应的C++函数包装器
 		METH_VARARGS,              // 表示函数接受参数元组
 		"调用C++的attachSubtitle方法" // 函数说明文档
+	},
+	{
+		"pushTimeTag",          // Python中调用的函数名
+		cppmodule_pushTimeTag,  // 对应的C++函数包装器
+		METH_VARARGS,              // 表示函数接受参数元组
+		"调用C++的pushTimeTag方法" // 函数说明文档
 	},
 	{nullptr, nullptr, 0, nullptr} // 结束标记
 };
@@ -63,7 +87,6 @@ void attachSubtitle(const std::string& path) {
 	LoadSubtitle(STR(data));
 	resetOSD();
 }
-
 
 extern QkString bin_path;
 

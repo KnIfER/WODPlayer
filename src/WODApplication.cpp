@@ -1121,6 +1121,15 @@ void setSelIndi() {
 	}
 }
 
+
+void pushTimeTag(int hourDay_, int minDay_, int secDay_) {
+	hourDay = hourDay_;
+	minDay =  minDay_;
+	secDay =  secDay_;
+	hasDayTime = true;
+}
+
+
 void parseTimeTag(QkString input) {
 	// Find the positions of the brackets
 	hourDay = 0;
@@ -1188,6 +1197,7 @@ void WODApplication::onNewVideo()
 	subsCnt = 0;
 	resetOSD();
 
+	hasDayTime = false;
 	auto tm = GetTickCount();
 	py_main(current);
 	lxx(time::dd, GetTickCount() - tm);
@@ -1203,6 +1213,7 @@ void WODApplication::onNewVideo()
 		//pzz(STR(path))
 	}
 
+	if(!hasDayTime)
 	parseTimeTag(_titleBar->GetText());
 
 	if(!_numBtn) 
